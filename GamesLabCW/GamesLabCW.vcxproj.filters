@@ -21,6 +21,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="Shaders\shader.vs" />
+    <None Include="Shaders\shader.fs" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GamesLabCW.h">
