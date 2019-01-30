@@ -1,17 +1,19 @@
 #include <stdio.h>
 #include <string>
 using namespace std;
+#include <fstream>
+
 #include <GL/glew.h>
 #include <GL/freeglut.h>
-#include <glm\glm.hpp>
+#include <glm/glm.hpp>
 using namespace glm;
 
 #include "GamesLabCW.h"
 
 GLuint VBO;
 
-const char* pVSFileName = "shader.vs";
-const char* pFSFileName = "shader.fs";
+const char* pVSFileName = "shaders/shader.vs";
+const char* pFSFileName = "shaders/shader.fs";
 
 int main(int argc, char** argv)
 {
@@ -103,6 +105,24 @@ static void AddShader(GLuint ShaderProgram, const char* pShaderText, GLenum Shad
 	glAttachShader(ShaderProgram, ShaderObj);
 }
 
+static std::string ReadFile(const char *filePath) {
+	string content;
+	ifstream fileStream(filePath, ios::in);
+
+	if (!fileStream.is_open()) {
+		return "";
+	}
+
+	string line = "";
+	while (!fileStream.eof()) {
+		std::getline(fileStream, line);
+		content.append(line + "\n");
+	}
+
+	fileStream.close();
+	return content;
+}
+
 static void CompileShaders()
 {
 	GLuint ShaderProgram = glCreateProgram();
@@ -112,17 +132,18 @@ static void CompileShaders()
 		exit(1);
 	}
 
-	string vs, fs;
-
-	if (!ReadFile(pVSFileName, vs)) {
+	string vs = ReadFile(pVSFileName);
+	if (vs == "") {
+		fprintf(stderr, "Error loading shader program\n");
 		exit(1);
-	};
-
-	if (!ReadFile(pFSFileName, fs)) {
-		exit(1);
-	};
-
+	}
 	AddShader(ShaderProgram, vs.c_str(), GL_VERTEX_SHADER);
+
+	string fs = ReadFile(pFSFileName);
+	if (vs == "") {
+		fprintf(stderr, "Error loading shader program\n");
+		exit(1);
+	}
 	AddShader(ShaderProgram, fs.c_str(), GL_FRAGMENT_SHADER);
 
 	GLint Success = 0;
