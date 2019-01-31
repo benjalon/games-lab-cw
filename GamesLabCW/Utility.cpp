@@ -1,5 +1,8 @@
 #include "Utility.h"
 
+#define _USE_MATH_DEFINES
+#include <math.h>
+
 std::string Utility::ReadFile(const char *filePath) {
 	std::string content;
 	std::ifstream fileStream(filePath, std::ios::in);
@@ -16,4 +19,9 @@ std::string Utility::ReadFile(const char *filePath) {
 
 	fileStream.close();
 	return content;
+}
+
+float Utility::ToRadian(float x)
+{
+	return (x * M_PI) / 180.0f;
 }

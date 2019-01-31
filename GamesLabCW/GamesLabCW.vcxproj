@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Camera.cpp" />
     <ClCompile Include="GamesLabCW.cpp" />
     <ClCompile Include="Utility.cpp" />
   </ItemGroup>
@@ -32,6 +33,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Camera.h" />
     <ClInclude Include="GamesLabCW.h" />
     <ClInclude Include="Utility.h" />
   </ItemGroup>
