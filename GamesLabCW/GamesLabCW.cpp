@@ -8,8 +8,9 @@
 #include "GamesLabCW.h"
 #include "Utility.h"
 
-GLuint VBO;
-GLuint gScaleLocation;
+GLuint VBO; // Vertex buffer object
+GLuint IBO; // Index buffer object
+GLuint gWorldLocation;
 
 const char* pVSFileName = "shaders/shader.vs";
 const char* pFSFileName = "shaders/shader.fs";
@@ -38,6 +39,7 @@ int main(int argc, char** argv)
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
 	CreateVertexBuffer();
+	CreateIndexBuffer();
 
 	CompileShaders();
 
@@ -61,13 +63,21 @@ static void RenderSceneCB()
 
 	static float Scale = 0.0f;
 	Scale += 0.001f;
-	glUniform1f(gScaleLocation, sinf(Scale));
+
+	glm::mat4 World;
+	World[0][0] = sinf(Scale); World[0][1] = 0.0f; World[0][2] = 0.0f;        World[0][3] = 0.0f;
+	World[1][0] = 0.0f; World[1][1] = sinf(Scale); World[1][2] = 0.0f;        World[1][3] = 0.0f;
+	World[2][0] = 0.0f; ; World[2][1] = 0.0f; ; World[2][2] = sinf(Scale); World[2][3] = 0.0f;
+	World[3][0] = 0.0f; ; World[3][1] = 0.0f; ; World[3][2] = 0.0f;        World[3][3] = 1.0f;
+
+	glUniformMatrix4fv(gWorldLocation, 1, GL_TRUE, &World[0][0]);
 
 	glEnableVertexAttribArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
 
-	glDrawArrays(GL_TRIANGLES, 0, 3);
+	glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, 0);
 
 	glDisableVertexAttribArray(0);
 
@@ -76,14 +86,27 @@ static void RenderSceneCB()
 
 static void CreateVertexBuffer()
 {
-	glm::vec3 Vertices[3];
+	glm::vec3 Vertices[4];
 	Vertices[0] = glm::vec3(-1.0f, -1.0f, 0.0f);
-	Vertices[1] = glm::vec3(1.0f, -1.0f, 0.0f);
-	Vertices[2] = glm::vec3(0.0f, 1.0f, 0.0f);
+	Vertices[1] = glm::vec3(0.0f, -1.0f, 1.0f);
+	Vertices[2] = glm::vec3(1.0f, -1.0f, 0.0f);
+	Vertices[3] = glm::vec3(0.0f, 1.0f, 0.0f);
 
 	glGenBuffers(1, &VBO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(Vertices), Vertices, GL_STATIC_DRAW);
+}
+
+static void CreateIndexBuffer()
+{
+	unsigned int Indices[] = { 0, 3, 1,
+		1, 3, 2,
+		2, 3, 0,
+		0, 1, 2 };
+
+	glGenBuffers(1, &IBO);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(Indices), Indices, GL_STATIC_DRAW);
 }
 
 static void AddShader(GLuint ShaderProgram, const char* pShaderText, GLenum ShaderType)
@@ -155,6 +178,6 @@ static void CompileShaders()
 
 	glUseProgram(ShaderProgram);
 
-	gScaleLocation = glGetUniformLocation(ShaderProgram, "gScale");
-	assert(gScaleLocation != 0xFFFFFFFF);
+	gWorldLocation = glGetUniformLocation(ShaderProgram, "gWorld");
+	assert(gWorldLocation != 0xFFFFFFFF);
 }
