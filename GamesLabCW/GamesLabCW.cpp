@@ -1,16 +1,15 @@
 #include <stdio.h>
 #include <string>
-using namespace std;
-#include <fstream>
 
 #include <GL/glew.h>
 #include <GL/freeglut.h>
 #include <glm/glm.hpp>
-using namespace glm;
 
 #include "GamesLabCW.h"
+#include "Utility.h"
 
 GLuint VBO;
+GLuint gScaleLocation;
 
 const char* pVSFileName = "shaders/shader.vs";
 const char* pFSFileName = "shaders/shader.fs";
@@ -22,10 +21,9 @@ int main(int argc, char** argv)
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);
 	glutInitWindowSize(1024, 768);
 	glutInitWindowPosition(100, 100);
-	glutCreateWindow("RBS");
+	glutCreateWindow("Games Lab CW");
 
-	// Pass buffer clear function
-	glutDisplayFunc(RenderSceneCB);
+	InitializeGlutCallbacks();
 
 	// Initialize GLEW
 	GLenum res = glewInit();
@@ -48,12 +46,22 @@ int main(int argc, char** argv)
 	return 0;
 }
 
+static void InitializeGlutCallbacks()
+{
+	glutDisplayFunc(RenderSceneCB); // Pass buffer clear function
+	glutIdleFunc(RenderSceneCB);
+}
+
 /*
-	Clear back buffer, render onto it and then swap it in
+Clear back buffer, render onto it and then swap it in
 */
 static void RenderSceneCB()
 {
 	glClear(GL_COLOR_BUFFER_BIT);
+
+	static float Scale = 0.0f;
+	Scale += 0.001f;
+	glUniform1f(gScaleLocation, sinf(Scale));
 
 	glEnableVertexAttribArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
@@ -68,10 +76,10 @@ static void RenderSceneCB()
 
 static void CreateVertexBuffer()
 {
-	vec3 Vertices[3];
-	Vertices[0] = vec3(-1.0f, -1.0f, 0.0f);
-	Vertices[1] = vec3(1.0f, -1.0f, 0.0f);
-	Vertices[2] = vec3(0.0f, 1.0f, 0.0f);
+	glm::vec3 Vertices[3];
+	Vertices[0] = glm::vec3(-1.0f, -1.0f, 0.0f);
+	Vertices[1] = glm::vec3(1.0f, -1.0f, 0.0f);
+	Vertices[2] = glm::vec3(0.0f, 1.0f, 0.0f);
 
 	glGenBuffers(1, &VBO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
@@ -81,7 +89,6 @@ static void CreateVertexBuffer()
 static void AddShader(GLuint ShaderProgram, const char* pShaderText, GLenum ShaderType)
 {
 	GLuint ShaderObj = glCreateShader(ShaderType);
-
 	if (ShaderObj == 0) {
 		fprintf(stderr, "Error creating shader type %d\n", ShaderType);
 		exit(0);
@@ -105,42 +112,23 @@ static void AddShader(GLuint ShaderProgram, const char* pShaderText, GLenum Shad
 	glAttachShader(ShaderProgram, ShaderObj);
 }
 
-static std::string ReadFile(const char *filePath) {
-	string content;
-	ifstream fileStream(filePath, ios::in);
-
-	if (!fileStream.is_open()) {
-		return "";
-	}
-
-	string line = "";
-	while (!fileStream.eof()) {
-		std::getline(fileStream, line);
-		content.append(line + "\n");
-	}
-
-	fileStream.close();
-	return content;
-}
-
 static void CompileShaders()
 {
 	GLuint ShaderProgram = glCreateProgram();
-
 	if (ShaderProgram == 0) {
 		fprintf(stderr, "Error creating shader program\n");
 		exit(1);
 	}
 
-	string vs = ReadFile(pVSFileName);
+	std::string vs = Utility::ReadFile(pVSFileName);
 	if (vs == "") {
 		fprintf(stderr, "Error loading shader program\n");
 		exit(1);
 	}
 	AddShader(ShaderProgram, vs.c_str(), GL_VERTEX_SHADER);
 
-	string fs = ReadFile(pFSFileName);
-	if (vs == "") {
+	std::string fs = Utility::ReadFile(pFSFileName);
+	if (fs == "") {
 		fprintf(stderr, "Error loading shader program\n");
 		exit(1);
 	}
@@ -166,4 +154,7 @@ static void CompileShaders()
 	}
 
 	glUseProgram(ShaderProgram);
+
+	gScaleLocation = glGetUniformLocation(ShaderProgram, "gScale");
+	assert(gScaleLocation != 0xFFFFFFFF);
 }
