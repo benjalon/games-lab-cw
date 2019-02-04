@@ -21,7 +21,7 @@ std::string Utility::ReadFile(const char *filePath) {
 	return content;
 }
 
-float Utility::ToRadian(float x)
+float Utility::ToRadians(float x)
 {
 	return (x * M_PI) / 180.0f;
 }

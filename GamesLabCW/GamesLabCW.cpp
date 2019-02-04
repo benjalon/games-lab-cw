@@ -7,13 +7,16 @@
 
 #include "GamesLabCW.h"
 #include "Utility.h"
+#include "Model.h"
 
-GLuint VBO; // Vertex buffer object
-GLuint IBO; // Index buffer object
-GLuint gWorldLocation;
+GLuint vbo; // Vertex buffer object
+GLuint ibo; // Index buffer object
+GLuint modelMatrixLocation;
 
-const char* pVSFileName = "shaders/shader.vs";
-const char* pFSFileName = "shaders/shader.fs";
+const char* vsFileName = "shaders/shader.vs";
+const char* fsFileName = "shaders/shader.fs";
+
+Model* model;
 
 int main(int argc, char** argv)
 {
@@ -35,6 +38,8 @@ int main(int argc, char** argv)
 
 	printf("GL version: %s\n", glGetString(GL_VERSION));
 
+	model = new Model();
+
 	// Render objects
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
@@ -44,6 +49,8 @@ int main(int argc, char** argv)
 	CompileShaders();
 
 	glutMainLoop();
+
+	delete model;
 
 	return 0;
 }
@@ -61,21 +68,12 @@ static void RenderSceneCB()
 {
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	static float Scale = 0.0f;
-	Scale += 0.001f;
-
-	glm::mat4 World;
-	World[0][0] = sinf(Scale); World[0][1] = 0.0f; World[0][2] = 0.0f;        World[0][3] = 0.0f;
-	World[1][0] = 0.0f; World[1][1] = sinf(Scale); World[1][2] = 0.0f;        World[1][3] = 0.0f;
-	World[2][0] = 0.0f; ; World[2][1] = 0.0f; ; World[2][2] = sinf(Scale); World[2][3] = 0.0f;
-	World[3][0] = 0.0f; ; World[3][1] = 0.0f; ; World[3][2] = 0.0f;        World[3][3] = 1.0f;
-
-	glUniformMatrix4fv(gWorldLocation, 1, GL_TRUE, &World[0][0]);
+	model->Render(modelMatrixLocation);
 
 	glEnableVertexAttribArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
 
 	glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, 0);
 
@@ -92,8 +90,8 @@ static void CreateVertexBuffer()
 	Vertices[2] = glm::vec3(1.0f, -1.0f, 0.0f);
 	Vertices[3] = glm::vec3(0.0f, 1.0f, 0.0f);
 
-	glGenBuffers(1, &VBO);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glGenBuffers(1, &vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(Vertices), Vertices, GL_STATIC_DRAW);
 }
 
@@ -104,8 +102,8 @@ static void CreateIndexBuffer()
 		2, 3, 0,
 		0, 1, 2 };
 
-	glGenBuffers(1, &IBO);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
+	glGenBuffers(1, &ibo);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(Indices), Indices, GL_STATIC_DRAW);
 }
 
@@ -143,14 +141,14 @@ static void CompileShaders()
 		exit(1);
 	}
 
-	std::string vs = Utility::ReadFile(pVSFileName);
+	std::string vs = Utility::ReadFile(vsFileName);
 	if (vs == "") {
 		fprintf(stderr, "Error loading shader program\n");
 		exit(1);
 	}
 	AddShader(ShaderProgram, vs.c_str(), GL_VERTEX_SHADER);
 
-	std::string fs = Utility::ReadFile(pFSFileName);
+	std::string fs = Utility::ReadFile(fsFileName);
 	if (fs == "") {
 		fprintf(stderr, "Error loading shader program\n");
 		exit(1);
@@ -178,6 +176,6 @@ static void CompileShaders()
 
 	glUseProgram(ShaderProgram);
 
-	gWorldLocation = glGetUniformLocation(ShaderProgram, "gWorld");
-	assert(gWorldLocation != 0xFFFFFFFF);
+	modelMatrixLocation = glGetUniformLocation(ShaderProgram, "modelMatrix");
+	assert(modelMatrixLocation != 0xFFFFFFFF);
 }
