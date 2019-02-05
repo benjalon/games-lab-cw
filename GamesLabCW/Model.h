@@ -2,6 +2,8 @@
 
 #include <GL/glew.h>
 
+class Camera;
+
 class Model
 {
 private:
@@ -10,7 +12,7 @@ private:
 	glm::vec3 rotation;
 	glm::vec3 scale;
 
-	GLuint modelMatrixLocation;
+	GLuint mvpMatrixLocation;
 	GLuint vbo;
 	GLuint ibo;
 public:
@@ -20,10 +22,13 @@ public:
 	void SetPosition(glm::vec3 position) { this->position = position; }
 	void SetRotation(glm::vec3 rotation) { this->rotation = rotation; }
 	void SetScale(glm::vec3 scale) { this->scale = scale; }
+	void Move(int x, int y, int z) { this->position.x += x; this->position.y += y; this->position.z += z; }
+	void Rotate(int x, int y, int z) { this->rotation.x += x; this->rotation.y += y; this->rotation.z += z; }
+	void Scale(int x, int y, int z) { this->scale.x += x; this->scale.y += y; this->scale.z += z; }
 
-	void Model::CreateVertexBuffer();
-	void Model::CreateIndexBuffer();
+	void CreateVertexBuffer();
+	void CreateIndexBuffer();
 
-	void Render();
+	void Render(Camera* camera);
 };
 

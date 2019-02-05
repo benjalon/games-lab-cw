@@ -7,10 +7,13 @@
 
 #include "GamesLabCW.h"
 #include "Utility.h"
+#include "Camera.h"
 #include "Model.h"
 
 const char* vsFileName = "shaders/shader.vs";
 const char* fsFileName = "shaders/shader.fs";
+
+Camera* camera;
 
 GLuint shaderProgram;
 Model* model;
@@ -20,7 +23,7 @@ int main(int argc, char** argv)
 	// Setup and create a cross-platform GLUT window
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);
-	glutInitWindowSize(1024, 768);
+	glutInitWindowSize(SCREEN_WIDTH, SCREEN_HEIGHT);
 	glutInitWindowPosition(100, 100);
 	glutCreateWindow("Games Lab CW");
 
@@ -37,6 +40,8 @@ int main(int argc, char** argv)
 
 	// Setup rendering
 	CompileShaders();
+
+	camera = new Camera(SCREEN_WIDTH, SCREEN_HEIGHT);
 
 	model = new Model(shaderProgram);
 	model->CreateVertexBuffer();
@@ -64,7 +69,8 @@ static void RenderSceneCB()
 {
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	model->Render();
+	camera->Render();
+	model->Render(camera);
 
 	glutSwapBuffers();
 }
