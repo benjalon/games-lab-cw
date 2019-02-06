@@ -2,7 +2,7 @@
 
 #include "GamesLabCW.h"
 
-int main(int argc, char** argv)
+int main_(int argc, char** argv)
 {
 	// Setup and create a cross-platform GLUT window
 	glutInit(&argc, argv);
