@@ -84,3 +84,9 @@ game::Vector2::operator glm::vec2() const
 {
 	return glm::vec2(x, y);
 }
+
+std::ostream &game::operator<<(std::ostream &os, const Vector2 &v)
+{
+	os << v.x << "," << v.y;
+	return os;
+}

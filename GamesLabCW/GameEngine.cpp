@@ -29,6 +29,8 @@ game::GameEngine::GameEngine(bool fullscreen, bool vsync, bool ground) :
 
 	//Remove 'loading' from title
 	glfwSetWindowTitle(window_, WINDOW_TITLE.c_str());
+
+	scene_.instantiate();
 }
 
 void game::GameEngine::run()

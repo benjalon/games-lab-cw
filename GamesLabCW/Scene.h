@@ -23,5 +23,8 @@ namespace game
 
 		//Invokes the render systems in this Scene
 		void draw();
+
+		//Instantiates an entity
+		void instantiate();
 	};
 }

@@ -6,6 +6,7 @@
 #pragma once
 
 #include <glm/glm.hpp>
+#include <iostream>
 
 namespace game
 {
@@ -37,5 +38,7 @@ namespace game
 
 		//Allows implicit casting to glm
 		operator glm::vec3() const;
+
+		friend std::ostream &operator<<(std::ostream &os, const Vector3 &v);
 	};
 }
