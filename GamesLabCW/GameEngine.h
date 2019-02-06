@@ -6,8 +6,8 @@
 
 #pragma once
 
-#include <utility>
 #include <GLFW/glfw3.h>
+#include <utility>
 
 #include "Scene.h"
 

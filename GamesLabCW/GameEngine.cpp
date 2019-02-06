@@ -22,6 +22,7 @@ game::GameEngine::GameEngine(bool fullscreen, bool vsync, bool ground) :
 		throw std::exception("Could not create game window");
 
 	glfwMakeContextCurrent(window_);
+	glfwSetWindowUserPointer(window_, this);
 
 	//Enable v-sync
 	if (vsync) glfwSwapInterval(1);
