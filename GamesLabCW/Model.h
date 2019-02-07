@@ -19,6 +19,10 @@ public:
 	Model(GLuint shaderProgram);
 	~Model();
 
+	glm::vec3 GetPosition() { return position; }
+	glm::vec3 GetRotation() { return rotation; }
+	glm::vec3 GetScale() { return scale; }
+
 	void SetPosition(glm::vec3 position) { this->position = position; }
 	void SetRotation(glm::vec3 rotation) { this->rotation = rotation; }
 	void SetScale(glm::vec3 scale) { this->scale = scale; }

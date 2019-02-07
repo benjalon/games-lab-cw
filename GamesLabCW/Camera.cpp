@@ -4,21 +4,18 @@
 #include "glm\gtx\transform.hpp"
 #include "glm\gtc\matrix_transform.hpp"
 
-Camera::Camera(float screenWidth, float screenHeight)
-{
+Camera::Camera(float screenWidth, float screenHeight) {
 	aspectRatio = screenWidth / screenHeight;
 
-	SetPosition(glm::vec3(0, 1, -1));
+	SetPosition(glm::vec3(0, 0, -1.0f));
 	SetTarget(glm::vec3(0, 0, 0)); // Look at origin
 	SetUp(glm::vec3(0, 1, 0)); // Up is up
 }
 
-Camera::~Camera()
-{
+Camera::~Camera() {
 }
 
-void Camera::Render()
-{
+void Camera::Render() {
 	viewMatrix = glm::lookAt(position, target, up);
 
 	projectionMatrix = glm::perspective(glm::radians(FOV), aspectRatio, MIN_RANGE, MAX_RANGE);

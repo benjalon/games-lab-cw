@@ -18,8 +18,7 @@ Camera* camera;
 GLuint shaderProgram;
 Model* model;
 
-int main(int argc, char** argv)
-{
+int main(int argc, char** argv) {
 	// Setup and create a cross-platform GLUT window
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);
@@ -42,16 +41,14 @@ int main(int argc, char** argv)
 	CompileShaders();
 
 	camera = new Camera(SCREEN_WIDTH, SCREEN_HEIGHT);
-
 	model = new Model(shaderProgram);
-	model->CreateVertexBuffer();
-	model->CreateIndexBuffer();
 
 	// Render 
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glutMainLoop();
 
 	delete model;
+	delete camera;
 
 	return 0;
 }
@@ -65,9 +62,14 @@ static void InitializeGlutCallbacks()
 /*
 Clear back buffer, render onto it and then swap it in
 */
-static void RenderSceneCB()
-{
+static void RenderSceneCB() {
 	glClear(GL_COLOR_BUFFER_BIT);
+
+	static float scale = 0.0f;
+	scale += 0.001f;
+
+	model->SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
+	model->Rotate(0.0f, scale, 0.0f);
 
 	camera->Render();
 	model->Render(camera);
@@ -75,8 +77,7 @@ static void RenderSceneCB()
 	glutSwapBuffers();
 }
 
-static void AddShader(GLuint shaderProgram, const char* shaderText, GLenum shaderType)
-{
+static void AddShader(GLuint shaderProgram, const char* shaderText, GLenum shaderType) {
 	GLuint shaderObj = glCreateShader(shaderType);
 	if (shaderObj == 0) {
 		fprintf(stderr, "Error creating shader type %d\n", shaderType);
