@@ -23,9 +23,9 @@ Model::~Model() {
 
 void Model::CreateVertexBuffer() {
 	glm::vec3 vertices[4];
-	vertices[0] = glm::vec3(-1.0f, -1.0f, 0.0f);
-	vertices[1] = glm::vec3(0.0f, -1.0f, 1.0f);
-	vertices[2] = glm::vec3(1.0f, -1.0f, 0.0f);
+	vertices[0] = glm::vec3(-1.0f, -1.0f, 0.5773f);
+	vertices[1] = glm::vec3(0.0f, -1.0f, -1.15475f);
+	vertices[2] = glm::vec3(1.0f, -1.0f, 0.5773f);
 	vertices[3] = glm::vec3(0.0f, 1.0f, 0.0f);
 
 	glGenBuffers(1, &vbo);
@@ -34,13 +34,10 @@ void Model::CreateVertexBuffer() {
 }
 
 void Model::CreateIndexBuffer() {
-	unsigned int indices[] = 
-	{ 
-		0, 3, 1,
+	unsigned int indices[] = { 0, 3, 1,
 		1, 3, 2,
 		2, 3, 0,
-		0, 1, 2
-	};
+		0, 1, 2 };
 
 	glGenBuffers(1, &ibo);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
@@ -48,7 +45,6 @@ void Model::CreateIndexBuffer() {
 }
 
 void Model::Render(Camera* camera) {
-	//SetScale(scale * 1.001f);
 
 	modelMatrix = glm::translate(position) *
 		glm::rotate(glm::radians(rotation.x), glm::vec3(1, 0, 0)) *
@@ -56,7 +52,7 @@ void Model::Render(Camera* camera) {
 		glm::rotate(glm::radians(rotation.y), glm::vec3(0, 1, 0)) *
 		glm::scale(scale);
 
-	glm::mat4 mvpMatrix = camera->GetProjectionMatrix() * camera->GetViewMatrix() * modelMatrix;
+	glm::mat4 mvpMatrix = /*camera->GetProjectionMatrix() * camera->GetViewMatrix() **/ modelMatrix;
 	glUniformMatrix4fv(mvpMatrixLocation, 1, GL_TRUE, &mvpMatrix[0][0]);
 
 	glEnableVertexAttribArray(0);

@@ -65,11 +65,8 @@ Clear back buffer, render onto it and then swap it in
 static void RenderSceneCB() {
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	static float scale = 0.0f;
-	scale += 0.001f;
-
-	model->SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
-	model->Rotate(0.0f, scale, 0.0f);
+	//model->Move(1, 0, 0);
+	model->Rotate(0, 1, 0);
 
 	camera->Render();
 	model->Render(camera);

@@ -7,7 +7,7 @@
 Camera::Camera(float screenWidth, float screenHeight) {
 	aspectRatio = screenWidth / screenHeight;
 
-	SetPosition(glm::vec3(0, 0, -1.0f));
+	SetPosition(glm::vec3(0, 0, -15.0f));
 	SetTarget(glm::vec3(0, 0, 0)); // Look at origin
 	SetUp(glm::vec3(0, 1, 0)); // Up is up
 }
