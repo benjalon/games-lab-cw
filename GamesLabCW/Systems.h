@@ -51,6 +51,6 @@ namespace game
 
 //Registers a function as a system expecting an arbitrary number of components
 #define SYSTEM(name, ...) \
-	struct name##_SYS { static System<name##_SYS, __VA_ARGS__> s; }; \
-	System<name##_SYS, __VA_ARGS__> name##_SYS::s ( \
-	name ) \
+	struct SYS_##name { static System<SYS_##name, __VA_ARGS__> s; }; \
+	System<SYS_##name, __VA_ARGS__> SYS_##name::s ( \
+	name )

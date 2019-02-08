@@ -7,7 +7,7 @@
 #include "Scene.h"
 
 #include "Systems.h"
-#include "GameEngine.h"
+#include "Prototypes.h"
 
 void game::Scene::tick(double dt)
 {
@@ -23,5 +23,5 @@ void game::Scene::draw()
 
 game::Entity game::Scene::instantiate(std::string p)
 {
-	return GameEngine::prototype(p)(registry_);
+	return prototypes::prototypes.at(p)(registry_);
 }

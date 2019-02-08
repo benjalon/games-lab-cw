@@ -22,6 +22,7 @@
     <ClCompile Include="GameEngine.cpp" />
     <ClCompile Include="GamesLabCW.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Prototypes.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="Systems.cpp" />
     <ClCompile Include="Vector2.cpp" />
@@ -35,6 +36,7 @@
     <ClInclude Include="Components.h" />
     <ClInclude Include="GameEngine.h" />
     <ClInclude Include="GamesLabCW.h" />
+    <ClInclude Include="Prototypes.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="Systems.h" />
     <ClInclude Include="Vector2.h" />
