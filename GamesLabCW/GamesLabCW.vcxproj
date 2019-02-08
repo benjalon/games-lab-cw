@@ -20,7 +20,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GameEngine.cpp" />
-    <ClCompile Include="GamesLabCW.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Prototypes.cpp" />
     <ClCompile Include="Scene.cpp" />
@@ -35,7 +34,6 @@
   <ItemGroup>
     <ClInclude Include="Components.h" />
     <ClInclude Include="GameEngine.h" />
-    <ClInclude Include="GamesLabCW.h" />
     <ClInclude Include="Prototypes.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="Systems.h" />
