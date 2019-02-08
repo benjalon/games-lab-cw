@@ -23,10 +23,12 @@
     <ClCompile Include="GamesLabCW.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Scene.cpp" />
+    <ClCompile Include="Systems.cpp" />
     <ClCompile Include="Vector2.cpp" />
     <ClCompile Include="Vector3.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="cpp.hint" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
@@ -34,6 +36,7 @@
     <ClInclude Include="GameEngine.h" />
     <ClInclude Include="GamesLabCW.h" />
     <ClInclude Include="Scene.h" />
+    <ClInclude Include="Systems.h" />
     <ClInclude Include="Vector2.h" />
     <ClInclude Include="Vector3.h" />
   </ItemGroup>

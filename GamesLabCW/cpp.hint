@@ -1,0 +1,4 @@
+#define SYSTEM(name, ...) \
+	struct name##_SYS { static System<name##_SYS, __VA_ARGS__> s; }; \
+	System<name##_SYS, __VA_ARGS__> name##_SYS::s ( \
+	name ) \
