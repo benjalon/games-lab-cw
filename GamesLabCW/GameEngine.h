@@ -8,6 +8,7 @@
 
 #include <GLFW/glfw3.h>
 #include <utility>
+#include <unordered_map>
 
 #include "Scene.h"
 
@@ -53,11 +54,17 @@ namespace game
 		//Renders the game
 		void draw();
 
+		//Dictionary of entity prototypes
+		static std::unordered_map<std::string, entt::prototype<Entity>> prototypes_;
+
 	public:
 		//Initialise the game context and settings with the given options
 		GameEngine(bool fullscreen, bool vsync, bool ground);
 
 		//Commence the main game loop
 		void run();
+
+		//Returns the given named entity prototype
+		static entt::prototype<Entity> &prototype(std::string name);
 	};
 }

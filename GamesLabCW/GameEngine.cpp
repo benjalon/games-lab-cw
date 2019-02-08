@@ -8,6 +8,13 @@
 
 #include <exception>
 
+#include "Components.h"
+
+//Empty registry used only for prototype creation
+entt::registry<> dummy_reg;
+
+std::unordered_map<std::string, entt::prototype<game::Entity>> game::GameEngine::prototypes_;
+
 game::GameEngine::GameEngine(bool fullscreen, bool vsync, bool ground) :
 	fullscreen_(fullscreen), vsync_(vsync), ground_(ground)
 {
@@ -30,7 +37,14 @@ game::GameEngine::GameEngine(bool fullscreen, bool vsync, bool ground) :
 	//Remove 'loading' from title
 	glfwSetWindowTitle(window_, WINDOW_TITLE.c_str());
 
-	scene_.instantiate();
+	//Load entity prototypes
+	//TODO Load from external data file at runtime
+	auto &p = prototypes_.emplace("KinematicBody", dummy_reg).first->second;
+	p.set<TransformComponent>();
+	p.set<KinematicComponent>();
+
+	//EXAMPLE Instantiates a kinematic body with given variables
+	scene_.instantiate("KinematicBody", KinematicComponent{ {0,100,0}, {1,0,0} }, TransformComponent{ {1,1,1} });
 }
 
 void game::GameEngine::run()
@@ -79,4 +93,9 @@ void game::GameEngine::draw()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	scene_.draw();
 	glfwSwapBuffers(window_);
+}
+
+entt::prototype<game::Entity> &game::GameEngine::prototype(std::string name)
+{
+	return prototypes_.at(name);
 }

@@ -6,9 +6,8 @@
 
 #include "Scene.h"
 
-#include <iostream>
-
 #include "Systems.h"
+#include "GameEngine.h"
 
 void game::Scene::tick(double dt)
 {
@@ -22,14 +21,7 @@ void game::Scene::draw()
 
 }
 
-void game::Scene::instantiate()
+game::Entity game::Scene::instantiate(std::string p)
 {
-	//Example kinematic entity creation
-	auto entity = registry_.create();
-	registry_.assign<TransformComponent>(entity);
-	registry_.assign<KinematicComponent>(entity, Vector3(0,0,0), Vector3(1,0,0));
-
-	//Example named entity creation
-	auto entity2 = registry_.create();
-	registry_.assign<NameComponent>(entity2, "MyEntity");
+	return GameEngine::prototype(p)(registry_);
 }
