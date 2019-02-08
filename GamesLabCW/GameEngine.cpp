@@ -29,6 +29,7 @@ game::GameEngine::GameEngine(bool fullscreen, bool vsync, bool ground) :
 
 	glfwMakeContextCurrent(window_);
 	glfwSetWindowUserPointer(window_, this);
+	gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
 
 	//Enable v-sync
 	if (vsync) glfwSwapInterval(1);
