@@ -1,144 +1,60 @@
-#include <stdio.h>
-#include <string>
-
 #include <GL/glew.h>
 #include <GL/freeglut.h>
-#include <glm/glm.hpp>
 
-#include "GamesLabCW.h"
-#include "Utility.h"
 #include "Camera.h"
-#include "Model.h"
+#include "Shader.h"
+#include "Mesh.h"
 
-const char* vsFileName = "shaders/shader.vs";
-const char* fsFileName = "shaders/shader.fs";
+std::unique_ptr<Camera> camera;
+std::unique_ptr<Shader> shader;
+std::unique_ptr<Mesh> mesh;
 
-Camera* camera;
+const float WINDOW_WIDTH = 1280.0f;
+const float WINDOW_HEIGHT = 1024.0f;
 
-GLuint shaderProgram;
-Model* model;
-
-int main(int argc, char** argv) {
-	// Setup and create a cross-platform GLUT window
-	glutInit(&argc, argv);
-	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);
-	glutInitWindowSize(SCREEN_WIDTH, SCREEN_HEIGHT);
-	glutInitWindowPosition(100, 100);
-	glutCreateWindow("Games Lab CW");
-
-	InitializeGlutCallbacks();
-
-	// Initialize GLEW
-	GLenum res = glewInit();
-	if (res != GLEW_OK) {
-		fprintf(stderr, "Error: '%s'\n", glewGetErrorString(res));
-		return 1;
-	}
-
-	printf("GL version: %s\n", glGetString(GL_VERSION));
-
-	// Setup rendering
-	CompileShaders();
-
-	camera = new Camera(SCREEN_WIDTH, SCREEN_HEIGHT);
-	model = new Model(shaderProgram);
-
-	// Render 
-	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-	glutMainLoop();
-
-	delete model;
-	delete camera;
-
-	return 0;
-}
-
-static void InitializeGlutCallbacks()
+static void Render()
 {
-	glutDisplayFunc(RenderSceneCB); // Pass buffer clear function
-	glutIdleFunc(RenderSceneCB);
-}
-
-/*
-Clear back buffer, render onto it and then swap it in
-*/
-static void RenderSceneCB() {
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	//model->Move(1, 0, 0);
-	model->Rotate(0, 1, 0);
-
-	camera->Render();
-	model->Render(camera);
+	camera->Render(WINDOW_WIDTH, WINDOW_HEIGHT);
+	mesh->Render(shader->GetShaderID(), camera->GetProjectionMatrix(), camera->GetViewMatrix());
 
 	glutSwapBuffers();
 }
 
-static void AddShader(GLuint shaderProgram, const char* shaderText, GLenum shaderType) {
-	GLuint shaderObj = glCreateShader(shaderType);
-	if (shaderObj == 0) {
-		fprintf(stderr, "Error creating shader type %d\n", shaderType);
-		exit(0);
-	}
-
-	const GLchar* p[1];
-	p[0] = shaderText;
-	GLint Lengths[1];
-	Lengths[0] = strlen(shaderText);
-	glShaderSource(shaderObj, 1, p, Lengths);
-	glCompileShader(shaderObj);
-	GLint success;
-	glGetShaderiv(shaderObj, GL_COMPILE_STATUS, &success);
-	if (!success) {
-		GLchar InfoLog[1024];
-		glGetShaderInfoLog(shaderObj, 1024, NULL, InfoLog);
-		fprintf(stderr, "Error compiling shader type %d: '%s'\n", shaderType, InfoLog);
-		exit(1);
-	}
-
-	glAttachShader(shaderProgram, shaderObj);
+static void InitializeGlutCallbacks()
+{
+	glutDisplayFunc(Render);
+	glutIdleFunc(Render);
 }
 
-static void CompileShaders()
+int main(int argc, char** argv)
 {
-	shaderProgram = glCreateProgram();
-	if (shaderProgram == 0) {
-		fprintf(stderr, "Error creating shader program\n");
-		exit(1);
-	}
+	// Initialize glut
+	glutInit(&argc, argv);
+	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);
+	glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT);
+	glutInitWindowPosition(100, 100);
+	glutCreateWindow("Dungeon Crawler");
+	InitializeGlutCallbacks();
 
-	std::string vs = Utility::ReadFile(vsFileName);
-	if (vs == "") {
-		fprintf(stderr, "Error loading shader program\n");
-		exit(1);
-	}
-	AddShader(shaderProgram, vs.c_str(), GL_VERTEX_SHADER);
+	// Initialize glew
+	GLenum response = glewInit();
+	assert(response == GLEW_OK && glewGetErrorString(response));
 
-	std::string fs = Utility::ReadFile(fsFileName);
-	if (fs == "") {
-		fprintf(stderr, "Error loading shader program\n");
-		exit(1);
-	}
-	AddShader(shaderProgram, fs.c_str(), GL_FRAGMENT_SHADER);
+	// Create scene objects
+	camera = std::make_unique<Camera>();
+	shader = std::make_unique<Shader>();
+	mesh = std::make_unique<Mesh>("bench.obj");
 
-	GLint success = 0;
-	GLchar errorLog[1024] = { 0 };
+	// Render setup
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	glFrontFace(GL_CW);
+	glCullFace(GL_BACK);
+	glEnable(GL_CULL_FACE);
 
-	glLinkProgram(shaderProgram);
-	glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
-	if (success == 0) {
-		glGetProgramInfoLog(shaderProgram, sizeof(errorLog), NULL, errorLog);
-		fprintf(stderr, "Error linking shader program: '%s'\n", errorLog);
-		exit(1);
-	}
+	// Render
+	glutMainLoop();
 
-	glValidateProgram(shaderProgram);
-	glGetProgramiv(shaderProgram, GL_VALIDATE_STATUS, &success);
-	if (!success) {
-		glGetProgramInfoLog(shaderProgram, sizeof(errorLog), NULL, errorLog);
-		fprintf(stderr, "Invalid shader program: '%s'\n", errorLog);
-		exit(1);
-	}
-
-	glUseProgram(shaderProgram);
+	return 0;
 }
