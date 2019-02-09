@@ -21,7 +21,11 @@ void game::Scene::draw()
 
 }
 
-game::Entity game::Scene::instantiate(std::string p)
+game::Entity game::Scene::instantiate(std::initializer_list<std::string> p)
 {
-	return prototypes::prototypes.at(p)(registry_);
+	//Initialises a new entity with the given prototypes
+	auto e = registry_.create();
+	for (auto &s : p)
+		prototypes::prototypes.at(s)(registry_, e);
+	return e;
 }

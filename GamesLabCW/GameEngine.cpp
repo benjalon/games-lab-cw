@@ -40,9 +40,10 @@ game::GameEngine::GameEngine(bool fullscreen, bool vsync, bool ground) :
 
 void game::GameEngine::run()
 {
-	//EXAMPLE Instantiates a kinematic body and named entity with given variables
-	scene_.instantiate("KinematicBody", KinematicComponent{ {0,100,0}, {1,0,0} }, TransformComponent{ {1,1,1} });
+	//EXAMPLE Instantiates entities by prototypes with given variables
+	scene_.instantiate("NamedEntity");
 	scene_.instantiate("NamedEntity", NameComponent{ "MyName" });
+	scene_.instantiate({ "NamedEntity", "KinematicBody" }, KinematicComponent{ {0,0,0},{1,0,0} }, NameComponent{ "Hello" });
 
 	//Time of next update
 	double t_next = glfwGetTime();

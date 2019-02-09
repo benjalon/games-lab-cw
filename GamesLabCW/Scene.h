@@ -19,24 +19,6 @@ namespace game
 		//Registry of entities
 		entt::registry<> registry_;
 
-		//Base case variadic template for instantiation
-		template <typename T>
-		Entity instantiate_comps(std::string p, T c)
-		{
-			auto e = instantiate(p);
-			registry_.replace<T>(e, c);
-			return e;
-		}
-
-		//Recursive case variadic template for instantiation
-		template <typename T, typename... Ts>
-		Entity instantiate_comps(std::string p, T c, Ts... cs)
-		{
-			auto e = instantiate_comps(p, cs...);
-			registry_.replace<T>(e, c);
-			return e;
-		}
-
 	public:
 		//Ticks all logic systems in this Scene
 		void tick(double dt);
@@ -45,13 +27,22 @@ namespace game
 		void draw();
 
 		//Default-instantiates an entity of the given prototype
-		Entity instantiate(std::string p);
+		Entity instantiate(std::string p) { return instantiate({ p }); }
+
+		//Default-instantiates an entity of the given prototypes
+		Entity instantiate(std::initializer_list<std::string> p);
 
 		//Instantiates an entity of the given prototype with the given component values
 		template <typename... Ts>
-		Entity instantiate(std::string p, Ts... components)
+		Entity instantiate(std::string p, Ts... components) { return instantiate({ p }, components...); }
+
+		//Instantiates an entity of the given prototypes with the given component values
+		template <typename... Ts>
+		Entity instantiate(std::initializer_list<std::string> p, Ts... components)
 		{
-			return instantiate_comps(p, components...);
+			auto e = instantiate(p);
+			(registry_.replace<Ts>(e, components), ...);
+			return e;
 		}
 	};
 }

@@ -13,7 +13,7 @@ namespace game
 {
 	struct NameComponent
 	{
-		std::string name;
+		std::string name = "unnamed";
 	};
 
 	struct TransformComponent
