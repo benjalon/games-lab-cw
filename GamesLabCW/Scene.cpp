@@ -12,7 +12,7 @@
 void game::Scene::tick(double dt)
 {
 	//Invoke all systems
-	for (auto &s : SystemRegistry::system_invokers)
+	for (auto &s : systems::system_invokers)
 		s(dt, registry_);
 }
 

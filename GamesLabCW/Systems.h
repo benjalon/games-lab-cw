@@ -11,7 +11,7 @@
 
 #include "Components.h"
 
-namespace game
+namespace game::systems
 {
 	//Function representing a system, receiving dt, entity and arbitrary components
 	template <typename... Ts>
@@ -32,15 +32,12 @@ namespace game
 		};
 	}
 
-	//Base class containing collection of wrapped system function
-	struct SystemRegistry
-	{
-		static std::vector<SystemInvoker> system_invokers;
-	};
+	//Dictionary of wrapped system functions
+	extern std::vector<SystemInvoker> system_invokers;
 
-	//CRTP derived class registering system function definitions
+	//CRTP base class registering system function definitions
 	template <typename T, typename... Ts>
-	struct System : SystemRegistry
+	struct System
 	{
 		System(const SystemFunction<Ts...> &f)
 		{
