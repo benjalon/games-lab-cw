@@ -16,19 +16,22 @@
 namespace game
 {
 	//Initial window width
-	const int WINDOW_WIDTH = 1920;
+	constexpr int WINDOW_WIDTH = 1920;
 
 	//Initial window height
-	const int WINDOW_HEIGHT = 1080;
+	constexpr int WINDOW_HEIGHT = 1080;
 
 	//Aspect ratio to enforce
-	const std::pair<int, int> ASPECT_RATIO { 16, 9 };
+	constexpr std::pair<int, int> ASPECT_RATIO { 16, 9 };
+
+	//Aspect ratio to enforce
+	constexpr double ASPECT_RATIO_VAL = ASPECT_RATIO.first / ASPECT_RATIO.second;
 
 	//Target game rate (Hz)
-	const int GAME_RATE = 60;
+	constexpr int GAME_RATE = 60;
 
 	//Minimum game rate (Hz)
-	const int GAME_RATE_MIN = 10;
+	constexpr int GAME_RATE_MIN = 10;
 
 	//Application window title
 	const std::string WINDOW_TITLE = "Dungeon Crawler";

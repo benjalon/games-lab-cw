@@ -8,6 +8,7 @@
 
 #include "Systems.h"
 #include "Prototypes.h"
+#include "Renderer.h"
 
 void game::Scene::tick(double dt)
 {
@@ -18,7 +19,12 @@ void game::Scene::tick(double dt)
 
 void game::Scene::draw()
 {
-
+	//Render all models in the scene for each camera
+	registry_.view<CameraComponent>().each([&](auto, auto &c) {
+		registry_.view<ModelComponent, TransformComponent>().each([&](auto, auto &m, auto &t) {
+			renderer::render_model(c, m, t);
+		});
+	});
 }
 
 game::Entity game::Scene::instantiate(std::initializer_list<std::string> p)

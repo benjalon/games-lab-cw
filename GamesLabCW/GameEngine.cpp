@@ -10,13 +10,12 @@
 
 #include "Components.h"
 #include "Prototypes.h"
+#include "Renderer.h"
+
 
 game::GameEngine::GameEngine(bool fullscreen, bool vsync, bool ground) :
 	fullscreen_(fullscreen), vsync_(vsync), ground_(ground)
 {
-	//Load entity prototypes
-	prototypes::register_prototypes();
-
 	//Initialise the GLFW window
 	if (!glfwInit())
 		throw std::exception("GLFW could not be initialised");
@@ -34,16 +33,26 @@ game::GameEngine::GameEngine(bool fullscreen, bool vsync, bool ground) :
 	//Enable v-sync
 	if (vsync) glfwSwapInterval(1);
 
+	//Initialise the render system
+	renderer::init();
+
+	//Load entity prototypes
+	prototypes::register_prototypes();
+
 	//Remove 'loading' from title
 	glfwSetWindowTitle(window_, WINDOW_TITLE.c_str());
 }
 
 void game::GameEngine::run()
 {
+	//EXAMPLE Instantiates a camera and models
+	scene_.instantiate("Camera");
+	scene_.instantiate("Model");
+	//scene_.instantiate("Model");
 	//EXAMPLE Instantiates entities by prototypes with given variables
-	scene_.instantiate("NamedEntity");
-	scene_.instantiate("NamedEntity", NameComponent{ "MyName" });
-	scene_.instantiate({ "NamedEntity", "KinematicBody" }, KinematicComponent{ {0,0,0},{1,0,0} }, NameComponent{ "Hello" });
+	//scene_.instantiate("NamedEntity");
+	//scene_.instantiate("NamedEntity", NameComponent{ "MyName" });
+	//scene_.instantiate({ "NamedEntity", "KinematicBody" }, KinematicComponent{ {0,0,0},{1,0,0} }, NameComponent{ "Hello" });
 
 	//Time of next update
 	double t_next = glfwGetTime();
