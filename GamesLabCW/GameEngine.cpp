@@ -10,7 +10,7 @@
 
 #include "Components.h"
 #include "Prototypes.h"
-#include "Renderer.h"
+#include "renderer/Renderer.h"
 
 
 game::GameEngine::GameEngine(bool fullscreen, bool vsync, bool ground) :
@@ -39,17 +39,24 @@ game::GameEngine::GameEngine(bool fullscreen, bool vsync, bool ground) :
 	//Load entity prototypes
 	prototypes::register_prototypes();
 
+	//EXAMPLE Load models
+	renderer::load("models/Wolf/wolf.obj");
+	renderer::load("models/teapot.obj");
+	renderer::finalise();
+
 	//Remove 'loading' from title
 	glfwSetWindowTitle(window_, WINDOW_TITLE.c_str());
 }
 
 void game::GameEngine::run()
 {
-	//EXAMPLE Instantiates a camera and models
-	scene_.instantiate("Camera");
-	scene_.instantiate("Model");
-	//scene_.instantiate("Model");
-	//EXAMPLE Instantiates entities by prototypes with given variables
+	//EXAMPLE Instantiate a camera and models
+	scene_.instantiate("Camera", CameraComponent{ {0,2,5} });
+	scene_.instantiate("Model", ModelComponent{ "models/Wolf/wolf.obj" });
+	TransformComponent t_teapot; t_teapot.position.x = 2; t_teapot.scale = { 0.5, 0.5, 0.5 };
+	scene_.instantiate("Model", ModelComponent{ "models/teapot.obj" }, ColourComponent{ {1,0.5,1} }, t_teapot);
+
+	//EXAMPLE Instantiate entities by prototypes with given variables
 	//scene_.instantiate("NamedEntity");
 	//scene_.instantiate("NamedEntity", NameComponent{ "MyName" });
 	//scene_.instantiate({ "NamedEntity", "KinematicBody" }, KinematicComponent{ {0,0,0},{1,0,0} }, NameComponent{ "Hello" });

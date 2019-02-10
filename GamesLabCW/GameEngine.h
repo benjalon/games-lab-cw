@@ -25,7 +25,7 @@ namespace game
 	constexpr std::pair<int, int> ASPECT_RATIO { 16, 9 };
 
 	//Aspect ratio to enforce
-	constexpr double ASPECT_RATIO_VAL = ASPECT_RATIO.first / ASPECT_RATIO.second;
+	constexpr double ASPECT_RATIO_VAL = (double)ASPECT_RATIO.first / ASPECT_RATIO.second;
 
 	//Target game rate (Hz)
 	constexpr int GAME_RATE = 60;

@@ -8,7 +8,7 @@
 
 #include "Systems.h"
 #include "Prototypes.h"
-#include "Renderer.h"
+#include "renderer/Renderer.h"
 
 void game::Scene::tick(double dt)
 {
@@ -20,9 +20,9 @@ void game::Scene::tick(double dt)
 void game::Scene::draw()
 {
 	//Render all models in the scene for each camera
-	registry_.view<CameraComponent>().each([&](auto, auto &c) {
-		registry_.view<ModelComponent, TransformComponent>().each([&](auto, auto &m, auto &t) {
-			renderer::render_model(c, m, t);
+	registry_.view<CameraComponent>().each([&](auto, auto &cam) {
+		registry_.view<ModelComponent, ColourComponent, TransformComponent>().each([&](auto, auto &m, auto &c, auto &t) {
+			renderer::render_model(cam, m, c, t);
 		});
 	});
 }
