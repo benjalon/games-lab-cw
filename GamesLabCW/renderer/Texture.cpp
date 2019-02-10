@@ -7,7 +7,7 @@
 #include "Texture.h"
 
 #include <glad/glad.h>
-#include <soil.h>
+#include <SOIL/SOIL.h>
 
 #include <iostream>
 
