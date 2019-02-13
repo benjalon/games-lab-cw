@@ -114,8 +114,10 @@ GLuint game::Shader::loadShader(const char* filename, GLenum type, std::string p
 
 	GLuint shader = glCreateShader(type);
 
-	//the reinterpret cast is used to convert between pointer types
-	source.insert(0, prepend);
+	//Prepend version and custom source code
+	source.insert(0, GLSL_VERSION_DIRECTIVE + prepend);
+
+	//the reinterpret cast is used to convert between pointer types	
 	const GLchar* glSource = reinterpret_cast<const GLchar*>(source.c_str());
 	glShaderSource(shader, 1, &glSource, 0);
 

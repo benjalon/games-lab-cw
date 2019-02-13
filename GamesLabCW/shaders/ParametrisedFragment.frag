@@ -1,8 +1,6 @@
 //TEXTURED - should a texture be used?
 //N_AMBIENT - number of ambient lights
 
-#version 330 core
-
 in vec2 v_vTexcoord;
 
 out vec4 colour;

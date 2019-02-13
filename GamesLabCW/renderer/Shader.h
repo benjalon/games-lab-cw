@@ -5,6 +5,8 @@
 
 namespace game
 {
+	const std::string GLSL_VERSION_DIRECTIVE = "#version 330 core\n";
+
 	class Shader
 	{
 	private:
