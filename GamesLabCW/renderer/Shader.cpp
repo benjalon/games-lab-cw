@@ -21,13 +21,14 @@ game::Shader::~Shader(void)
 }
 
 
-bool game::Shader::load(const std::string name, const char* vertexFilename, const char* fragmentFilename)
+bool game::Shader::load(const std::string name, const char* vertexFilename, const char* fragmentFilename,
+	std::string vertexPrepend, std::string fragmentPrepend)
 {
 	m_name = name;
 	GLint success = 0;
 
 	//here we create a vertex shader and set the shader source
-	m_vertexShader = loadShader(vertexFilename, GL_VERTEX_SHADER);
+	m_vertexShader = loadShader(vertexFilename, GL_VERTEX_SHADER, vertexPrepend);
 
 	//next compile the vertex shader
 	glCompileShader(m_vertexShader);
@@ -46,7 +47,7 @@ bool game::Shader::load(const std::string name, const char* vertexFilename, cons
 	else
 	{
 		//create a fragment shader and set the shader source
-		m_fragmentShader = loadShader(fragmentFilename, GL_FRAGMENT_SHADER);
+		m_fragmentShader = loadShader(fragmentFilename, GL_FRAGMENT_SHADER, fragmentPrepend);
 
 		//compile the fragment shader
 		glCompileShader(m_fragmentShader);
@@ -95,7 +96,7 @@ bool game::Shader::load(const std::string name, const char* vertexFilename, cons
 }
 
 //reads the shader from a file and defines the shader source
-GLuint game::Shader::loadShader(const char* filename, GLenum type) const
+GLuint game::Shader::loadShader(const char* filename, GLenum type, std::string prepend) const
 {
 	std::string source;
 	std::ifstream file(filename, std::ios::binary);
@@ -114,6 +115,7 @@ GLuint game::Shader::loadShader(const char* filename, GLenum type) const
 	GLuint shader = glCreateShader(type);
 
 	//the reinterpret cast is used to convert between pointer types
+	source.insert(0, prepend);
 	const GLchar* glSource = reinterpret_cast<const GLchar*>(source.c_str());
 	glShaderSource(shader, 1, &glSource, 0);
 

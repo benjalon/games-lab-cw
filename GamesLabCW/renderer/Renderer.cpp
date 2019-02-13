@@ -97,7 +97,7 @@ namespace game::renderer
 			size_t meshFaces = mesh->mNumFaces;
 			m.materials.push_back(mesh->mMaterialIndex);
 			size_t size0 = vbo.size();
-			m.mesh_starts.push_back(size0 / vertexTotalSize);
+			m.mesh_starts.push_back((GLuint)size0 / vertexTotalSize);
 
 			for (size_t j = 0; j < meshFaces; j++)
 			{
@@ -122,11 +122,11 @@ namespace game::renderer
 			}
 
 			totalVertices += mesh->mNumVertices;
-			m.mesh_sizes.push_back((vbo.size() - size0) / vertexTotalSize);
+			m.mesh_sizes.push_back((GLuint)(vbo.size() - size0) / vertexTotalSize);
 		}
 
 		m.num_materials = scene->mNumMaterials;
-		std::vector<int> materialRemap(m.num_materials);
+		std::vector<size_t> materialRemap(m.num_materials);
 
 		for (size_t i = 0; i < m.num_materials; i++)
 		{
@@ -161,7 +161,7 @@ namespace game::renderer
 		for (int i = 0; i < (int)m.mesh_sizes.size(); i++)
 		{
 			int o = m.materials[i];
-			m.materials[i] = materialRemap[o];
+			m.materials[i] = (GLuint)materialRemap[o];
 		}
 	}
 
@@ -223,8 +223,9 @@ namespace game::renderer
 		glDepthFunc(GL_LESS);
 
 		//Load shaders
-		flatcolour_shader.load("FlatColour", "shaders/Passthrough.vert", "shaders/FlatColour.frag");
-		texture_shader.load("Texture", "shaders/Passthrough.vert", "shaders/Texture.frag");
+		flatcolour_shader.load("FlatColour", "shaders/Passthrough.vert", "shaders/ParametrisedFragment.frag");
+		texture_shader.load("Texture", "shaders/Passthrough.vert", "shaders/ParametrisedFragment.frag", "",
+			"#define TEXTURED");
 	}
 
 	void render_model(CameraComponent camera, ModelComponent model, ColourComponent c, TransformComponent t)
