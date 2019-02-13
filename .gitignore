@@ -339,3 +339,6 @@ ASALocalRun/
 
 # BeatPulse healthcheck temp database 
 healthchecksdb
+
+# CUSTOM Include 3D model .obj files
+!GamesLabCW/models/**/*.obj
