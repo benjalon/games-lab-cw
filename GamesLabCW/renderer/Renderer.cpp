@@ -7,6 +7,8 @@
 
 #include "Renderer.h"
 
+#include <map>
+
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -24,8 +26,34 @@
 
 namespace game::renderer
 {
-	Shader flatcolour_shader;
-	Shader texture_shader;
+	//Returns the (potentially cached) shader using the given paramaters
+	GLuint get_shader(bool textured)
+	{
+		//Cache of parametrised shaders
+		static std::map<std::tuple<bool>, Shader> shaders;
+
+		auto args = std::make_tuple(textured);
+
+		//If the requested shader already exists, return it
+		auto it = shaders.find(args);
+		if (it != shaders.end())
+			return it->second.handle();
+
+		//Else, compile and return the new shader
+		else
+		{
+			//Shader parameters to prepend to source
+			std::string v, f;
+			auto define = [](std::string &s, std::string def) { s.append("#define " + def + "\n"); };
+
+			if (textured) define(f, "TEXTURED");
+
+			//Create new shader
+			auto &s = shaders[args];
+			s.load("", "shaders/Passthrough.vert", "shaders/ParametrisedFragment.frag", v, f);
+			return s.handle();
+		}
+	}
 
 	//Global vertex array object
 	GLuint vao;
@@ -221,11 +249,6 @@ namespace game::renderer
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glEnable(GL_DEPTH_TEST);
 		glDepthFunc(GL_LESS);
-
-		//Load shaders
-		flatcolour_shader.load("FlatColour", "shaders/Passthrough.vert", "shaders/ParametrisedFragment.frag");
-		texture_shader.load("Texture", "shaders/Passthrough.vert", "shaders/ParametrisedFragment.frag", "",
-			"#define TEXTURED");
 	}
 
 	void render_model(CameraComponent camera, ModelComponent model, ColourComponent c, TransformComponent t)
@@ -239,7 +262,7 @@ namespace game::renderer
 		const Mesh &mesh = it->second;
 
 		//Determine and use appropriate shader
-		auto shader = (mesh.textured ? texture_shader : flatcolour_shader).handle();
+		GLuint shader = get_shader(mesh.textured);
 		glUseProgram(shader);
 
 		//Calculate MVP matrices
