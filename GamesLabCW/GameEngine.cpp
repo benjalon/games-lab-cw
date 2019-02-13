@@ -56,6 +56,9 @@ void game::GameEngine::run()
 	TransformComponent t_teapot; t_teapot.position.x = 2; t_teapot.scale = { 0.5, 0.5, 0.5 };
 	scene_.instantiate("Model", ModelComponent{ "models/teapot.obj" }, ColourComponent{ {1,0.5,1} }, t_teapot);
 
+	//EXAMPLE Add a 'warm flourescent' ambient light
+	scene_.instantiate("AmbientLight", AmbientLightComponent{ {1, 244.0/255, 229.0/255}, 1.0 });
+
 	//EXAMPLE Instantiate entities by prototypes with given variables
 	//scene_.instantiate("NamedEntity");
 	//scene_.instantiate("NamedEntity", NameComponent{ "MyName" });

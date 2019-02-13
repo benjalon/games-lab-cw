@@ -19,10 +19,15 @@ void game::Scene::tick(double dt)
 
 void game::Scene::draw()
 {
+	//Get all ambient lights
+	size_t n_a = registry_.raw_view<AmbientLightComponent>().size();
+	AmbientLightComponent *a = registry_.raw_view<AmbientLightComponent>().raw();
+
 	//Render all models in the scene for each camera
 	registry_.view<CameraComponent>().each([&](auto, auto &cam) {
 		registry_.view<ModelComponent, ColourComponent, TransformComponent>().each([&](auto, auto &m, auto &c, auto &t) {
-			renderer::render_model(cam, m, c, t);
+			renderer::render_model(cam, m, c, t,
+				n_a, a);
 		});
 	});
 }

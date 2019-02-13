@@ -14,6 +14,8 @@ void game::prototypes::register_prototypes()
 	PROTOTYPE(Camera, CameraComponent);
 	PROTOTYPE(Model, ModelComponent, ColourComponent, TransformComponent);
 
+	PROTOTYPE(AmbientLight, AmbientLightComponent);
+
 	PROTOTYPE(NamedEntity, NameComponent);
 	PROTOTYPE(KinematicBody, TransformComponent, KinematicComponent);
 }

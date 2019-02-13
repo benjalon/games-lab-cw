@@ -43,6 +43,12 @@ namespace game
 		Vector3 scale{ 1.0, 1.0, 1.0 };
 	};
 
+	struct AmbientLightComponent
+	{
+		Vector3 colour{ 1.0, 1.0, 1.0 };
+		double intensity = 1.0;
+	};
+
 	struct KinematicComponent
 	{
 		Vector3 velocity;

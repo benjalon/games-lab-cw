@@ -27,12 +27,12 @@
 namespace game::renderer
 {
 	//Returns the (potentially cached) shader using the given paramaters
-	GLuint get_shader(bool textured)
+	GLuint get_shader(bool textured, size_t n_ambient)
 	{
 		//Cache of parametrised shaders
-		static std::map<std::tuple<bool>, Shader> shaders;
+		static std::map<std::tuple<bool, size_t>, Shader> shaders;
 
-		auto args = std::make_tuple(textured);
+		auto args = std::make_tuple(textured, n_ambient);
 
 		//If the requested shader already exists, return it
 		auto it = shaders.find(args);
@@ -47,6 +47,7 @@ namespace game::renderer
 			auto define = [](std::string &s, std::string def) { s.append("#define " + def + "\n"); };
 
 			if (textured) define(f, "TEXTURED");
+			define(f, "N_AMBIENT " + std::to_string(n_ambient));
 
 			//Create new shader
 			auto &s = shaders[args];
@@ -251,7 +252,8 @@ namespace game::renderer
 		glDepthFunc(GL_LESS);
 	}
 
-	void render_model(CameraComponent camera, ModelComponent model, ColourComponent c, TransformComponent t)
+	void render_model(CameraComponent camera, ModelComponent model, ColourComponent c, TransformComponent t,
+		size_t n_ambient, AmbientLightComponent *ambients)
 	{
 		//Bind correct VAO
 		glBindVertexArray(vao);
@@ -262,7 +264,7 @@ namespace game::renderer
 		const Mesh &mesh = it->second;
 
 		//Determine and use appropriate shader
-		GLuint shader = get_shader(mesh.textured);
+		GLuint shader = get_shader(mesh.textured, n_ambient);
 		glUseProgram(shader);
 
 		//Calculate MVP matrices
@@ -277,7 +279,7 @@ namespace game::renderer
 
 		glm::mat4 modelview = v * m;
 
-		//Provide MVP matrices to shader
+		//Provide MVP matrices
 		glUniformMatrix4fv(
 			glGetUniformLocation(shader, "projectionMatrix"),
 			1, GL_FALSE, glm::value_ptr(p)
@@ -286,11 +288,27 @@ namespace game::renderer
 			glGetUniformLocation(shader, "modelviewMatrix"),
 			1, GL_FALSE, glm::value_ptr(modelview)
 		);
+
+		//Provide flat colour component
 		glUniform4f(
 			glGetUniformLocation(shader, "flatColour"),
 			(GLfloat)c.colour.x, (GLfloat)c.colour.y, (GLfloat)c.colour.z,
 			(GLfloat)c.alpha
 		);
+
+		//Provide ambient lights information
+		for (size_t i = 0; i < n_ambient; i++)
+		{
+			std::string j = std::to_string(i);
+			glUniform3f(glGetUniformLocation(shader,
+				("ambientLights[" + j + "].colour").c_str()),
+				(GLfloat)ambients[i].colour.x,
+				(GLfloat)ambients[i].colour.y,
+				(GLfloat)ambients[i].colour.z);
+			glUniform1f(glGetUniformLocation(shader,
+				("ambientLights[" + j + "].intensity").c_str()),
+				(GLfloat)ambients[i].intensity);
+		}
 
 		//Draw the model
 		for (size_t i = 0; i < mesh.mesh_sizes.size(); i++)
