@@ -51,8 +51,8 @@ namespace game
 
 	struct DirectionalLightComponent
 	{
-		Vector3 direction{ 1.0, 1.0, 1.0 };
-		double intensity = 1.0;
+		Vector3 colour{ 1.0, 1.0, 1.0 };
+		Vector3 position{ 0.0, 0.0, 0.0 };
 	};
 
 	struct KinematicComponent

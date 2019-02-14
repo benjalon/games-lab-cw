@@ -27,7 +27,7 @@
 namespace game::renderer
 {
 	//Returns the (potentially cached) shader using the given paramaters
-	GLuint get_shader(bool textured, size_t n_ambient)
+	GLuint get_shader(bool textured, size_t n_ambient, size_t n_directional)
 	{
 		//Cache of parametrised shaders
 		static std::map<std::tuple<bool, size_t>, Shader> shaders;
@@ -48,6 +48,7 @@ namespace game::renderer
 
 			if (textured) define(f, "TEXTURED");
 			define(f, "N_AMBIENT " + std::to_string(n_ambient));
+			define(f, "N_DIRECTIONAL " + std::to_string(n_directional));
 
 			//Create new shader
 			auto &s = shaders[args];
@@ -254,7 +255,7 @@ namespace game::renderer
 	}
 
 	void render_model(CameraComponent camera, ModelComponent model, ColourComponent c, TransformComponent t,
-		size_t n_ambient, AmbientLightComponent *ambients)
+		size_t n_ambient, AmbientLightComponent *ambients, size_t n_directional, DirectionalLightComponent *directionals)
 	{
 		//Bind correct VAO
 		glBindVertexArray(vao);
@@ -265,7 +266,7 @@ namespace game::renderer
 		const Mesh &mesh = it->second;
 
 		//Determine and use appropriate shader
-		GLuint shader = get_shader(mesh.textured, n_ambient);
+		GLuint shader = get_shader(mesh.textured, n_ambient, n_directional);
 		glUseProgram(shader);
 
 		//Calculate MVP matrices
@@ -313,6 +314,22 @@ namespace game::renderer
 			glUniform1f(glGetUniformLocation(shader,
 				("ambientLights[" + j + "].intensity").c_str()),
 				(GLfloat)ambients[i].intensity);
+		}
+
+		//Provide ambient lights information
+		for (size_t i = 0; i < n_directional; i++)
+		{
+			std::string j = std::to_string(i);
+			glUniform3f(glGetUniformLocation(shader,
+				("directionalLights[" + j + "].colour").c_str()),
+				(GLfloat)directionals[i].colour.x,
+				(GLfloat)directionals[i].colour.y,
+				(GLfloat)directionals[i].colour.z);
+			glUniform3f(glGetUniformLocation(shader,
+				("directionalLights[" + j + "].position").c_str()),
+				(GLfloat)directionals[i].position.x,
+				(GLfloat)directionals[i].position.y,
+				(GLfloat)directionals[i].position.z);
 		}
 
 		//Draw the model
