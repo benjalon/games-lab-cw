@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClCompile Include="..\glad\src\glad.c" />
     <ClCompile Include="GameEngine.cpp" />
+    <ClCompile Include="Input.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Prototypes.cpp" />
     <ClCompile Include="renderer\Renderer.cpp" />
@@ -40,6 +41,7 @@
   <ItemGroup>
     <ClInclude Include="Components.h" />
     <ClInclude Include="GameEngine.h" />
+    <ClInclude Include="Input.h" />
     <ClInclude Include="Prototypes.h" />
     <ClInclude Include="renderer\Renderer.h" />
     <ClInclude Include="renderer\Shader.h" />

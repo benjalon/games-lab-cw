@@ -66,6 +66,15 @@ namespace game
 		void run();
 
 
+		//Key input callback
+		static void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
+
+		//Cursor position callback
+		static void cursor_position_callback(GLFWwindow *window, double x, double y);
+
+		//Mouse button callback
+		static void mouse_button_callback(GLFWwindow *window, int button, int action, int mods);
+
 		//Window size callback
 		static void window_size_callback(GLFWwindow *window, int width, int height);
 	};

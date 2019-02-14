@@ -5,10 +5,13 @@
 
 #include "Systems.h"
 
+#include "Input.h"
+#include "Utility.h"
+
+std::vector<game::systems::SystemInvoker> game::systems::system_invokers;
+
 namespace game::systems
 {
-	std::vector<SystemInvoker> system_invokers;
-
 	//Basic kinematic system of calculus of motion
 	auto KinematicSystem = [](double dt, auto entity, auto &t, auto &k)
 	{

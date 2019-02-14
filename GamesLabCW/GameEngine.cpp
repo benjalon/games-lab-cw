@@ -11,7 +11,7 @@
 #include "Components.h"
 #include "Prototypes.h"
 #include "renderer/Renderer.h"
-
+#include "Input.h"
 
 game::GameEngine::GameEngine(bool fullscreen, bool vsync, bool ground) :
 	fullscreen_(fullscreen), vsync_(vsync), ground_(ground)
@@ -33,6 +33,9 @@ game::GameEngine::GameEngine(bool fullscreen, bool vsync, bool ground) :
 	gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
 
 	//Set callback functions
+	glfwSetKeyCallback(window_, key_callback);
+	glfwSetCursorPosCallback(window_, cursor_position_callback);
+	glfwSetMouseButtonCallback(window_, mouse_button_callback);
 	glfwSetWindowSizeCallback(window_, window_size_callback);
 
 	//Enable v-sync
@@ -88,6 +91,8 @@ void game::GameEngine::run()
 			t_next += 1.0 / GAME_RATE;
 
 			//Tick game logic
+			input::pressed.clear();
+			input::released.clear();
 			glfwPollEvents();
 			double dt = t_now - t_last;
 			if (dt > 1.0 / GAME_RATE_MIN)
@@ -113,6 +118,43 @@ void game::GameEngine::draw()
 	scene_.draw();
 	glfwSwapBuffers(window_);
 }
+
+void game::GameEngine::key_callback(GLFWwindow *window, int key, int scancode, int action, int mods)
+{
+	if (key != GLFW_KEY_UNKNOWN)
+	{
+		if (action == GLFW_PRESS)
+		{
+			input::pressed.emplace(key);
+			input::held.emplace(key);
+		}
+		else if (action == GLFW_RELEASE)
+		{
+			input::released.emplace(key);
+			input::held.erase(key);
+		}
+	}
+}
+
+void game::GameEngine::cursor_position_callback(GLFWwindow *window, double x, double y)
+{
+	input::cursor_pos = { x, y };
+}
+
+void game::GameEngine::mouse_button_callback(GLFWwindow *window, int button, int action, int mods)
+{
+	if (action == GLFW_PRESS)
+	{
+		input::pressed.emplace(button);
+		input::held.emplace(button);
+	}
+	else if (action == GLFW_RELEASE)
+	{
+		input::released.emplace(button);
+		input::held.erase(button);
+	}
+}
+
 void game::GameEngine::window_size_callback(GLFWwindow *window, int width, int height)
 {
 	//Ensure the viewport scales to the new window size
