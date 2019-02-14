@@ -46,6 +46,12 @@ namespace game
 	struct AmbientLightComponent
 	{
 		Vector3 colour{ 1.0, 1.0, 1.0 };
+		double intensity = 0.3;
+	};
+
+	struct DirectionalLightComponent
+	{
+		Vector3 direction{ 0.0, 0.0, 0.0 };
 		double intensity = 1.0;
 	};
 

@@ -52,6 +52,7 @@ namespace game::renderer
 			//Create new shader
 			auto &s = shaders[args];
 			s.load("", "shaders/Passthrough.vert", "shaders/ParametrisedFragment.frag", v, f);
+			//s.load("", "shaders/BlinnPhong.vert", "shaders/BlinnPhong.frag", v, f);
 			return s.handle();
 		}
 	}
@@ -288,6 +289,10 @@ namespace game::renderer
 			glGetUniformLocation(shader, "modelviewMatrix"),
 			1, GL_FALSE, glm::value_ptr(modelview)
 		);
+		/*glUniformMatrix4fv(
+			glGetUniformLocation(shader, "modelMatrix"),
+			1, GL_FALSE, glm::value_ptr(m)
+		);*/
 
 		//Provide flat colour component
 		glUniform4f(
