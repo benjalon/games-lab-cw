@@ -27,11 +27,15 @@ void game::Scene::draw()
 	size_t n_d = registry_.raw_view<DirectionalLightComponent>().size();
 	DirectionalLightComponent *d = registry_.raw_view<DirectionalLightComponent>().raw();
 
+	//Get all point lights
+	size_t n_p = registry_.raw_view<PointLightComponent>().size();
+	PointLightComponent *p = registry_.raw_view<PointLightComponent>().raw();
+
 	//Render all models in the scene for each camera
 	registry_.view<CameraComponent>().each([&](auto, auto &cam) {
 		registry_.view<ModelComponent, ColourComponent, TransformComponent>().each([&](auto, auto &m, auto &c, auto &t) {
 			renderer::render_model(cam, m, c, t,
-				n_a, a, n_d, d);
+				n_a, a, n_d, d, n_p, p);
 		});
 	});
 }

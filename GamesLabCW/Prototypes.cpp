@@ -16,6 +16,7 @@ void game::prototypes::register_prototypes()
 
 	PROTOTYPE(AmbientLight, AmbientLightComponent);
 	PROTOTYPE(DirectionalLight, DirectionalLightComponent);
+	PROTOTYPE(PointLight, PointLightComponent);
 
 	PROTOTYPE(NamedEntity, NameComponent);
 	PROTOTYPE(KinematicBody, TransformComponent, KinematicComponent);

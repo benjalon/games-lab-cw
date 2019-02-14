@@ -27,7 +27,7 @@
 namespace game::renderer
 {
 	//Returns the (potentially cached) shader using the given paramaters
-	GLuint get_shader(bool textured, size_t n_ambient, size_t n_directional)
+	GLuint get_shader(bool textured, size_t n_ambient, size_t n_directional, size_t n_point)
 	{
 		//Cache of parametrised shaders
 		static std::map<std::tuple<bool, size_t>, Shader> shaders;
@@ -49,6 +49,7 @@ namespace game::renderer
 			if (textured) define(f, "TEXTURED");
 			define(f, "N_AMBIENT " + std::to_string(n_ambient));
 			define(f, "N_DIRECTIONAL " + std::to_string(n_directional));
+			define(f, "N_POINT " + std::to_string(n_point));
 
 			//Create new shader
 			auto &s = shaders[args];
@@ -255,7 +256,8 @@ namespace game::renderer
 	}
 
 	void render_model(CameraComponent camera, ModelComponent model, ColourComponent c, TransformComponent t,
-		size_t n_ambient, AmbientLightComponent *ambients, size_t n_directional, DirectionalLightComponent *directionals)
+		size_t n_ambient, AmbientLightComponent *ambients, size_t n_directional, DirectionalLightComponent *directionals,
+		size_t n_point, PointLightComponent *points)
 	{
 		//Bind correct VAO
 		glBindVertexArray(vao);
@@ -266,7 +268,7 @@ namespace game::renderer
 		const Mesh &mesh = it->second;
 
 		//Determine and use appropriate shader
-		GLuint shader = get_shader(mesh.textured, n_ambient, n_directional);
+		GLuint shader = get_shader(mesh.textured, n_ambient, n_directional, n_point);
 		glUseProgram(shader);
 
 		//Calculate MVP matrices
@@ -328,7 +330,7 @@ namespace game::renderer
 				(GLfloat)ambients[i].intensity);
 		}
 
-		//Provide ambient lights information
+		//Provide directional lights information
 		for (size_t i = 0; i < n_directional; i++)
 		{
 			std::string j = std::to_string(i);
@@ -345,6 +347,34 @@ namespace game::renderer
 				(GLfloat)directionals[i].position.x,
 				(GLfloat)directionals[i].position.y,
 				(GLfloat)directionals[i].position.z);
+		}
+
+		//Provide point lights information
+		for (size_t i = 0; i < n_point; i++)
+		{
+			std::string j = std::to_string(i);
+			glUniform3f(glGetUniformLocation(shader,
+				("pointLights[" + j + "].colour").c_str()),
+				(GLfloat)points[i].colour.x,
+				(GLfloat)points[i].colour.y,
+				(GLfloat)points[i].colour.z);
+			glUniform1f(glGetUniformLocation(shader,
+				("pointLights[" + j + "].intensity").c_str()),
+				(GLfloat)points[i].intensity);
+			glUniform3f(glGetUniformLocation(shader,
+				("pointLights[" + j + "].position").c_str()),
+				(GLfloat)points[i].position.x,
+				(GLfloat)points[i].position.y,
+				(GLfloat)points[i].position.z);
+			glUniform1f(glGetUniformLocation(shader,
+				("pointLights[" + j + "].constant").c_str()),
+				(GLfloat)points[i].constant);
+			glUniform1f(glGetUniformLocation(shader,
+				("pointLights[" + j + "].linear").c_str()),
+				(GLfloat)points[i].linear);
+			glUniform1f(glGetUniformLocation(shader,
+				("pointLights[" + j + "].exponent").c_str()),
+				(GLfloat)points[i].exponent);
 		}
 
 		//Draw the model
