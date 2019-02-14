@@ -302,6 +302,12 @@ namespace game::renderer
 			(GLfloat)c.alpha
 		);
 
+		//Provide shininess value (used to determine how much specular highlighting the model will have)
+		glUniform1f(
+			glGetUniformLocation(shader, "shininess"),
+			(GLfloat)model.shininess
+		);
+
 		// Provide camera position for eye calculations
 		glUniform3f(
 			glGetUniformLocation(shader, "cameraPosition"),

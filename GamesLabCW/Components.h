@@ -28,6 +28,7 @@ namespace game
 	struct ModelComponent
 	{
 		std::string model_file;
+		double shininess = 32.0;
 	};
 
 	struct ColourComponent

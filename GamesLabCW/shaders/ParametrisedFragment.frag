@@ -9,6 +9,8 @@ out vec4 colour;
 
 uniform sampler2D texSampler;
 uniform vec4 flatColour;
+uniform float shininess;
+
 uniform vec3 cameraPosition;
 
 struct AmbientLight
@@ -47,7 +49,6 @@ void main()
 	//Apply directional lights
 	vec3 diffuse = vec3(0.0);
 	vec3 specular = vec3(0.0);
-	float shininess = 100;
 	for (int i = 0; i < N_DIRECTIONAL; i++)
 	{
 		// Calculate diffuse for this light source
@@ -59,7 +60,7 @@ void main()
 		// Calculate specular for this light source
 		vec3 blinnHalfDirection = normalize(lightDirection + viewDirection); // Used to apply blinn correction to specular
 		vec3 reflectDirection = reflect(-lightDirection, normal);
-		float spec = pow(max(dot(normal, halfwayDir), 0.0), shininess);
+		float spec = pow(max(dot(normal, blinnHalfDirection), 0.0), shininess);
 		specular += directionalLights[i].intensity * spec * directionalLights[i].colour; 
 	}
 	
