@@ -64,5 +64,9 @@ namespace game
 
 		//Commence the main game loop
 		void run();
+
+
+		//Window size callback
+		static void window_size_callback(GLFWwindow *window, int width, int height);
 	};
 }

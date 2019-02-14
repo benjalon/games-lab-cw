@@ -26,9 +26,14 @@ game::GameEngine::GameEngine(bool fullscreen, bool vsync, bool ground) :
 	if (!window_)
 		throw std::exception("Could not create game window");
 
+	glfwSetWindowAspectRatio(window_, ASPECT_RATIO.first, ASPECT_RATIO.second);
+
 	glfwMakeContextCurrent(window_);
 	glfwSetWindowUserPointer(window_, this);
 	gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
+
+	//Set callback functions
+	glfwSetWindowSizeCallback(window_, window_size_callback);
 
 	//Enable v-sync
 	if (vsync) glfwSwapInterval(1);
@@ -107,4 +112,9 @@ void game::GameEngine::draw()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	scene_.draw();
 	glfwSwapBuffers(window_);
+}
+void game::GameEngine::window_size_callback(GLFWwindow *window, int width, int height)
+{
+	//Ensure the viewport scales to the new window size
+	glViewport(0, 0, width, height);
 }
