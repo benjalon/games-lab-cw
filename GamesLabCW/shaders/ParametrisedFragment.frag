@@ -9,6 +9,7 @@ out vec4 colour;
 
 uniform sampler2D texSampler;
 uniform vec4 flatColour;
+uniform vec3 cameraPosition;
 
 struct AmbientLight
 {
@@ -20,6 +21,7 @@ uniform AmbientLight ambientLights[N_AMBIENT];
 struct DirectionalLight
 {
 	vec3 colour;
+	float intensity;
 	vec3 position;
 };
 uniform DirectionalLight directionalLights[N_DIRECTIONAL];
@@ -38,31 +40,29 @@ void main()
 	for (int i = 0; i < N_AMBIENT; i++)
 		ambient += ambientLights[i].intensity * ambientLights[i].colour;
 
+	// Calculate lighting parameters
 	vec3 normal = normalize(v_vNormalMatrix);
-
-	// TODO MAKE THIS NOT HARD CODED
-	vec3 cameraPosition = vec3(0.0, 2.0, 2.0);
+	vec3 viewDirection = normalize(cameraPosition - v_vPosition.xyz);
 
 	//Apply directional lights
 	vec3 diffuse = vec3(0.0);
 	vec3 specular = vec3(0.0);
+	float shininess = 100;
 	for (int i = 0; i < N_DIRECTIONAL; i++)
 	{
-		float intensity = 1;
+		// Calculate diffuse for this light source
 		vec3 lightDirection = normalize(directionalLights[i].position - v_vPosition.xyz);
-		float diff = max(dot(normal, lightDirection), 0.0);
-		diffuse += intensity * diff * directionalLights[i].colour;
 
-		vec3 viewDirection = normalize(cameraPosition - v_vPosition.xyz);
+		float diff = max(dot(normal, lightDirection), 0.0);
+		diffuse += directionalLights[i].intensity * diff * directionalLights[i].colour;
+		
+		// Calculate specular for this light source
+		vec3 blinnHalfDirection = normalize(lightDirection + viewDirection); // Used to apply blinn correction to specular
 		vec3 reflectDirection = reflect(-lightDirection, normal);
-		float spec = pow(max(dot(viewDirection, reflectDirection), 0.0), 32);
-		specular += intensity * spec * directionalLights[i].colour; 
+		float spec = pow(max(dot(normal, halfwayDir), 0.0), shininess);
+		specular += directionalLights[i].intensity * spec * directionalLights[i].colour; 
 	}
 	
-
-//
-//	// Calculate specular light
-
-//	colour *= vec4((ambient + diffuse + specular), 1.0);
+	// Combine lights into blinn-phong lighting model
 	colour *= vec4((ambient + diffuse + specular), 1.0);
 }

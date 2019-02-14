@@ -64,7 +64,7 @@ void game::GameEngine::run()
 	//EXAMPLE Add a 'warm flourescent' ambient light
 	scene_.instantiate("AmbientLight", AmbientLightComponent{ {1, 244.0/255, 229.0/255}, 0.1 });
 
-	scene_.instantiate("DirectionalLight", DirectionalLightComponent{ {1, 0, 0}, {1,1,1} });
+	scene_.instantiate("DirectionalLight", DirectionalLightComponent{ {1, 0, 0}, 1, {1,1,1} });
 
 	//EXAMPLE Instantiate entities by prototypes with given variables
 	//scene_.instantiate("NamedEntity");

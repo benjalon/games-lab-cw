@@ -302,6 +302,12 @@ namespace game::renderer
 			(GLfloat)c.alpha
 		);
 
+		// Provide camera position for eye calculations
+		glUniform3f(
+			glGetUniformLocation(shader, "cameraPosition"),
+			(GLfloat)camera.position.x, (GLfloat)camera.position.y, (GLfloat)camera.position.z
+		);
+
 		//Provide ambient lights information
 		for (size_t i = 0; i < n_ambient; i++)
 		{
@@ -325,6 +331,9 @@ namespace game::renderer
 				(GLfloat)directionals[i].colour.x,
 				(GLfloat)directionals[i].colour.y,
 				(GLfloat)directionals[i].colour.z);
+			glUniform1f(glGetUniformLocation(shader,
+				("directionalLights[" + j + "].intensity").c_str()),
+				(GLfloat)directionals[i].intensity);
 			glUniform3f(glGetUniformLocation(shader,
 				("directionalLights[" + j + "].position").c_str()),
 				(GLfloat)directionals[i].position.x,
