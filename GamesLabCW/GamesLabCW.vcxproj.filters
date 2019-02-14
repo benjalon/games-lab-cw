@@ -58,8 +58,6 @@
   <ItemGroup>
     <None Include="packages.config" />
     <None Include="cpp.hint" />
-    <None Include="shaders\BlinnPhong.vert" />
-    <None Include="shaders\BlinnPhong.frag" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GameEngine.h">

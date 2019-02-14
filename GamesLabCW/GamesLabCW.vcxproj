@@ -36,8 +36,6 @@
   <ItemGroup>
     <None Include="cpp.hint" />
     <None Include="packages.config" />
-    <None Include="shaders\BlinnPhong.frag" />
-    <None Include="shaders\BlinnPhong.vert" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Components.h" />
