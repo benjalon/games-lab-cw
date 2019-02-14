@@ -59,10 +59,12 @@ void game::GameEngine::run()
 	scene_.instantiate("Camera", CameraComponent{ {0,2,5} });
 	scene_.instantiate("Model", ModelComponent{ "models/Wolf/wolf.obj" });
 	TransformComponent t_teapot; t_teapot.position.x = 2; t_teapot.scale = { 0.5, 0.5, 0.5 };
-	scene_.instantiate("Model", ModelComponent{ "models/teapot.obj" }, ColourComponent{ {0, 0.1, 0.1} }, t_teapot);
+	scene_.instantiate("Model", ModelComponent{ "models/teapot.obj" }, ColourComponent{ {1,0.5,1} }, t_teapot);
 
 	//EXAMPLE Add a 'warm flourescent' ambient light
-	scene_.instantiate("AmbientLight", AmbientLightComponent{ {1, 244.0/255, 229.0/255}, 1.0 });
+	scene_.instantiate("AmbientLight", AmbientLightComponent{ {1, 244.0/255, 229.0/255}, 0.1 });
+
+	scene_.instantiate("DirectionalLight", DirectionalLightComponent{ {1, 0, 0}, 0.7 });
 
 	//EXAMPLE Instantiate entities by prototypes with given variables
 	//scene_.instantiate("NamedEntity");

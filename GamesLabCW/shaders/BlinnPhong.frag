@@ -31,7 +31,7 @@ void main()
 	for (int i = 0; i < N_AMBIENT; i++)
 		ambient += ambientLights[i].intensity * ambientLights[i].colour;
 	
-	vec3 lightPos = vec3(0.0, 1.0, 0.0);
+	vec3 lightPos = vec3(1.0, 1.0, 0.0);
 	vec3 lightDirection = normalize(lightPos - v_vPosition.xyz);
 	vec3 lightColor = vec3(1.0, 0.0, 0.0);
 
@@ -45,10 +45,10 @@ void main()
 
 	// Calculate specular light
 	float specularStrength = 1;
-	vec3 viewDirection = normalize(cameraPosition - v_vPosition.xqz);
+	vec3 viewDirection = normalize(cameraPosition - v_vPosition.xyz);
 	vec3 reflectDirection = reflect(-lightDirection, normal);
 	float spec = pow(max(dot(viewDirection, reflectDirection), 0.0), 32);
-	vec3 specular = specularStrength * spec * lightColor; 
+	vec3 specular = specularStrength * spec * vec3(0.0, 1.0, 0.0); 
 
-	colour *= vec4(ambient + diffuse + specular, 1.0);
+	colour *= vec4((ambient + diffuse + specular), 1.0);
 }
