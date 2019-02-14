@@ -16,5 +16,5 @@ void main()
 
 	v_vPosition = gl_Position;
 	v_vTexcoord = in_TextureCoord;
-	v_vNormal = in_Normal;
+	v_vNormal = mat3(transpose(inverse(modelMatrix))) * in_Normal;
 }

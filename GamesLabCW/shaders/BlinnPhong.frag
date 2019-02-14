@@ -35,9 +35,20 @@ void main()
 	vec3 lightDirection = normalize(lightPos - v_vPosition.xyz);
 	vec3 lightColor = vec3(1.0, 0.0, 0.0);
 
+	// Calculate diffuse light
 	vec3 normal = normalize(v_vNormal);
 	float diff = max(dot(normal, lightDirection), 0.0);
 	vec3 diffuse = diff * lightColor;
 
-	colour *= vec4(ambient + diffuse, 1.0 );
+	// TODO MAKE THIS NOT HARD CODED
+	vec3 cameraPosition = vec3(0.0, 2.0, 2.0);
+
+	// Calculate specular light
+	float specularStrength = 1;
+	vec3 viewDirection = normalize(cameraPosition - v_vPosition.xqz);
+	vec3 reflectDirection = reflect(-lightDirection, normal);
+	float spec = pow(max(dot(viewDirection, reflectDirection), 0.0), 32);
+	vec3 specular = specularStrength * spec * lightColor; 
+
+	colour *= vec4(ambient + diffuse + specular, 1.0);
 }
