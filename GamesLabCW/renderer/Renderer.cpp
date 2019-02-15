@@ -280,16 +280,14 @@ namespace game::renderer
 			glm::rotate(R(t.rotation.y), glm::vec3(0, 1, 0)) *
 			glm::scale(glm::vec3(t.scale));
 
-		glm::mat4 modelview = v * m;
-
 		//Provide MVP matrices
 		glUniformMatrix4fv(
 			glGetUniformLocation(shader, "projectionMatrix"),
 			1, GL_FALSE, glm::value_ptr(p)
 		);
 		glUniformMatrix4fv(
-			glGetUniformLocation(shader, "modelviewMatrix"),
-			1, GL_FALSE, glm::value_ptr(modelview)
+			glGetUniformLocation(shader, "viewMatrix"),
+			1, GL_FALSE, glm::value_ptr(v)
 		);
 		glUniformMatrix4fv(
 			glGetUniformLocation(shader, "modelMatrix"),
