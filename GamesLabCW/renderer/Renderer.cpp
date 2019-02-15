@@ -54,7 +54,6 @@ namespace game::renderer
 			//Create new shader
 			auto &s = shaders[args];
 			s.load("", "shaders/Passthrough.vert", "shaders/ParametrisedFragment.frag", v, f);
-			//s.load("", "shaders/BlinnPhong.vert", "shaders/BlinnPhong.frag", v, f);
 			return s.handle();
 		}
 	}
