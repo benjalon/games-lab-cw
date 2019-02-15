@@ -66,8 +66,8 @@ void game::GameEngine::run()
 
 	//EXAMPLE Add a 'warm flourescent' ambient light
 	scene_.instantiate("AmbientLight", AmbientLightComponent{ {1, 244.0/255, 229.0/255}, 1.0 });
-	// Sample red directional
-	scene_.instantiate("DirectionalLight", DirectionalLightComponent{ {1, 0, 0}, 1, {1,1,1} });
+	// Sample directional
+	scene_.instantiate("DirectionalLight", DirectionalLightComponent{ {0, 1, 0}, 1, {2,1,1} });
 	// Orange lantern-type camera-following pointlight
 	scene_.instantiate("PointLight", PointLightComponent{ {1, 0.6, 0}, 1, {0, 2, 5} });
 

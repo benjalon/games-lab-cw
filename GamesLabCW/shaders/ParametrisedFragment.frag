@@ -89,7 +89,7 @@ void main()
 		vec3 blinnHalfDirection = normalize(lightDirection + viewDirection); // Used to apply blinn correction to specular
 		float spec = pow(max(dot(normal, blinnHalfDirection), 0.0), shininess);
 
-		// Calculate attenuation for this light source
+		// Calculate attenuation (light drop-off) for this light source
 		float dist = length(pointLights[i].position - v_vPosition.xyz);
 		float attenuation = 1.0 / (pointLights[i].constant + pointLights[i].linear * dist + pointLights[i].exponent * (dist * dist));
 
