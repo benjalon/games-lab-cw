@@ -14,7 +14,9 @@ namespace game::renderer
 
 	//Renders an individual model using the given camera
 	void render_model(CameraComponent camera, ModelComponent model, ColourComponent c, TransformComponent t,
-		size_t n_ambient, AmbientLightComponent *ambients);
+		size_t n_ambient, AmbientLightComponent *ambients,
+		size_t n_directional, DirectionalLightComponent *directionals,
+		size_t n_point, PointLightComponent *points);
 
 	//Loads the given model
 	void load(std::string file);

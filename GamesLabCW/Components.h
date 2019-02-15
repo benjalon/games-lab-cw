@@ -28,6 +28,7 @@ namespace game
 	struct ModelComponent
 	{
 		std::string model_file;
+		double shininess = 32.0;
 	};
 
 	struct ColourComponent
@@ -47,6 +48,23 @@ namespace game
 	{
 		Vector3 colour{ 1.0, 1.0, 1.0 };
 		double intensity = 1.0;
+	};
+
+	struct DirectionalLightComponent
+	{
+		Vector3 colour{ 1.0, 1.0, 1.0 };
+		double intensity = 1.0;
+		Vector3 direction{ 0.0, 0.0, 0.0 };
+	};
+
+	struct PointLightComponent
+	{
+		Vector3 colour{ 1.0, 1.0, 1.0 };
+		double intensity = 1.0;
+		Vector3 position{ 2.0, 0.0, 0.0 };
+		double constant = 1.0;
+		double linear = 0.1;
+		double exponent = 0.0;
 	};
 
 	struct KinematicComponent

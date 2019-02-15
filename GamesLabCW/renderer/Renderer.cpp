@@ -27,12 +27,12 @@
 namespace game::renderer
 {
 	//Returns the (potentially cached) shader using the given paramaters
-	GLuint get_shader(bool textured, size_t n_ambient)
+	GLuint get_shader(bool textured, size_t n_ambient, size_t n_directional, size_t n_point)
 	{
 		//Cache of parametrised shaders
-		static std::map<std::tuple<bool, size_t>, Shader> shaders;
+		static std::map<std::tuple<bool, size_t, size_t, size_t>, Shader> shaders;
 
-		auto args = std::make_tuple(textured, n_ambient);
+		auto args = std::make_tuple(textured, n_ambient, n_directional, n_point);
 
 		//If the requested shader already exists, return it
 		auto it = shaders.find(args);
@@ -48,6 +48,8 @@ namespace game::renderer
 
 			if (textured) define(f, "TEXTURED");
 			define(f, "N_AMBIENT " + std::to_string(n_ambient));
+			define(f, "N_DIRECTIONAL " + std::to_string(n_directional));
+			define(f, "N_POINT " + std::to_string(n_point));
 
 			//Create new shader
 			auto &s = shaders[args];
@@ -253,7 +255,8 @@ namespace game::renderer
 	}
 
 	void render_model(CameraComponent camera, ModelComponent model, ColourComponent c, TransformComponent t,
-		size_t n_ambient, AmbientLightComponent *ambients)
+		size_t n_ambient, AmbientLightComponent *ambients, size_t n_directional, DirectionalLightComponent *directionals,
+		size_t n_point, PointLightComponent *points)
 	{
 		//Bind correct VAO
 		glBindVertexArray(vao);
@@ -264,7 +267,7 @@ namespace game::renderer
 		const Mesh &mesh = it->second;
 
 		//Determine and use appropriate shader
-		GLuint shader = get_shader(mesh.textured, n_ambient);
+		GLuint shader = get_shader(mesh.textured, n_ambient, n_directional, n_point);
 		glUseProgram(shader);
 
 		//Calculate MVP matrices
@@ -288,12 +291,28 @@ namespace game::renderer
 			glGetUniformLocation(shader, "modelviewMatrix"),
 			1, GL_FALSE, glm::value_ptr(modelview)
 		);
+		glUniformMatrix4fv(
+			glGetUniformLocation(shader, "modelMatrix"),
+			1, GL_FALSE, glm::value_ptr(m)
+		);
 
 		//Provide flat colour component
 		glUniform4f(
 			glGetUniformLocation(shader, "flatColour"),
 			(GLfloat)c.colour.x, (GLfloat)c.colour.y, (GLfloat)c.colour.z,
 			(GLfloat)c.alpha
+		);
+
+		//Provide shininess value (used to determine how much specular highlighting the model will have)
+		glUniform1f(
+			glGetUniformLocation(shader, "shininess"),
+			(GLfloat)model.shininess
+		);
+
+		// Provide camera position for eye calculations
+		glUniform3f(
+			glGetUniformLocation(shader, "cameraPosition"),
+			(GLfloat)camera.position.x, (GLfloat)camera.position.y, (GLfloat)camera.position.z
 		);
 
 		//Provide ambient lights information
@@ -308,6 +327,53 @@ namespace game::renderer
 			glUniform1f(glGetUniformLocation(shader,
 				("ambientLights[" + j + "].intensity").c_str()),
 				(GLfloat)ambients[i].intensity);
+		}
+
+		//Provide directional lights information
+		for (size_t i = 0; i < n_directional; i++)
+		{
+			std::string j = std::to_string(i);
+			glUniform3f(glGetUniformLocation(shader,
+				("directionalLights[" + j + "].colour").c_str()),
+				(GLfloat)directionals[i].colour.x,
+				(GLfloat)directionals[i].colour.y,
+				(GLfloat)directionals[i].colour.z);
+			glUniform1f(glGetUniformLocation(shader,
+				("directionalLights[" + j + "].intensity").c_str()),
+				(GLfloat)directionals[i].intensity);
+			glUniform3f(glGetUniformLocation(shader,
+				("directionalLights[" + j + "].direction").c_str()),
+				(GLfloat)directionals[i].direction.x,
+				(GLfloat)directionals[i].direction.y,
+				(GLfloat)directionals[i].direction.z);
+		}
+
+		//Provide point lights information
+		for (size_t i = 0; i < n_point; i++)
+		{
+			std::string j = std::to_string(i);
+			glUniform3f(glGetUniformLocation(shader,
+				("pointLights[" + j + "].colour").c_str()),
+				(GLfloat)points[i].colour.x,
+				(GLfloat)points[i].colour.y,
+				(GLfloat)points[i].colour.z);
+			glUniform1f(glGetUniformLocation(shader,
+				("pointLights[" + j + "].intensity").c_str()),
+				(GLfloat)points[i].intensity);
+			glUniform3f(glGetUniformLocation(shader,
+				("pointLights[" + j + "].position").c_str()),
+				(GLfloat)points[i].position.x,
+				(GLfloat)points[i].position.y,
+				(GLfloat)points[i].position.z);
+			glUniform1f(glGetUniformLocation(shader,
+				("pointLights[" + j + "].constant").c_str()),
+				(GLfloat)points[i].constant);
+			glUniform1f(glGetUniformLocation(shader,
+				("pointLights[" + j + "].linear").c_str()),
+				(GLfloat)points[i].linear);
+			glUniform1f(glGetUniformLocation(shader,
+				("pointLights[" + j + "].exponent").c_str()),
+				(GLfloat)points[i].exponent);
 		}
 
 		//Draw the model
