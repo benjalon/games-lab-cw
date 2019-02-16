@@ -98,5 +98,11 @@ void main()
 	}
 	
 	// Combine lights into blinn-phong lighting model
-	colour *= vec4((ambient + diffuse + specular), 1.0);
+	vec3 blinnPhong = ambient + diffuse + specular;
+
+	// Apply gamma correction (fixes monitor color biases)
+	vec3 gamma = vec3(1.0 / 2.2);
+	blinnPhong = pow(blinnPhong, gamma);
+
+	colour *= vec4(blinnPhong, 1.0);
 }
