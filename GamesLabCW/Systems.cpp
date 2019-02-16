@@ -29,12 +29,13 @@ namespace game::systems
 	};
 	SYSTEM(NameSystem, NameComponent);
 
-	//EXAMPLE System that uses input to turn lights on if mouse is held
-	auto LightMouseSystem = [](double dt, auto entity, auto &al)
-	{
-		al.intensity = utility::contains(input::held, input::MOUSE_BUTTON_LEFT) ? 1.0 : 0.0;
-	};
-	SYSTEM(LightMouseSystem, AmbientLightComponent);
+	// --- Bug: This breaks other ambient lighting, i think because it doesn't increment the N_Ambient count ---
+	////EXAMPLE System that uses input to turn lights on if mouse is held
+	//auto LightMouseSystem = [](double dt, auto entity, auto &al)
+	//{
+	//	al.intensity = utility::contains(input::held, input::MOUSE_BUTTON_LEFT) ? 1.0 : 0.0;
+	//};
+	//SYSTEM(LightMouseSystem, AmbientLightComponent);
 
 	auto MoveCameraSystem = [](double dt, auto entity, CameraComponent &c)
 	{

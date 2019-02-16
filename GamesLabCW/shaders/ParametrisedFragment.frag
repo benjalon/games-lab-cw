@@ -5,14 +5,15 @@
 
 in vec4 v_vPosition;
 in vec2 v_vTexcoord;
-in vec3 v_vNormalMatrix;
+in vec3 v_vNormal;
+in mat4 v_mMVP;
 
 out vec4 colour;
 
 uniform sampler2D texSampler;
 uniform vec4 flatColour;
 uniform float shininess;
-
+uniform mat4 modelMatrix;
 uniform vec3 cameraPosition;
 
 struct AmbientLight
@@ -44,10 +45,11 @@ uniform PointLight pointLights[N_POINT];
 void main()
 {
 	//Sample texture if one is used, otherwise use the flat colour
+	vec3 baseColour = vec3(0.0);
 	#ifdef TEXTURED
-		colour = texture( texSampler, v_vTexcoord );
+		baseColour = texture( texSampler, v_vTexcoord ).xyz;
 	#else
-		colour = flatColour;
+		baseColour = flatColour.xyz;
 	#endif
 
 	//Apply ambient lights
@@ -56,7 +58,7 @@ void main()
 		ambient += ambientLights[i].intensity * ambientLights[i].colour;
 
 	// Calculate lighting parameters
-	vec3 normal = normalize(v_vNormalMatrix);
+	vec3 normal = normalize(v_vNormal);
 	vec3 viewDirection = normalize(cameraPosition - v_vPosition.xyz);
 
 	vec3 diffuse = vec3(0.0);
@@ -80,7 +82,8 @@ void main()
 	// Apply point lights
 	for (int i = 0; i < N_POINT; i++)
 	{
-		vec3 lightDirection = normalize(pointLights[i].position - v_vPosition.xyz);
+		vec4 lightPosition = v_mMVP * vec4(pointLights[i].position, 1.0);
+		vec3 lightDirection = normalize(lightPosition.xyz - v_vPosition.xyz);
 		
 		// Calculate diffuse for this light source
 		float diff = max(dot(normal, lightDirection), 0.0);
@@ -100,9 +103,12 @@ void main()
 	// Combine lights into blinn-phong lighting model
 	vec3 blinnPhong = ambient + diffuse + specular;
 
+	// Apply lighting
+	vec3 result = baseColour * blinnPhong;
+
 	// Apply gamma correction (fixes monitor color biases)
 	vec3 gamma = vec3(1.0 / 2.2);
-	blinnPhong = pow(blinnPhong, gamma);
+	result = pow(result, gamma);
 
-	colour *= vec4(blinnPhong, 1.0);
+	colour = vec4(result, 1.0);
 }
