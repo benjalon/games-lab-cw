@@ -51,6 +51,7 @@ game::GameEngine::GameEngine(bool fullscreen, bool vsync, bool ground) :
 	renderer::load("models/Wolf/wolf.obj");
 	renderer::load("models/teapot.obj");
 	renderer::load("models/sphere.obj");
+	renderer::load("models/Moon/moon.obj");
 	renderer::load("models/torus.obj");
 	renderer::load("models/Plane/Plane.obj");
 	renderer::finalise();
@@ -68,8 +69,8 @@ void game::GameEngine::run()
 	scene_.instantiate("Model", ModelComponent{ "models/Wolf/wolf.obj" }, t_wolf);
 	TransformComponent t_teapot; t_teapot.position.y = 1;  t_teapot.position.x = -2; t_teapot.scale = { 0.08, 0.08, 0.08 };
 	scene_.instantiate("Model", ModelComponent{ "models/teapot.obj", 8 }, ColourComponent{ {1,0.5,1} }, t_teapot);
-	TransformComponent t_sphere; t_sphere.position.y = 5; t_sphere.scale = { 0.08, 0.08, 0.08 };
-	scene_.instantiate("Model", ModelComponent{ "models/sphere.obj", 128 }, ColourComponent{ {0,1,0.2} }, t_sphere);
+	TransformComponent t_sphere; t_sphere.position.y = 5; t_sphere.scale = { 0.07, 0.07, 0.07 };
+	scene_.instantiate("Model", ModelComponent{ "models/Moon/moon.obj", 128 }, t_sphere);
 	TransformComponent t_torus; t_torus.position.y = 1; t_torus.position.x = 5; t_torus.scale = { 0.04, 0.04, 0.04 };
 	scene_.instantiate("Model", ModelComponent{ "models/torus.obj" }, ColourComponent{ {0,0.2,1} }, t_torus);
 

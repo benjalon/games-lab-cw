@@ -122,7 +122,7 @@ namespace game::renderer
 		Mesh &m = meshes.emplace(file, Mesh()).first->second;
 
 		//Load all model data from aiScene
-		const size_t vertexTotalSize = sizeof(aiVector3D) * 2 + sizeof(aiVector2D);
+		const size_t vertexTotalSize = sizeof(aiVector3D) * 3 + sizeof(aiVector2D);
 		size_t totalVertices = 0;
 
 		for (size_t i = 0; i < scene->mNumMeshes; i++)
@@ -148,10 +148,14 @@ namespace game::renderer
 					aiVector3D normal = (mesh->HasNormals()) ?
 						mesh->mNormals[face.mIndices[k]] :
 						aiVector3D(1.0f, 1.0f, 1.0f);
+					aiVector3D tangent = (mesh->HasTangentsAndBitangents()) ?
+						mesh->mTangents[face.mIndices[k]] :
+						aiVector3D(1.0f, 1.0f, 1.0f);
 
 					vbo.add_data(&pos, sizeof(aiVector3D));
 					vbo.add_data(&uv, sizeof(aiVector2D));
 					vbo.add_data(&normal, sizeof(aiVector3D));
+					vbo.add_data(&tangent, sizeof(aiVector3D));
 				}
 			}
 
@@ -240,13 +244,16 @@ namespace game::renderer
 
 		//Vertex positions
 		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 2 * sizeof(aiVector3D) + sizeof(aiVector2D), (void*)0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(aiVector3D) + sizeof(aiVector2D), (void*)0);
 		//Texture coordinates
 		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(aiVector3D) + sizeof(aiVector2D), (void*)sizeof(aiVector3D));
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 3 * sizeof(aiVector3D) + sizeof(aiVector2D), (void*)sizeof(aiVector3D));
 		//Normal vectors
 		glEnableVertexAttribArray(2);
-		glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 2 * sizeof(aiVector3D) + sizeof(aiVector2D), (void*)(sizeof(aiVector3D) + sizeof(aiVector2D)));
+		glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(aiVector3D) + sizeof(aiVector2D), (void*)(sizeof(aiVector3D) + sizeof(aiVector2D)));
+		//Tangent vectors
+		glEnableVertexAttribArray(3);
+		glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(aiVector3D) + sizeof(aiVector2D), (void*)(2 * sizeof(aiVector3D) + sizeof(aiVector2D)));
 	}
 
 	//Calculates the projection matrix for a camera
