@@ -66,6 +66,7 @@ namespace game::renderer
 
 	//Global textures collection
 	std::vector<Texture> textures;
+	std::vector<Texture> normalMaps;
 
 	//Represents data of a mesh
 	struct Mesh
@@ -75,6 +76,7 @@ namespace game::renderer
 		std::vector<GLuint> materials;
 		size_t num_materials;
 		bool textured;
+		bool normalMapped;
 	};
 
 	//Dictionary of meshes
@@ -185,6 +187,28 @@ namespace game::renderer
 					Texture t(fullPath, true);
 					materialRemap[i] = textures.size();
 					textures.push_back(t);
+				}
+			}
+
+			if (material->GetTexture(aiTextureType_HEIGHT, texIndex, &path) == AI_SUCCESS) // Note assimp treats the way .obj stores normalmaps as heightmaps
+			{
+				m.normalMapped = true;
+				std::string fullPath = strip_last_path(file) + path.data;
+
+				int normalFound = -1;
+				for (int j = 0; j < (int)normalMaps.size(); j++)
+					if (fullPath == normalMaps[j].path)
+					{
+						normalFound = j;
+						break;
+					}
+				if (normalFound != -1)
+					materialRemap[i] = normalFound;
+				else
+				{
+					Texture t(fullPath, true);
+					materialRemap[i] = normalMaps.size();
+					normalMaps.push_back(t);
 				}
 			}
 		}
@@ -384,6 +408,14 @@ namespace game::renderer
 				glBindTexture(GL_TEXTURE_2D, t.handle);
 				glBindSampler(0, t.sampler);
 			}
+
+			if (mesh.normalMapped)
+			{
+				Texture &n = normalMaps[mesh.materials[i]];
+				glBindTexture(GL_TEXTURE_2D, n.handle);
+				glBindSampler(0, n.sampler);
+			}
+
 			//Draw the triangles
 			glDrawArrays(GL_TRIANGLES, mesh.mesh_starts[i], mesh.mesh_sizes[i]);
 		}
