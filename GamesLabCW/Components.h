@@ -63,8 +63,8 @@ namespace game
 		double intensity = 1.0;
 		Vector3 position{ 2.0, 0.0, 0.0 };
 		double constant = 1.0;
-		double linear = 0.045;
-		double exponent = 0.075;
+		double linear = 0.01;
+		double exponent = 0;
 	};
 
 	struct KinematicComponent

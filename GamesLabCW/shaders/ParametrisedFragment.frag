@@ -4,9 +4,9 @@
 //N_DIRECTIONAL - number of directional lights
 //N_POINT - number of point lights
 
+in mat4 v_mModel;
 in vec3 v_vPosition;
 in vec2 v_vTexcoord;
-in mat4 v_mModel;
 in vec3 v_vNormal;
 in mat3 v_mTBN;
 
@@ -47,11 +47,10 @@ uniform PointLight pointLights[N_POINT];
 
 void main()
 {
-	vec3 normal;
-	vec3 cameraPos;
-	vec3 pos;
+	// Calculate direction variables
+	vec3 normal, cameraPos, pos;
 	#ifdef NORMAL_MAPPED
-		// Use tangent space normals
+		// Use tangent space
 		normal = texture(normalSampler, v_vTexcoord).xyz;
 		normal = normalize(normal * 2.0 - 1.0);
 
@@ -62,6 +61,7 @@ void main()
 		cameraPos = cameraPosition;
 		pos = v_vPosition;
 	#endif
+	vec3 viewDirection = normalize(cameraPos - pos);
 
 	//Sample texture if one is used, otherwise use the flat colour
 	vec3 baseColour = vec3(0.0);
@@ -70,21 +70,15 @@ void main()
 	#else
 		baseColour = flatColour.xyz;
 	#endif
-
-
-	//Apply ambient lights
-	vec3 ambient = vec3( 0.0 );
-	for (int i = 0; i < N_AMBIENT; i++)
-		ambient += ambientLights[i].intensity * ambientLights[i].colour;
-
-	// Calculate lighting parameters
-//	vec3 normal = normalize(v_vNormal);
 	
-	vec3 viewDirection = normalize(cameraPos - pos);
-
+	vec3 ambient = vec3(0.0);
 	vec3 diffuse = vec3(0.0);
 	vec3 specular = vec3(0.0);
 
+	//Apply ambient lights
+	for (int i = 0; i < N_AMBIENT; i++)
+		ambient += ambientLights[i].intensity * ambientLights[i].colour;
+		
 	// Apply directional lights
 	for (int i = 0; i < N_DIRECTIONAL; i++)
 	{
@@ -112,7 +106,7 @@ void main()
 		#ifdef NORMAL_MAPPED
 			lightPosition = v_mTBN * pointLights[i].position;
 		#else
-			lightPosition = (v_mModel * vec4(pointLights[i].position, 1.0)).xyz; // Should this be using the MVP?
+			lightPosition = pointLights[i].position;
 		#endif
 
 		vec3 lightDirection = normalize(lightPosition - pos);

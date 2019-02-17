@@ -12,7 +12,6 @@ newmtl 01___Default
 	Kd 0.5882 0.5882 0.5882
 	Ks 0.0000 0.0000 0.0000
 	Ke 0.0000 0.0000 0.0000
-	map_Ka MoonMap2_2500x1250.jpg
-	map_Kd MoonMap2_2500x1250.jpg
-	map_bump moon-normal.jpg
-	bump moon-normal.jpg
+	map_Kd sandTexture.dds
+	map_bump sandBump.dds
+	bump sandBump.dds
