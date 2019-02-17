@@ -1,4 +1,5 @@
 //TEXTURED - should a texture be used?
+//NORMAL_MAPPED - should a normal map be used?
 //N_AMBIENT - number of ambient lights
 //N_DIRECTIONAL - number of directional lights
 //N_POINT - number of point lights
@@ -11,6 +12,7 @@ in mat4 v_mMVP;
 out vec4 colour;
 
 uniform sampler2D texSampler;
+uniform sampler2D normalSampler;
 uniform vec4 flatColour;
 uniform float shininess;
 uniform mat4 modelMatrix;
@@ -50,6 +52,10 @@ void main()
 		baseColour = texture( texSampler, v_vTexcoord ).xyz;
 	#else
 		baseColour = flatColour.xyz;
+	#endif
+
+	#ifdef NORMAL_MAPPED
+		baseColour = texture( normalSampler, v_vTexcoord ).xyz;
 	#endif
 
 	//Apply ambient lights

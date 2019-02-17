@@ -27,12 +27,12 @@
 namespace game::renderer
 {
 	//Returns the (potentially cached) shader using the given paramaters
-	GLuint get_shader(bool textured, size_t n_ambient, size_t n_directional, size_t n_point)
+	GLuint get_shader(bool textured, bool normal_mapped, size_t n_ambient, size_t n_directional, size_t n_point)
 	{
 		//Cache of parametrised shaders
-		static std::map<std::tuple<bool, size_t, size_t, size_t>, Shader> shaders;
+		static std::map<std::tuple<bool, bool, size_t, size_t, size_t>, Shader> shaders;
 
-		auto args = std::make_tuple(textured, n_ambient, n_directional, n_point);
+		auto args = std::make_tuple(textured, normal_mapped, n_ambient, n_directional, n_point);
 
 		//If the requested shader already exists, return it
 		auto it = shaders.find(args);
@@ -47,6 +47,7 @@ namespace game::renderer
 			auto define = [](std::string &s, std::string def) { s.append("#define " + def + "\n"); };
 
 			if (textured) define(f, "TEXTURED");
+			if (normal_mapped) define(f, "NORMAL_MAPPED");
 			define(f, "N_AMBIENT " + std::to_string(n_ambient));
 			define(f, "N_DIRECTIONAL " + std::to_string(n_directional));
 			define(f, "N_POINT " + std::to_string(n_point));
@@ -76,7 +77,7 @@ namespace game::renderer
 		std::vector<GLuint> materials;
 		size_t num_materials;
 		bool textured;
-		bool normalMapped;
+		bool normal_mapped;
 	};
 
 	//Dictionary of meshes
@@ -164,7 +165,6 @@ namespace game::renderer
 		for (size_t i = 0; i < m.num_materials; i++)
 		{
 			const aiMaterial *material = scene->mMaterials[i];
-			int a = 5;
 			int texIndex = 0;
 			aiString path;
 
@@ -189,10 +189,18 @@ namespace game::renderer
 					textures.push_back(t);
 				}
 			}
+		}
+
+
+		for (size_t i = 0; i < m.num_materials; i++)
+		{
+			const aiMaterial *material = scene->mMaterials[i];
+			int texIndex = 0;
+			aiString path;
 
 			if (material->GetTexture(aiTextureType_HEIGHT, texIndex, &path) == AI_SUCCESS) // Note assimp treats the way .obj stores normalmaps as heightmaps
 			{
-				m.normalMapped = true;
+				m.normal_mapped = true;
 				std::string fullPath = strip_last_path(file) + path.data;
 
 				int normalFound = -1;
@@ -291,7 +299,7 @@ namespace game::renderer
 		const Mesh &mesh = it->second;
 
 		//Determine and use appropriate shader
-		GLuint shader = get_shader(mesh.textured, n_ambient, n_directional, n_point);
+		GLuint shader = get_shader(mesh.textured, mesh.normal_mapped, n_ambient, n_directional, n_point);
 		glUseProgram(shader);
 
 		//Calculate MVP matrices
@@ -401,19 +409,30 @@ namespace game::renderer
 		//Draw the model
 		for (size_t i = 0; i < mesh.mesh_sizes.size(); i++)
 		{
+			int offset = 0;
+
 			//Bind texture if the model has them
 			if (mesh.textured)
 			{
 				Texture &t = textures[mesh.materials[i]];
+
+				glActiveTexture(GL_TEXTURE0);
 				glBindTexture(GL_TEXTURE_2D, t.handle);
-				glBindSampler(0, t.sampler);
+				glUniform1i(glGetUniformLocation(shader, "texSampler"), 0);
+
+				offset++;
 			}
 
-			if (mesh.normalMapped)
+			// Bind model normal maps
+			if (mesh.normal_mapped)
 			{
 				Texture &n = normalMaps[mesh.materials[i]];
+
+				glActiveTexture(GL_TEXTURE0 + offset);
 				glBindTexture(GL_TEXTURE_2D, n.handle);
-				glBindSampler(0, n.sampler);
+				glUniform1i(glGetUniformLocation(shader, "normalSampler"), offset);
+
+				offset++;
 			}
 
 			//Draw the triangles

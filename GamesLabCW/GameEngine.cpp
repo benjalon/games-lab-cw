@@ -63,16 +63,16 @@ void game::GameEngine::run()
 {
 	//EXAMPLE Instantiate a camera and models
 	scene_.instantiate("Camera", CameraComponent{ {0,2,5} });
-	//scene_.instantiate("Model", ModelComponent{ "models/Plane/Plane.obj" }, ColourComponent{ {0.2,0.2,0.2} });
+	scene_.instantiate("Model", ModelComponent{ "models/Plane/Plane.obj" }, ColourComponent{ {0.2,0.2,0.2} });
 	TransformComponent t_wolf; t_wolf.position.x = -5;
 	scene_.instantiate("Model", ModelComponent{ "models/Wolf/wolf.obj" }, t_wolf);
-	/*TransformComponent t_teapot; t_teapot.position.y = 1;  t_teapot.position.x = -2; t_teapot.scale = { 0.08, 0.08, 0.08 };
+	TransformComponent t_teapot; t_teapot.position.y = 1;  t_teapot.position.x = -2; t_teapot.scale = { 0.08, 0.08, 0.08 };
 	scene_.instantiate("Model", ModelComponent{ "models/teapot.obj", 8 }, ColourComponent{ {1,0.5,1} }, t_teapot);
 	TransformComponent t_sphere; t_sphere.position.y = 5; t_sphere.scale = { 0.08, 0.08, 0.08 };
 	scene_.instantiate("Model", ModelComponent{ "models/sphere.obj", 128 }, ColourComponent{ {0,1,0.2} }, t_sphere);
 	TransformComponent t_torus; t_torus.position.y = 1; t_torus.position.x = 5; t_torus.scale = { 0.04, 0.04, 0.04 };
 	scene_.instantiate("Model", ModelComponent{ "models/torus.obj" }, ColourComponent{ {0,0.2,1} }, t_torus);
-*/
+
 	scene_.instantiate("AmbientLight", AmbientLightComponent{ {1, 147.0 / 255.0, 41.0 / 255.0}, 0.01 });
 	scene_.instantiate("DirectionalLight", DirectionalLightComponent{ {1, 1, 1}, 1, {2,1,1} });
 	scene_.instantiate("PointLight", PointLightComponent{ {1, 147.0 / 255.0, 41.0 / 255.0}, 1, {-7,0,0} });
