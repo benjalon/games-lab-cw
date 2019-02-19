@@ -13,21 +13,31 @@
 
 namespace game::systems
 {
+	//Struct of general-purpose information passed to every system
+	struct SceneInfo
+	{
+		//Reference to the current scene
+		Scene &scene;
+
+		//Delta time (seconds since last update)
+		double dt;
+	};
+
 	//Function representing a system, receiving dt, entity and arbitrary components
 	template <typename... Ts>
-	using SystemFunction = std::function<void(double, entt::registry<>::entity_type, Ts&...)>;
+	using SystemFunction = std::function<void(SceneInfo, entt::registry<>::entity_type, Ts&...)>;
 
 	//Wrapped system function to be invoked by registry owner
-	using SystemInvoker = std::function<void(double, entt::registry<>&)>;
+	using SystemInvoker = std::function<void(SceneInfo, entt::registry<>&)>;
 
 	//Wraps a system function
 	template <typename... Ts>
 	SystemInvoker system_invoker(const SystemFunction<Ts...> &f)
 	{
-		return [f](double dt, entt::registry<> &reg)
+		return [f](SceneInfo info, entt::registry<> &reg)
 		{
 			reg.view<Ts...>().each(
-				[f, dt](auto entity, auto&... params) { f(dt, entity, params...); }
+				[f, info](auto entity, auto&... params) { f(info, entity, params...); }
 			);
 		};
 	}

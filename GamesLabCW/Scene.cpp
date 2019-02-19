@@ -14,7 +14,7 @@ void game::Scene::tick(double dt)
 {
 	//Invoke all systems
 	for (auto &s : systems::system_invokers)
-		s(dt, registry_);
+		s({ *this, dt }, registry_);
 }
 
 void game::Scene::draw()

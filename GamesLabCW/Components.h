@@ -13,10 +13,7 @@
 
 namespace game
 {
-	struct NameComponent
-	{
-		std::string name = "unnamed";
-	};
+	/* CAMERAS AND RENDERING */
 
 	struct CameraComponent
 	{
@@ -44,6 +41,9 @@ namespace game
 		Vector3 scale{ 1.0, 1.0, 1.0 };
 	};
 
+
+	/* LIGHTING */
+
 	struct AmbientLightComponent
 	{
 		Vector3 colour{ 1.0, 1.0, 1.0 };
@@ -66,6 +66,9 @@ namespace game
 		double linear = 0.045;
 		double exponent = 0.075;
 	};
+
+
+	/* PHYSICS */
 
 	struct KinematicComponent
 	{
