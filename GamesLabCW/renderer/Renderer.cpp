@@ -27,12 +27,16 @@
 namespace game::renderer
 {
 	//Returns the (potentially cached) shader using the given paramaters
-	GLuint get_shader(bool textured, size_t n_ambient, size_t n_directional, size_t n_point)
+	GLuint get_shader(bool textured, size_t n_ambient, size_t n_directional, size_t n_point,
+		std::string vertex_shader, std::string fragment_shader)
 	{
-		//Cache of parametrised shaders
-		static std::map<std::tuple<bool, size_t, size_t, size_t>, Shader> shaders;
+		using Args = std::tuple<bool, size_t, size_t, size_t, std::string, std::string>;
 
-		auto args = std::make_tuple(textured, n_ambient, n_directional, n_point);
+		//Cache of parametrised shaders
+		static std::map<Args, Shader> shaders;
+
+		Args args = std::make_tuple(textured, n_ambient, n_directional, n_point,
+			vertex_shader, fragment_shader);
 
 		//If the requested shader already exists, return it
 		auto it = shaders.find(args);
@@ -40,22 +44,23 @@ namespace game::renderer
 			return it->second.handle();
 
 		//Else, compile and return the new shader
-		else
-		{
-			//Shader parameters to prepend to source
-			std::string v, f;
-			auto define = [](std::string &s, std::string def) { s.append("#define " + def + "\n"); };
 
-			if (textured) define(f, "TEXTURED");
-			define(f, "N_AMBIENT " + std::to_string(n_ambient));
-			define(f, "N_DIRECTIONAL " + std::to_string(n_directional));
-			define(f, "N_POINT " + std::to_string(n_point));
+		//Shader parameters to prepend to source
+		std::string v, f;
+		auto define = [](std::string &s, std::string def) { s.append("#define " + def + "\n"); };
 
-			//Create new shader
-			auto &s = shaders[args];
-			s.load("", "shaders/Passthrough.vert", "shaders/ParametrisedFragment.frag", v, f);
-			return s.handle();
-		}
+		if (textured) define(f, "TEXTURED");
+		define(f, "N_AMBIENT " + std::to_string(n_ambient));
+		define(f, "N_DIRECTIONAL " + std::to_string(n_directional));
+		define(f, "N_POINT " + std::to_string(n_point));
+
+		//Create new shader
+		auto &s = shaders[args];
+		s.load("",
+			vertex_shader.empty() ? "shaders/Passthrough.vert" : vertex_shader.c_str(),
+			fragment_shader.empty() ? "shaders/ParametrisedFragment.frag" : fragment_shader.c_str(),
+			v, f);
+		return s.handle();
 	}
 
 	//Global vertex array object
@@ -267,7 +272,8 @@ namespace game::renderer
 		const Mesh &mesh = it->second;
 
 		//Determine and use appropriate shader
-		GLuint shader = get_shader(mesh.textured, n_ambient, n_directional, n_point);
+		GLuint shader = get_shader(mesh.textured, n_ambient, n_directional, n_point,
+			model.vertex_shader, model.fragment_shader);
 		glUseProgram(shader);
 
 		//Calculate MVP matrices

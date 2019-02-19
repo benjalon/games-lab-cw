@@ -26,6 +26,8 @@ namespace game
 	{
 		std::string model_file;
 		double shininess = 32.0;
+		std::string vertex_shader;
+		std::string fragment_shader;
 	};
 
 	struct ColourComponent

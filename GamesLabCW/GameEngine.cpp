@@ -63,7 +63,8 @@ void game::GameEngine::run()
 	//EXAMPLE Instantiate a camera and models
 	scene_.instantiate("Camera", CameraComponent{ {0,2,5} });
 	TransformComponent t_wolf; t_wolf.position.x = -5;
-	scene_.instantiate("Model", ModelComponent{ "models/Wolf/wolf.obj" }, t_wolf);
+	ModelComponent m_wolf; m_wolf.model_file = "models/Wolf/wolf.obj"; m_wolf.fragment_shader = "shaders/BlueSpirit.frag";
+	scene_.instantiate("Model", m_wolf, t_wolf);
 	TransformComponent t_teapot; t_teapot.position.x = -2; t_teapot.scale = { 0.08, 0.08, 0.08 };
 	scene_.instantiate("Model", ModelComponent{ "models/teapot.obj", 8 }, ColourComponent{ {1,0.5,1} }, t_teapot);
 	TransformComponent t_sphere; t_sphere.position.y = 5; t_sphere.scale = { 0.08, 0.08, 0.08 };
