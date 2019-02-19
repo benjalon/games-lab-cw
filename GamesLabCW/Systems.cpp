@@ -17,8 +17,6 @@ namespace game::systems
 	{
 		k.velocity += k.acceleration * info.dt;
 		t.position += k.velocity * info.dt;
-
-		std::cout << "s=" << t.position << " v=" << k.velocity << " a=" << k.acceleration << std::endl;
 	};
 	SYSTEM(KinematicSystem, TransformComponent, KinematicComponent);
 
@@ -27,9 +25,9 @@ namespace game::systems
 	{
 		double linear = 18.0 * info.dt;
 		double angular = 36.0 * info.dt;
-		c.position.x += (utility::contains(input::held, input::KEY_D) - utility::contains(input::held, input::KEY_A)) * linear;
-		c.position.z += (utility::contains(input::held, input::KEY_S) - utility::contains(input::held, input::KEY_W)) * linear;
-		c.orientation.x += (utility::contains(input::held, input::KEY_Q) - utility::contains(input::held, input::KEY_E)) * angular;
+		c.position.x += (input::is_held(input::KEY_D) - input::is_held(input::KEY_A)) * linear;
+		c.position.z += (input::is_held(input::KEY_S) - input::is_held(input::KEY_W)) * linear;
+		c.orientation.x += (input::is_held(input::KEY_Q) - input::is_held(input::KEY_E)) * angular;
 	};
 	SYSTEM(MoveCameraSystem, CameraComponent);
 }

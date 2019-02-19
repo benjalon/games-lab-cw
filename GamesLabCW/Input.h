@@ -29,6 +29,16 @@ namespace game::input
 	extern std::unordered_set<Input> held;
 
 
+	//Tests if pressed inputs contain the given input
+	bool is_pressed(Input i);
+
+	//Tests if released inputs contain the given input
+	bool is_released(Input i);
+
+	//Tests if held inputs contain the given input
+	bool is_held(Input i);
+
+
 	//Input codes (derived from GLFW)
 
 	constexpr Input KEY_SPACE = 32;
