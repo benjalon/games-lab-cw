@@ -75,11 +75,6 @@ void game::GameEngine::run()
 	scene_.instantiate("DirectionalLight", DirectionalLightComponent{ {1, 1, 1}, 1, {2,1,1} });
 	scene_.instantiate("PointLight", PointLightComponent{ {1, 147.0 / 255.0, 41.0 / 255.0}, 1, {-7,0,0} });
 
-	//EXAMPLE Instantiate entities by prototypes with given variables
-	//scene_.instantiate("NamedEntity");
-	//scene_.instantiate("NamedEntity", NameComponent{ "MyName" });
-	//scene_.instantiate({ "NamedEntity", "KinematicBody" }, KinematicComponent{ {0,0,0},{1,0,0} }, NameComponent{ "Hello" });
-
 	//Time of next update
 	double t_next = glfwGetTime();
 

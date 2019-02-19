@@ -44,5 +44,24 @@ namespace game
 			(registry_.replace<Ts>(e, components), ...);
 			return e;
 		}
+
+		//Instantiates the given components as a new entity
+		template <typename... Ts>
+		Entity instantiate(Ts... components)
+		{
+			auto e = registry_.create();
+			(registry_.assign_or_replace<Ts>(e, components), ...);
+			return e;
+		}
+
+		//Adds the given component to the given entity in this scene
+		template <typename T>
+		void add(Entity e, T component)
+		{
+			registry_.assign_or_replace<T>(e, component);
+		}
+
+		//Destroys the given entity
+		void destroy(Entity e);
 	};
 }

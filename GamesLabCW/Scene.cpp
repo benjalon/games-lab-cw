@@ -48,3 +48,8 @@ game::Entity game::Scene::instantiate(std::initializer_list<std::string> p)
 		prototypes::prototypes.at(s)(registry_, e);
 	return e;
 }
+
+void game::Scene::destroy(Entity e)
+{
+	registry_.destroy(e);
+}
