@@ -45,9 +45,9 @@ namespace game
 			return e;
 		}
 
-		//Instantiates the given components as a new entity
+		//Creates a custom new entity using the given components
 		template <typename... Ts>
-		Entity instantiate(Ts... components)
+		Entity create(Ts... components)
 		{
 			auto e = registry_.create();
 			(registry_.assign_or_replace<Ts>(e, components), ...);
