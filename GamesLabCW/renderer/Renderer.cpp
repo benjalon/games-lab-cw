@@ -27,16 +27,12 @@
 namespace game::renderer
 {
 	//Returns the (potentially cached) shader using the given paramaters
-	GLuint get_shader(bool textured, size_t n_ambient, size_t n_directional, size_t n_point,
-		std::string vertex_shader, std::string fragment_shader)
+	GLuint get_shader(bool textured, bool normal_mapped, size_t n_ambient, size_t n_directional, size_t n_point)
 	{
-		using Args = std::tuple<bool, size_t, size_t, size_t, std::string, std::string>;
-
 		//Cache of parametrised shaders
-		static std::map<Args, Shader> shaders;
+		static std::map<std::tuple<bool, bool, size_t, size_t, size_t>, Shader> shaders;
 
-		Args args = std::make_tuple(textured, n_ambient, n_directional, n_point,
-			vertex_shader, fragment_shader);
+		auto args = std::make_tuple(textured, normal_mapped, n_ambient, n_directional, n_point);
 
 		//If the requested shader already exists, return it
 		auto it = shaders.find(args);
@@ -44,23 +40,23 @@ namespace game::renderer
 			return it->second.handle();
 
 		//Else, compile and return the new shader
+		else
+		{
+			//Shader parameters to prepend to source
+			std::string v, f;
+			auto define = [](std::string &s, std::string def) { s.append("#define " + def + "\n"); };
 
-		//Shader parameters to prepend to source
-		std::string v, f;
-		auto define = [](std::string &s, std::string def) { s.append("#define " + def + "\n"); };
+			if (textured) define(f, "TEXTURED");
+			if (normal_mapped) define(f, "NORMAL_MAPPED");
+			define(f, "N_AMBIENT " + std::to_string(n_ambient));
+			define(f, "N_DIRECTIONAL " + std::to_string(n_directional));
+			define(f, "N_POINT " + std::to_string(n_point));
 
-		if (textured) define(f, "TEXTURED");
-		define(f, "N_AMBIENT " + std::to_string(n_ambient));
-		define(f, "N_DIRECTIONAL " + std::to_string(n_directional));
-		define(f, "N_POINT " + std::to_string(n_point));
-
-		//Create new shader
-		auto &s = shaders[args];
-		s.load("",
-			vertex_shader.empty() ? "shaders/Passthrough.vert" : vertex_shader.c_str(),
-			fragment_shader.empty() ? "shaders/ParametrisedFragment.frag" : fragment_shader.c_str(),
-			v, f);
-		return s.handle();
+			//Create new shader
+			auto &s = shaders[args];
+			s.load("", "shaders/Passthrough.vert", "shaders/ParametrisedFragment.frag", v, f);
+			return s.handle();
+		}
 	}
 
 	//Global vertex array object
@@ -71,6 +67,7 @@ namespace game::renderer
 
 	//Global textures collection
 	std::vector<Texture> textures;
+	std::vector<Texture> normalMaps;
 
 	//Represents data of a mesh
 	struct Mesh
@@ -80,6 +77,7 @@ namespace game::renderer
 		std::vector<GLuint> materials;
 		size_t num_materials;
 		bool textured;
+		bool normal_mapped;
 	};
 
 	//Dictionary of meshes
@@ -124,7 +122,7 @@ namespace game::renderer
 		Mesh &m = meshes.emplace(file, Mesh()).first->second;
 
 		//Load all model data from aiScene
-		const size_t vertexTotalSize = sizeof(aiVector3D) * 2 + sizeof(aiVector2D);
+		const size_t vertexTotalSize = sizeof(aiVector3D) * 3 + sizeof(aiVector2D);
 		size_t totalVertices = 0;
 
 		for (size_t i = 0; i < scene->mNumMeshes; i++)
@@ -150,10 +148,14 @@ namespace game::renderer
 					aiVector3D normal = (mesh->HasNormals()) ?
 						mesh->mNormals[face.mIndices[k]] :
 						aiVector3D(1.0f, 1.0f, 1.0f);
+					aiVector3D tangent = (mesh->HasTangentsAndBitangents()) ?
+						mesh->mTangents[face.mIndices[k]] :
+						aiVector3D(1.0f, 1.0f, 1.0f);
 
 					vbo.add_data(&pos, sizeof(aiVector3D));
 					vbo.add_data(&uv, sizeof(aiVector2D));
 					vbo.add_data(&normal, sizeof(aiVector3D));
+					vbo.add_data(&tangent, sizeof(aiVector3D));
 				}
 			}
 
@@ -167,7 +169,6 @@ namespace game::renderer
 		for (size_t i = 0; i < m.num_materials; i++)
 		{
 			const aiMaterial *material = scene->mMaterials[i];
-			int a = 5;
 			int texIndex = 0;
 			aiString path;
 
@@ -194,6 +195,36 @@ namespace game::renderer
 			}
 		}
 
+
+		for (size_t i = 0; i < m.num_materials; i++)
+		{
+			const aiMaterial *material = scene->mMaterials[i];
+			int texIndex = 0;
+			aiString path;
+
+			if (material->GetTexture(aiTextureType_HEIGHT, texIndex, &path) == AI_SUCCESS) // Note assimp treats the way .obj stores normalmaps as heightmaps
+			{
+				m.normal_mapped = true;
+				std::string fullPath = strip_last_path(file) + path.data;
+
+				int normalFound = -1;
+				for (int j = 0; j < (int)normalMaps.size(); j++)
+					if (fullPath == normalMaps[j].path)
+					{
+						normalFound = j;
+						break;
+					}
+				if (normalFound != -1)
+					materialRemap[i] = normalFound;
+				else
+				{
+					Texture t(fullPath, true);
+					materialRemap[i] = normalMaps.size();
+					normalMaps.push_back(t);
+				}
+			}
+		}
+
 		for (int i = 0; i < (int)m.mesh_sizes.size(); i++)
 		{
 			int o = m.materials[i];
@@ -213,13 +244,16 @@ namespace game::renderer
 
 		//Vertex positions
 		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 2 * sizeof(aiVector3D) + sizeof(aiVector2D), (void*)0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(aiVector3D) + sizeof(aiVector2D), (void*)0);
 		//Texture coordinates
 		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(aiVector3D) + sizeof(aiVector2D), (void*)sizeof(aiVector3D));
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 3 * sizeof(aiVector3D) + sizeof(aiVector2D), (void*)sizeof(aiVector3D));
 		//Normal vectors
 		glEnableVertexAttribArray(2);
-		glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 2 * sizeof(aiVector3D) + sizeof(aiVector2D), (void*)(sizeof(aiVector3D) + sizeof(aiVector2D)));
+		glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(aiVector3D) + sizeof(aiVector2D), (void*)(sizeof(aiVector3D) + sizeof(aiVector2D)));
+		//Tangent vectors
+		glEnableVertexAttribArray(3);
+		glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(aiVector3D) + sizeof(aiVector2D), (void*)(2 * sizeof(aiVector3D) + sizeof(aiVector2D)));
 	}
 
 	//Calculates the projection matrix for a camera
@@ -272,8 +306,7 @@ namespace game::renderer
 		const Mesh &mesh = it->second;
 
 		//Determine and use appropriate shader
-		GLuint shader = get_shader(mesh.textured, n_ambient, n_directional, n_point,
-			model.vertex_shader, model.fragment_shader);
+		GLuint shader = get_shader(mesh.textured, mesh.normal_mapped, n_ambient, n_directional, n_point);
 		glUseProgram(shader);
 
 		//Calculate MVP matrices
@@ -383,13 +416,32 @@ namespace game::renderer
 		//Draw the model
 		for (size_t i = 0; i < mesh.mesh_sizes.size(); i++)
 		{
+			int offset = 0;
+
 			//Bind texture if the model has them
 			if (mesh.textured)
 			{
 				Texture &t = textures[mesh.materials[i]];
+
+				glActiveTexture(GL_TEXTURE0);
 				glBindTexture(GL_TEXTURE_2D, t.handle);
-				glBindSampler(0, t.sampler);
+				glUniform1i(glGetUniformLocation(shader, "texSampler"), 0);
+
+				offset++;
 			}
+
+			// Bind model normal maps
+			if (mesh.normal_mapped)
+			{
+				Texture &n = normalMaps[mesh.materials[i]];
+
+				glActiveTexture(GL_TEXTURE0 + offset);
+				glBindTexture(GL_TEXTURE_2D, n.handle);
+				glUniform1i(glGetUniformLocation(shader, "normalSampler"), offset);
+
+				offset++;
+			}
+
 			//Draw the triangles
 			glDrawArrays(GL_TRIANGLES, mesh.mesh_starts[i], mesh.mesh_sizes[i]);
 		}
