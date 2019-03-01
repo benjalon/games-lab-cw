@@ -27,12 +27,16 @@
 namespace game::renderer
 {
 	//Returns the (potentially cached) shader using the given paramaters
-	GLuint get_shader(bool textured, bool normal_mapped, size_t n_ambient, size_t n_directional, size_t n_point)
+	GLuint get_shader(bool textured, bool normal_mapped, size_t n_ambient, size_t n_directional, size_t n_point,
+		std::string vertex_shader, std::string fragment_shader)
 	{
-		//Cache of parametrised shaders
-		static std::map<std::tuple<bool, bool, size_t, size_t, size_t>, Shader> shaders;
+		using Args = std::tuple<bool, bool, size_t, size_t, size_t, std::string, std::string>;
 
-		auto args = std::make_tuple(textured, normal_mapped, n_ambient, n_directional, n_point);
+		//Cache of parametrised shaders
+		static std::map<Args, Shader> shaders;
+
+		Args args = std::make_tuple(textured, normal_mapped, n_ambient, n_directional, n_point,
+			vertex_shader, fragment_shader);
 
 		//If the requested shader already exists, return it
 		auto it = shaders.find(args);
@@ -54,7 +58,10 @@ namespace game::renderer
 
 			//Create new shader
 			auto &s = shaders[args];
-			s.load("", "shaders/Passthrough.vert", "shaders/ParametrisedFragment.frag", v, f);
+			s.load("",
+				vertex_shader.empty() ? "shaders/Passthrough.vert" : vertex_shader.c_str(),
+				fragment_shader.empty() ? "shaders/ParametrisedFragment.frag" : fragment_shader.c_str(),
+				v, f);
 			return s.handle();
 		}
 	}
@@ -306,7 +313,8 @@ namespace game::renderer
 		const Mesh &mesh = it->second;
 
 		//Determine and use appropriate shader
-		GLuint shader = get_shader(mesh.textured, mesh.normal_mapped, n_ambient, n_directional, n_point);
+		GLuint shader = get_shader(mesh.textured, mesh.normal_mapped, n_ambient, n_directional, n_point,
+			model.vertex_shader, model.fragment_shader);
 		glUseProgram(shader);
 
 		//Calculate MVP matrices

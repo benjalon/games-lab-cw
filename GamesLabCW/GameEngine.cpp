@@ -68,9 +68,9 @@ void game::GameEngine::run()
   
 	scene_.instantiate("Model", ModelComponent{ "models/Moon/moon.obj", 128 }, t_sphere);
   
-  ModelComponent m_torus; m_torus.model_file = "models/torus.obj"; m_torus.fragment_shader = "shaders/BlueSpirit.frag";
+	ModelComponent m_torus; m_torus.model_file = "models/torus.obj"; m_torus.fragment_shader = "shaders/BlueSpirit.frag";
 	TransformComponent t_torus; t_torus.position.y = 1; t_torus.position.x = 5; t_torus.scale = { 0.04, 0.04, 0.04 };
-	scene_.instantiate("Model", m_torus);
+	scene_.instantiate("Model", m_torus, t_torus);
   
 	scene_.instantiate("Model", ModelComponent{ "models/Cyborg/cyborg.obj" });
 
