@@ -61,7 +61,7 @@ game::GameEngine::GameEngine(bool fullscreen, bool vsync, bool ground) :
 void game::GameEngine::run()
 {
 	//EXAMPLE Instantiate a camera and models
-	scene_.instantiate("Camera", CameraComponent{ {0,2,5} });
+	scene_.instantiate("Camera", CameraComponent{ {0,2,5} }, KinematicComponent{ {0,0,0} });
 	TransformComponent t_wolf; t_wolf.position.x = -5;
 	ModelComponent m_wolf; m_wolf.model_file = "models/Wolf/wolf.obj"; m_wolf.fragment_shader = "shaders/BlueSpirit.frag";
 	scene_.instantiate("Model", m_wolf, t_wolf);

@@ -11,7 +11,7 @@ std::unordered_map<std::string, entt::prototype<game::Entity>> game::prototypes:
 
 void game::prototypes::register_prototypes()
 {
-	PROTOTYPE(Camera, CameraComponent);
+	PROTOTYPE(Camera, CameraComponent, KinematicComponent);
 	PROTOTYPE(Model, ModelComponent, ColourComponent, TransformComponent);
 
 	PROTOTYPE(AmbientLight, AmbientLightComponent);

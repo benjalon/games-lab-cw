@@ -21,7 +21,7 @@ namespace game::systems
 	SYSTEM(KinematicSystem, TransformComponent, KinematicComponent);
 
 	//Allows for noclip camera control by the player
-	auto MoveCameraSystem = [](SceneInfo info, auto entity, CameraComponent &c)
+	auto MoveCameraSystem = [](SceneInfo info, auto entity, CameraComponent &c, KinematicComponent &k)
 	{
 		ShowCursor(FALSE);
 		double screenWidth = 1920;
@@ -61,7 +61,34 @@ namespace game::systems
 			c.position -= c.orientation.direction_hv_right() * info.dt * speed;
 		}
 
+
+		//auto gravity = -9.81f;
+		auto gravity = -10;
+
+		k.velocity.y += -0.8;
+		c.position.y += k.velocity.y;
+
+		if (k.velocity.y < 0.0f) {
+			k.velocity.y = 0.0f;
+		}
+
+		if (c.position.y < 2.0f) {
+			c.position.y = 2.0f;
+		}
+			
+		
+
+		////When you want to jump, just set the velocity to a positive value :
+		if (utility::contains(input::pressed, input::KEY_SPACE))
+		{
+			if (true)
+			{
+				k.velocity.y += 4.0f;
+				//canjump = false;
+			}
+		}
+
 		input::cursor_pos = { screenWidth / 2, screenHeight / 2 };
 	};
-	SYSTEM(MoveCameraSystem, CameraComponent);
+	SYSTEM(MoveCameraSystem, CameraComponent, KinematicComponent);
 }
