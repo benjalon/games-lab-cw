@@ -43,13 +43,14 @@ namespace game::systems
 		c.orientation.x += mouseSpeedx * info.dt * float(screenWidth / 2 - xpos);
 		c.orientation.y += mouseSpeedy * info.dt * float(screenHeight / 2 - ypos);
 
+		auto direction = c.orientation.direction_hv();
+		direction = { direction.x, 0, direction.z };
 		if (utility::contains(input::held, input::KEY_W))
 		{
-			c.position += c.orientation.direction_hv() * info.dt * speed;
-		}
+			c.position += direction * info.dt * speed;		}
 		if (utility::contains(input::held, input::KEY_S))
 		{
-			c.position -= c.orientation.direction_hv() * info.dt * speed;
+			c.position -= direction * info.dt * speed;
 		}
 		if (utility::contains(input::held, input::KEY_D))
 		{
