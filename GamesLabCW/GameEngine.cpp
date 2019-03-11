@@ -52,6 +52,7 @@ game::GameEngine::GameEngine(bool fullscreen, bool vsync, bool ground) :
 	renderer::load("models/torus.obj");
 	renderer::load("models/Plane/Plane.obj");
 	renderer::load("models/Cyborg/cyborg.obj");
+	renderer::load("models/Room/room.obj");
 	renderer::finalise();
 
 	//Remove 'loading' from title
@@ -63,9 +64,13 @@ void game::GameEngine::run()
 	//EXAMPLE Instantiate a camera and models
 	scene_.instantiate("Camera", CameraComponent{ {0,2,5} });
   
-	scene_.instantiate("Model", ModelComponent{ "models/Plane/Plane.obj" }, ColourComponent{ {0.2,0.2,0.2} });
+	/*scene_.instantiate("Model", ModelComponent{ "models/Plane/Plane.obj" }, ColourComponent{ {0.2,0.2,0.2} });*/
+
+	ModelComponent m_room; m_room.model_file = "models/Room/room.obj"; /*m_room.fragment_shader = "shaders/BlueSpirit.frag";*/
+	TransformComponent t_room; t_room.position.y = 5;
+	scene_.instantiate("Model", m_room, t_room, ColourComponent{ {0.2,0.2,0.2} });
+
 	TransformComponent t_sphere; t_sphere.position.y = 5; t_sphere.position.z = -10; t_sphere.scale = { 0.04, 0.04, 0.04 };
-  
 	scene_.instantiate("Model", ModelComponent{ "models/Moon/moon.obj", 128 }, t_sphere);
   
 	ModelComponent m_torus; m_torus.model_file = "models/torus.obj"; m_torus.fragment_shader = "shaders/BlueSpirit.frag";
