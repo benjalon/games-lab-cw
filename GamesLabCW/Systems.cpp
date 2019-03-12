@@ -21,13 +21,74 @@ namespace game::systems
 	SYSTEM(KinematicSystem, TransformComponent, KinematicComponent);
 
 	//Allows for noclip camera control by the player
-	auto MoveCameraSystem = [](SceneInfo info, auto entity, CameraComponent &c)
+	auto MoveCameraSystem = [](SceneInfo info, auto entity, CameraComponent &c, KinematicComponent &k)
 	{
-		double linear = 18.0 * info.dt;
-		double angular = 36.0 * info.dt;
-		c.position.x += (input::is_held(input::KEY_D) - input::is_held(input::KEY_A)) * linear;
-		c.position.z += (input::is_held(input::KEY_S) - input::is_held(input::KEY_W)) * linear;
-		c.orientation.x += (input::is_held(input::KEY_Q) - input::is_held(input::KEY_E)) * angular;
+		ShowCursor(FALSE);
+		double screenWidth = 1920;
+		double screenHeight = 1080;
+		if (!utility::contains(input::held, input::KEY_ESCAPE))
+		{
+			//This has been hacked because of no fullscreen meaning it needs an offset.
+			SetCursorPos(1935 / 2, 1145 / 2);
+		}
+		
+		double xpos, ypos;
+		float speed = 11.0f; // 11 units / second
+		float mouseSpeedx = 2.0f;
+		float mouseSpeedy = 2.5f;
+
+		xpos = input::cursor_pos.x;
+		ypos = input::cursor_pos.y;
+
+		c.orientation.x += mouseSpeedx * info.dt * float(screenWidth / 2 - xpos);
+		c.orientation.y += mouseSpeedy * info.dt * float(screenHeight / 2 - ypos);
+
+		auto direction = c.orientation.direction_hv();
+		direction = { direction.x, 0, direction.z };
+		if (utility::contains(input::held, input::KEY_W))
+		{
+			c.position += direction * info.dt * speed;		}
+		if (utility::contains(input::held, input::KEY_S))
+		{
+			c.position -= direction * info.dt * speed;
+		}
+		if (utility::contains(input::held, input::KEY_D))
+		{
+			c.position += c.orientation.direction_hv_right() *info.dt * speed;
+		}
+		if (utility::contains(input::held, input::KEY_A))
+		{
+			c.position -= c.orientation.direction_hv_right() * info.dt * speed;
+		}
+
+
+		//auto gravity = -9.81f;
+		auto gravity = -10;
+
+		k.velocity.y += -0.8;
+		c.position.y += k.velocity.y;
+
+		if (k.velocity.y < 0.0f) {
+			k.velocity.y = 0.0f;
+		}
+
+		if (c.position.y < 2.0f) {
+			c.position.y = 2.0f;
+		}
+			
+		
+
+		////When you want to jump, just set the velocity to a positive value :
+		if (utility::contains(input::pressed, input::KEY_SPACE))
+		{
+			if (true)
+			{
+				k.velocity.y += 4.0f;
+				//canjump = false;
+			}
+		}
+
+		input::cursor_pos = { screenWidth / 2, screenHeight / 2 };
 	};
-	SYSTEM(MoveCameraSystem, CameraComponent);
+	SYSTEM(MoveCameraSystem, CameraComponent, KinematicComponent);
 }
