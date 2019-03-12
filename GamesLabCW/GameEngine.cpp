@@ -48,10 +48,10 @@ game::GameEngine::GameEngine(bool fullscreen, bool vsync, bool ground) :
 	prototypes::register_prototypes();
 
 	//EXAMPLE Load models
-	renderer::load("models/Wolf/wolf.obj");
-	renderer::load("models/teapot.obj");
-	renderer::load("models/sphere.obj");
+	renderer::load("models/Moon/moon.obj");
 	renderer::load("models/torus.obj");
+	renderer::load("models/Plane/Plane.obj");
+	renderer::load("models/Cyborg/cyborg.obj");
 	renderer::finalise();
 
 	//Remove 'loading' from title
@@ -61,20 +61,22 @@ game::GameEngine::GameEngine(bool fullscreen, bool vsync, bool ground) :
 void game::GameEngine::run()
 {
 	//EXAMPLE Instantiate a camera and models
-	scene_.instantiate("Camera", CameraComponent{ {0,2,5} }, KinematicComponent{ {0,0,0} });
-	TransformComponent t_wolf; t_wolf.position.x = -5;
-	ModelComponent m_wolf; m_wolf.model_file = "models/Wolf/wolf.obj"; m_wolf.fragment_shader = "shaders/BlueSpirit.frag";
-	scene_.instantiate("Model", m_wolf, t_wolf);
-	TransformComponent t_teapot; t_teapot.position.x = -2; t_teapot.scale = { 0.08, 0.08, 0.08 };
-	scene_.instantiate("Model", ModelComponent{ "models/teapot.obj", 8 }, ColourComponent{ {1,0.5,1} }, t_teapot);
-	TransformComponent t_sphere; t_sphere.position.y = 5; t_sphere.scale = { 0.08, 0.08, 0.08 };
-	scene_.instantiate("Model", ModelComponent{ "models/sphere.obj", 128 }, ColourComponent{ {0,1,0.2} }, t_sphere);
-	TransformComponent t_torus; t_torus.position.x = 5; t_torus.scale = { 0.08, 0.08, 0.08 };
-	scene_.instantiate("Model", ModelComponent{ "models/torus.obj" }, ColourComponent{ {0,0.2,1} }, t_torus);
+	scene_.instantiate("Camera", CameraComponent{ {0,2,5} });
+  
+	scene_.instantiate("Model", ModelComponent{ "models/Plane/Plane.obj" }, ColourComponent{ {0.2,0.2,0.2} });
+	TransformComponent t_sphere; t_sphere.position.y = 5; t_sphere.position.z = -10; t_sphere.scale = { 0.04, 0.04, 0.04 };
+  
+	scene_.instantiate("Model", ModelComponent{ "models/Moon/moon.obj", 128 }, t_sphere);
+  
+	ModelComponent m_torus; m_torus.model_file = "models/torus.obj"; m_torus.fragment_shader = "shaders/BlueSpirit.frag";
+	TransformComponent t_torus; t_torus.position.y = 1; t_torus.position.x = 5; t_torus.scale = { 0.04, 0.04, 0.04 };
+	scene_.instantiate("Model", m_torus, t_torus);
+  
+	scene_.instantiate("Model", ModelComponent{ "models/Cyborg/cyborg.obj" });
 
 	scene_.instantiate("AmbientLight", AmbientLightComponent{ {1, 147.0 / 255.0, 41.0 / 255.0}, 0.01 });
 	scene_.instantiate("DirectionalLight", DirectionalLightComponent{ {1, 1, 1}, 1, {2,1,1} });
-	scene_.instantiate("PointLight", PointLightComponent{ {1, 147.0 / 255.0, 41.0 / 255.0}, 1, {-7,0,0} });
+	scene_.instantiate("PointLight", PointLightComponent{ {1, 147.0 / 255.0, 41.0 / 255.0}, 1, {0,5,0} });
 
 	//Time of next update
 	double t_next = glfwGetTime();
