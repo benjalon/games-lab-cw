@@ -27,15 +27,15 @@
 namespace game::renderer
 {
 	//Returns the (potentially cached) shader using the given paramaters
-	GLuint get_shader(bool textured, bool normal_mapped, size_t n_ambient, size_t n_directional, size_t n_point,
+	GLuint get_shader(bool textured, bool normal_mapped, bool boned, size_t n_ambient, size_t n_directional, size_t n_point,
 		std::string vertex_shader, std::string fragment_shader)
 	{
-		using Args = std::tuple<bool, bool, size_t, size_t, size_t, std::string, std::string>;
+		using Args = std::tuple<bool, bool, bool, size_t, size_t, size_t, std::string, std::string>;
 
 		//Cache of parametrised shaders
 		static std::map<Args, Shader> shaders;
 
-		Args args = std::make_tuple(textured, normal_mapped, n_ambient, n_directional, n_point,
+		Args args = std::make_tuple(textured, normal_mapped, boned, n_ambient, n_directional, n_point,
 			vertex_shader, fragment_shader);
 
 		//If the requested shader already exists, return it
@@ -52,6 +52,7 @@ namespace game::renderer
 
 			if (textured) define(f, "TEXTURED");
 			if (normal_mapped) define(f, "NORMAL_MAPPED");
+			if (boned) define(v, "BONED");
 			define(f, "N_AMBIENT " + std::to_string(n_ambient));
 			define(f, "N_DIRECTIONAL " + std::to_string(n_directional));
 			define(f, "N_POINT " + std::to_string(n_point));
@@ -85,7 +86,57 @@ namespace game::renderer
 		size_t num_materials;
 		bool textured;
 		bool normal_mapped;
+		bool boned;
 	};
+
+	struct BoneInfo
+	{
+		aiMatrix4x4 boneOffset;
+		aiMatrix4x4 finalTransformation;
+
+		BoneInfo()
+		{
+		}
+	};
+
+	struct VertexBoneData
+	{
+		int ids[4];
+		float weights[4];
+
+		VertexBoneData()
+		{
+			Reset();
+		};
+
+		void Reset()
+		{
+			memset(ids, 0, sizeof(ids));
+			memset(weights, 0, sizeof(weights));
+		}
+
+		void AddBoneData(int id, float weight);
+	};
+
+	void VertexBoneData::AddBoneData(int id, float weight)
+	{
+		size_t elementSize = sizeof(ids) / sizeof(ids[0]);
+		for (size_t i = 0; i < elementSize; i++) {
+			if (weights[i] == 0.0) {
+				ids[i] = id;
+				weights[i] = weight;
+				return;
+			}
+		}
+
+		// should never get here - more bones than we have space for
+		/*assert(0);*/
+	}
+
+	std::map<std::string, int> boneMapping; // maps a bone name to its index
+	int boneCount;
+	std::vector<BoneInfo> boneInfo;
+	std::vector<VertexBoneData> bones;
 
 	//Dictionary of meshes
 	std::unordered_map<std::string, Mesh> meshes;
@@ -131,6 +182,7 @@ namespace game::renderer
 		//Load all model data from aiScene
 		const size_t vertexTotalSize = sizeof(aiVector3D) * 3 + sizeof(aiVector2D);
 		size_t totalVertices = 0;
+		size_t prevTotal;
 
 		for (size_t i = 0; i < scene->mNumMeshes; i++)
 		{
@@ -140,6 +192,7 @@ namespace game::renderer
 			size_t size0 = vbo.size();
 			m.mesh_starts.push_back((GLuint)size0 / vertexTotalSize);
 
+			// Load faces
 			for (size_t j = 0; j < meshFaces; j++)
 			{
 				const aiFace &face = mesh->mFaces[j];
@@ -166,13 +219,47 @@ namespace game::renderer
 				}
 			}
 
+			prevTotal = totalVertices;
 			totalVertices += mesh->mNumVertices;
 			m.mesh_sizes.push_back((GLuint)(vbo.size() - size0) / vertexTotalSize);
+
+			if (mesh->HasBones())
+			{
+				m.boned = true;
+				bones.resize(totalVertices);
+
+				// Load bones
+				for (size_t j = 0; j < mesh->mNumBones; j++) {
+					int boneID = 0;
+					std::string boneName(mesh->mBones[j]->mName.data);
+
+					if (boneMapping.find(boneName) == boneMapping.end()) {
+						// Allocate an index for a new bone
+						boneID = boneCount;
+						boneCount++;
+						BoneInfo bi;
+						boneInfo.push_back(bi);
+						boneInfo[boneID].boneOffset = mesh->mBones[j]->mOffsetMatrix;
+						boneMapping[boneName] = boneID;
+					}
+					else {
+						boneID = boneMapping[boneName];
+					}
+
+					for (size_t k = 0; k < mesh->mBones[j]->mNumWeights; k++) {
+						int vertexID = prevTotal + mesh->mBones[j]->mWeights[k].mVertexId; // maybe wrong
+						float weight = mesh->mBones[j]->mWeights[k].mWeight;
+						bones[vertexID].AddBoneData(boneID, weight);
+						vbo.add_data(&bones[k], bones.size());
+					}
+				}
+			}
 		}
 
 		m.num_materials = scene->mNumMaterials;
 		std::vector<size_t> materialRemap(m.num_materials);
 
+		// Load diffuse maps / textures
 		for (size_t i = 0; i < m.num_materials; i++)
 		{
 			const aiMaterial *material = scene->mMaterials[i];
@@ -202,7 +289,7 @@ namespace game::renderer
 			}
 		}
 
-
+		// Load normal maps
 		for (size_t i = 0; i < m.num_materials; i++)
 		{
 			const aiMaterial *material = scene->mMaterials[i];
@@ -261,6 +348,12 @@ namespace game::renderer
 		//Tangent vectors
 		glEnableVertexAttribArray(3);
 		glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(aiVector3D) + sizeof(aiVector2D), (void*)(2 * sizeof(aiVector3D) + sizeof(aiVector2D)));
+		//Bones
+		glEnableVertexAttribArray(4);
+		glVertexAttribPointer(4, 4, GL_INT, GL_FALSE, sizeof(VertexBoneData), (const GLvoid*)0);
+		//Bone weights
+		glEnableVertexAttribArray(4);
+		glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(VertexBoneData), (const GLvoid*)16);
 	}
 
 	//Calculates the projection matrix for a camera
@@ -313,7 +406,7 @@ namespace game::renderer
 		const Mesh &mesh = it->second;
 
 		//Determine and use appropriate shader
-		GLuint shader = get_shader(mesh.textured, mesh.normal_mapped, n_ambient, n_directional, n_point,
+		GLuint shader = get_shader(mesh.textured, mesh.normal_mapped, mesh.boned, n_ambient, n_directional, n_point,
 			model.vertex_shader, model.fragment_shader);
 		glUseProgram(shader);
 
