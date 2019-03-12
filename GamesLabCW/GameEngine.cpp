@@ -53,6 +53,7 @@ game::GameEngine::GameEngine(bool fullscreen, bool vsync, bool ground) :
 	renderer::load("models/Plane/Plane.obj");
 	renderer::load("models/Cyborg/cyborg.obj");
 	renderer::load("models/Room/room.obj");
+	renderer::load("models/Water/water.obj");
 	renderer::finalise();
 
 	//Remove 'loading' from title
@@ -65,6 +66,9 @@ void game::GameEngine::run()
 	scene_.instantiate("Camera", CameraComponent{ {0,2,5} });
   
 	/*scene_.instantiate("Model", ModelComponent{ "models/Plane/Plane.obj" }, ColourComponent{ {0.2,0.2,0.2} });*/
+
+	ModelComponent m_water; m_water.model_file = "models/Water/water.obj"; m_water.vertex_shader = "shaders/Water.vert"; m_water.fragment_shader = "shaders/Water.frag";
+	scene_.instantiate("Model", m_water);
 
 	ModelComponent m_room; m_room.model_file = "models/Room/room.obj"; /*m_room.fragment_shader = "shaders/BlueSpirit.frag";*/
 	TransformComponent t_room; t_room.position.y = 5;
