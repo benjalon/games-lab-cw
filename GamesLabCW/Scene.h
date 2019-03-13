@@ -20,6 +20,9 @@ namespace game
 		entt::registry<> registry_;
 
 	public:
+		//Default constructor
+		Scene();
+
 		//Ticks all logic systems in this Scene
 		void tick(double dt);
 

@@ -10,6 +10,11 @@
 #include "Prototypes.h"
 #include "renderer/Renderer.h"
 
+game::Scene::Scene()
+{
+	create(GameStateComponent());
+}
+
 void game::Scene::tick(double dt)
 {
 	//Invoke all systems

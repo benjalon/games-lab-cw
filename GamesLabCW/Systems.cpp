@@ -12,6 +12,15 @@ std::vector<game::systems::SystemInvoker> game::systems::system_invokers;
 
 namespace game::systems
 {
+	//General game state system
+	auto GameStateSystem = [](auto info, auto entity, GameStateComponent &g)
+	{
+		//ESC quits the game
+		if (input::is_pressed(input::KEY_ESCAPE))
+			events::dispatcher.trigger<events::QuitGame>();
+	};
+	SYSTEM(GameStateSystem, GameStateComponent);
+
 	//Basic kinematic system of calculus of motion
 	auto KinematicSystem = [](auto info, auto entity, auto &t, auto &k)
 	{

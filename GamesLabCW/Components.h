@@ -13,6 +13,14 @@
 
 namespace game
 {
+	/* GAME AND ENGINE */
+
+	struct GameStateComponent
+	{
+
+	};
+
+
 	/* CAMERAS AND RENDERING */
 
 	struct CameraComponent

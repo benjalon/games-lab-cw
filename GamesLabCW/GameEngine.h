@@ -12,6 +12,7 @@
 #include <unordered_map>
 
 #include "Scene.h"
+#include "Events.h"
 
 namespace game
 {
@@ -64,6 +65,10 @@ namespace game
 
 		//Commence the main game loop
 		void run();
+
+
+		//Handler to quit the game
+		void quit(const events::QuitGame &);
 
 
 		//Key input callback

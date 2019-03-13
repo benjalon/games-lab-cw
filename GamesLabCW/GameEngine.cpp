@@ -38,6 +38,9 @@ game::GameEngine::GameEngine(bool fullscreen, bool vsync, bool ground) :
 	glfwSetMouseButtonCallback(window_, mouse_button_callback);
 	glfwSetWindowSizeCallback(window_, window_size_callback);
 
+	//Set event handlers
+	events::dispatcher.sink<events::QuitGame>().connect<&GameEngine::quit>(this);
+
 	//Hide the cursor
 	glfwSetInputMode(window_, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 
@@ -136,6 +139,11 @@ void game::GameEngine::draw()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	scene_.draw();
 	glfwSwapBuffers(window_);
+}
+
+void game::GameEngine::quit(const events::QuitGame &)
+{
+	glfwSetWindowShouldClose(window_, true);
 }
 
 void game::GameEngine::key_callback(GLFWwindow *window, int key, int scancode, int action, int mods)
