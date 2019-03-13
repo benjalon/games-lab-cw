@@ -19,6 +19,10 @@ namespace game::input
 	//Current cursor position
 	extern Vector2 cursor_pos;
 
+	//Should the cursor position reflect an offset from the centre?
+	extern bool cursor_centre;
+
+
 	//Set of inputs just pressed
 	extern std::unordered_set<Input> pressed;
 

@@ -38,6 +38,9 @@ game::GameEngine::GameEngine(bool fullscreen, bool vsync, bool ground) :
 	glfwSetMouseButtonCallback(window_, mouse_button_callback);
 	glfwSetWindowSizeCallback(window_, window_size_callback);
 
+	//Hide the cursor
+	glfwSetInputMode(window_, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+
 	//Enable v-sync
 	if (vsync) glfwSwapInterval(1);
 
@@ -154,7 +157,34 @@ void game::GameEngine::key_callback(GLFWwindow *window, int key, int scancode, i
 
 void game::GameEngine::cursor_position_callback(GLFWwindow *window, double x, double y)
 {
-	input::cursor_pos = { x, y };
+	//Get current window size
+	int width, height;
+	glfwGetWindowSize(window, &width, &height);
+
+	//Rescales the given xy coordinate to expected window dimensions
+	auto xy = [&](Vector2 &v)
+	{
+		v.x /= width; v.x *= WINDOW_WIDTH;
+		v.y /= height; v.y *= WINDOW_HEIGHT;
+	};
+
+	//Get current cursor position
+	Vector2 pos = { x, y };
+	xy(pos);
+
+	if (input::cursor_centre)
+	{
+		//Set cursor to middle
+		glfwSetCursorPos(window, width / 2.0, height / 2.0);
+
+		//Get offset from middle
+		Vector2 pos_mid;
+		glfwGetCursorPos(window, &pos_mid.x, &pos_mid.y);
+		xy(pos_mid);
+		input::cursor_pos = pos_mid - pos;
+	}
+	else
+		input::cursor_pos = pos;
 }
 
 void game::GameEngine::mouse_button_callback(GLFWwindow *window, int button, int action, int mods)
