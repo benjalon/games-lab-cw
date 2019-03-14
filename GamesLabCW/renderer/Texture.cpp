@@ -44,6 +44,8 @@ game::Texture::Texture(const char *filename, bool genMipMaps)
 
 	//Generate sampler
 	glGenSamplers(1, &sampler);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glSamplerParameteri(sampler, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glSamplerParameteri(sampler, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
