@@ -14,7 +14,6 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include <assimp/Importer.hpp>
-#include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
 #include "Shader.h"
@@ -93,6 +92,15 @@ namespace game::renderer
 	//Dictionary of meshes
 	std::unordered_map<std::string, Mesh> meshes;
 
+	struct BoneAnimation
+	{
+		const aiScene *scene;
+		GLuint shader;
+	};
+	std::unordered_map<std::string, BoneAnimation> animations;
+
+	std::unordered_map<std::string, BoneAnimation> GetAnimations() { return animations; }
+
 	struct VertexBoneData
 	{
 		unsigned int IDs[4]; //!< An array of 4 bone Ids that influence a single vertex.
@@ -169,7 +177,6 @@ namespace game::renderer
 	glm::mat4 GlobalTransformation; //!< Root node transformation. 
 	glm::mat4 m_GlobalInverseTransform;
 	std::vector<VertexBoneData> bones;
-	std::unique_ptr<const aiScene> scene;
 
 	//Utility function to remove the final path node from the given file path
 	std::string strip_last_path(std::string path)
@@ -184,6 +191,20 @@ namespace game::renderer
 		return dir;
 	}
 
+	// Recursively copy nodes
+	aiNode* recursivelyCopyNode(const aiNode* node)
+	{
+		aiNode* n = new aiNode(*node);
+		n->mChildren = new aiNode*[node->mNumChildren];
+
+		// Do the same for all the node's children. 
+		for (unsigned i = 0; i < node->mNumChildren; i++) {
+			n->mChildren[i] = recursivelyCopyNode(node->mChildren[i]);
+		}
+
+		return n;
+	}
+
 	void load(std::string file)
 	{
 		//Ensure model hasn't already been loaded
@@ -195,13 +216,13 @@ namespace game::renderer
 
 		//Load model from file
 		Assimp::Importer imp;
-		scene = std::make_unique<aiScene>(*imp.ReadFile(file,
+		const aiScene *scene = imp.ReadFile(file,
 			aiProcess_CalcTangentSpace |
 			aiProcess_Triangulate |
 			aiProcess_JoinIdenticalVertices |
 			aiProcess_SortByPType |
 			aiProcess_LimitBoneWeights
-		));
+		);
 
 		//Abort if unsuccessful
 		std::cout << (scene ? "Loaded model " : "Could not load model ") << file << std::endl;
@@ -266,6 +287,33 @@ namespace game::renderer
 			if (mesh->HasBones())
 			{
 				//m.boned = true;
+
+				BoneAnimation &b = animations.emplace(file, BoneAnimation()).first->second;
+
+				// Copy all the data from the scene 
+				aiScene* s = new aiScene(*scene);
+
+				// Horrible copy code
+				s->mAnimations = new aiAnimation*[scene->mNumAnimations];
+				for (int i = 0; i < scene->mNumAnimations; i++)
+				{
+					s->mAnimations[i] = new aiAnimation(*scene->mAnimations[i]);
+
+					s->mAnimations[i]->mChannels = new aiNodeAnim*[scene->mAnimations[i]->mNumChannels];
+					for (int j = 0; j < scene->mAnimations[i]->mNumChannels; j++)
+					{
+						s->mAnimations[i]->mChannels[j] = new aiNodeAnim(*scene->mAnimations[i]->mChannels[j]);
+
+						s->mAnimations[i]->mChannels[j]->mPositionKeys = new aiVectorKey(*scene->mAnimations[i]->mChannels[j]->mPositionKeys);
+						s->mAnimations[i]->mChannels[j]->mRotationKeys = new aiQuatKey(*scene->mAnimations[i]->mChannels[j]->mRotationKeys);
+						s->mAnimations[i]->mChannels[j]->mScalingKeys = new aiVectorKey(*scene->mAnimations[i]->mChannels[j]->mScalingKeys);
+					}
+				}
+
+				s->mRootNode = recursivelyCopyNode(scene->mRootNode);
+				b.scene = s;
+				// End of horrible copy code
+
 				bones.resize(totalVertices);
 
 				// Loop through all bones in the Assimp mesh.
@@ -536,7 +584,7 @@ namespace game::renderer
 		Out = Start + Factor * Delta;
 	}
 
-	void ReadNodeHierarchy(float AnimationTime, const aiNode* pNode, const glm::mat4& ParentTransform)
+	void ReadNodeHierarchy(float AnimationTime, const aiScene* scene, const aiNode* pNode, const glm::mat4& ParentTransform)
 	{
 		glm::mat4 IdentityTest = glm::mat4();
 
@@ -595,19 +643,23 @@ namespace game::renderer
 
 		// Do the same for all the node's children. 
 		for (unsigned i = 0; i < pNode->mNumChildren; i++) {
-			ReadNodeHierarchy(AnimationTime, pNode->mChildren[i], GlobalTransformation);
+			ReadNodeHierarchy(AnimationTime, scene, pNode->mChildren[i], GlobalTransformation);
 		}
 	}
 
-	void BoneTransform(float TimeInSeconds, std::vector<glm::mat4>& Transforms)
+	void BoneTransform(float TimeInSeconds, std::vector<glm::mat4>& Transforms, GLuint& shader, std::string file)
 	{
 		glm::mat4 Identity = glm::mat4();
 
-		float TicksPerSecond = scene->mAnimations[0]->mTicksPerSecond;
-		float TimeInTicks = TimeInSeconds * TicksPerSecond;
-		float AnimationTime = fmod(TimeInTicks, scene->mAnimations[0]->mDuration);
+		auto it = renderer::animations.find(file);
+		if (it == renderer::animations.end()) return;
+		const renderer::BoneAnimation &animation = it->second;
 
-		ReadNodeHierarchy(AnimationTime, scene->mRootNode, Identity);
+		float TicksPerSecond = animation.scene->mAnimations[0]->mTicksPerSecond;
+		float TimeInTicks = TimeInSeconds * TicksPerSecond;
+		float AnimationTime = fmod(TimeInTicks, animation.scene->mAnimations[0]->mDuration);
+
+		ReadNodeHierarchy(AnimationTime, animation.scene, animation.scene->mRootNode, Identity);
 
 		Transforms.resize(m_NumBones);
 
@@ -615,6 +667,8 @@ namespace game::renderer
 		for (unsigned int i = 0; i < m_NumBones; i++) {
 			Transforms[i] = m_BoneInfo[i].FinalTransformation;
 		}
+
+		shader = animation.shader;
 	}
 
 	void init()
@@ -643,6 +697,12 @@ namespace game::renderer
 		GLuint shader = get_shader(mesh.textured, mesh.normal_mapped, n_ambient, n_directional, n_point,
 			model.vertex_shader, model.fragment_shader);
 		glUseProgram(shader);
+
+		// if boned
+		auto animationIt = animations.find(model.model_file);
+		if (animationIt == animations.end()) return;
+		BoneAnimation &animation = animationIt->second;
+		animation.shader = shader;
 
 		//Calculate MVP matrices
 		glm::mat4 p = proj_matrix(camera);
@@ -746,18 +806,6 @@ namespace game::renderer
 			glUniform1f(glGetUniformLocation(shader,
 				("pointLights[" + j + "].exponent").c_str()),
 				(GLfloat)points[i].exponent);
-		}
-
-		// if boned
-		std::vector<glm::mat4> Transforms;
-		BoneTransform(0, Transforms);
-
-		for (unsigned int i = 0; i < Transforms.size(); i++) {
-			assert(i < 100);
-
-			glUniformMatrix4fv(
-				glGetUniformLocation(shader, "gBones[70]"),
-				1, TRUE, glm::value_ptr(Transforms[i]));
 		}
 
 		//Draw the model

@@ -5,8 +5,12 @@
 
 #include "Systems.h"
 
+#include <glm/gtc/type_ptr.hpp>
+
 #include "Input.h"
 #include "Utility.h"
+#include "renderer/Renderer.h"
+
 
 std::vector<game::systems::SystemInvoker> game::systems::system_invokers;
 
@@ -91,4 +95,22 @@ namespace game::systems
 		input::cursor_pos = { screenWidth / 2, screenHeight / 2 };
 	};
 	SYSTEM(MoveCameraSystem, CameraComponent, KinematicComponent);
+
+	//Animation system
+	auto AnimationSystem = [](auto info, auto entity, auto &m)
+	{
+		// if boned
+		std::vector<glm::mat4> Transforms;
+		GLuint shader;
+		renderer::BoneTransform(info.dt, Transforms, shader, m.model_file);
+
+		for (unsigned int i = 0; i < Transforms.size(); i++) {
+			assert(i < 100);
+
+			glUniformMatrix4fv(
+				glGetUniformLocation(shader, "gBones[70]"),
+				1, TRUE, glm::value_ptr(Transforms[i]));
+		}
+	};
+	SYSTEM(AnimationSystem, ModelComponent);
 }

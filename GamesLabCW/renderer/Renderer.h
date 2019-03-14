@@ -7,6 +7,8 @@
 
 #include "../Components.h"
 
+#include <assimp/scene.h>
+
 namespace game::renderer
 {
 	//Initialises the render system
@@ -23,4 +25,7 @@ namespace game::renderer
 
 	//Finalises the loaded models
 	void finalise();
+
+	// Get bone transforms for animation
+	void BoneTransform(float TimeInSeconds, std::vector<glm::mat4>& Transforms, GLuint& shader, std::string file);
 }
