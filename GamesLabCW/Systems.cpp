@@ -72,8 +72,8 @@ namespace game::systems
 			k.velocity.y = 0.0f;
 		}
 
-		if (c.position.y < 2.0f) {
-			c.position.y = 2.0f;
+		if (c.position.y < 6.0f) {
+			c.position.y = 6.0f;
 		}
 			
 		
