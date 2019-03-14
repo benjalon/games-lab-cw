@@ -21,6 +21,7 @@ namespace game::systems
 	};
 	SYSTEM(GameStateSystem, GameStateComponent);
 
+
 	//Basic kinematic system of calculus of motion
 	auto KinematicSystem = [](auto info, auto entity, auto &t, auto &k)
 	{
@@ -29,26 +30,38 @@ namespace game::systems
 	};
 	SYSTEM(KinematicSystem, TransformComponent, KinematicComponent);
 
-	//Allows for noclip camera control by the player
-	auto MoveCameraSystem = [](SceneInfo info, auto entity, CameraComponent &c, KinematicComponent &k)
-	{
-		//Set to correct cursor mode
-		input::cursor_centre = true;
 
+	//First-person control by the player
+	auto FirstPersonControllerSystem = [](SceneInfo info, auto entity, FirstPersonControllerComponent &f, TransformComponent &t, KinematicComponent &k)
+	{
 		double mouse_sensitivity = 5.0;
 		double move_speed = 11.0;
 
 		//Rotate using cursor offset
-		c.orientation.x += mouse_sensitivity * input::cursor_pos.x * info.dt;
-		c.orientation.y += mouse_sensitivity * input::cursor_pos.y * info.dt;
+		t.rotation.x += mouse_sensitivity * input::cursor_pos.x * info.dt;
+		t.rotation.y += mouse_sensitivity * input::cursor_pos.y * info.dt;
+
+		//Clamp y rotation to avoid flipping
+		t.rotation.y = std::clamp(t.rotation.y, -60.0, 60.0);
 
 		//Move forward/backward
-		c.position += c.orientation.direction_hv() * move_speed * info.dt *
+		t.position += Vector2(t.rotation.x, t.rotation.y).direction_hv() * move_speed * info.dt *
 			(input::is_held(input::KEY_W) - input::is_held(input::KEY_S));
 
 		//Strafe
-		c.position += c.orientation.direction_hv_right() * move_speed * info.dt *
+		t.position += Vector2(t.rotation.x, t.rotation.y).direction_hv_right() * move_speed * info.dt *
 			(input::is_held(input::KEY_D) - input::is_held(input::KEY_A));
 	};
-	SYSTEM(MoveCameraSystem, CameraComponent, KinematicComponent);
+	SYSTEM(FirstPersonControllerSystem, FirstPersonControllerComponent, TransformComponent, KinematicComponent);
+
+
+	//Makes a camera follow its target
+	auto MoveCameraSystem = [](SceneInfo info, auto entity, CameraComponent &c)
+	{
+		TransformComponent &t = info.scene.get<TransformComponent>(c.follow);
+		c.position = t.position;
+		c.orientation = { t.rotation.x, t.rotation.y };
+		std::cout << c.orientation.y << std::endl;
+	};
+	SYSTEM(MoveCameraSystem, CameraComponent);
 }

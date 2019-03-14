@@ -64,6 +64,13 @@ namespace game
 			registry_.assign_or_replace<T>(e, component);
 		}
 
+		//Gets the given component of the given entity
+		template <typename T>
+		T &get(Entity e)
+		{
+			return registry_.get<T>(e);
+		}
+
 		//Destroys the given entity
 		void destroy(Entity e);
 	};

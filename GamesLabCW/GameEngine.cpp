@@ -41,8 +41,9 @@ game::GameEngine::GameEngine(bool fullscreen, bool vsync, bool ground) :
 	//Set event handlers
 	events::dispatcher.sink<events::QuitGame>().connect<&GameEngine::quit>(this);
 
-	//Hide the cursor
+	//Hide and initialise the cursor
 	glfwSetInputMode(window_, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+	input::cursor_centre = true;
 
 	//Enable v-sync
 	if (vsync) glfwSwapInterval(1);
@@ -70,7 +71,8 @@ game::GameEngine::GameEngine(bool fullscreen, bool vsync, bool ground) :
 void game::GameEngine::run()
 {
 	//EXAMPLE Instantiate a camera and models
-	scene_.instantiate("Camera", CameraComponent{ {0,2,5} });
+	auto player = scene_.instantiate("FirstPersonController", TransformComponent{ {0,2,5} , { 180,0,0 }});
+	scene_.instantiate("Camera", CameraComponent{ player });
   
 	/*scene_.instantiate("Model", ModelComponent{ "models/Plane/Plane.obj" }, ColourComponent{ {0.2,0.2,0.2} });*/
 

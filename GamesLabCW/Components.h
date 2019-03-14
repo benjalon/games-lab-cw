@@ -15,18 +15,24 @@ namespace game
 {
 	/* GAME AND ENGINE */
 
-	struct GameStateComponent
-	{
-
-	};
+	struct GameStateComponent {};
+	struct FirstPersonControllerComponent {};
 
 
 	/* CAMERAS AND RENDERING */
 
-	struct CameraComponent
+	struct TransformComponent
 	{
 		Vector3 position;
-		Vector2 orientation{ 180.0, 0.0 };
+		Vector3 rotation;
+		Vector3 scale{ 1.0, 1.0, 1.0 };
+	};
+
+	struct CameraComponent
+	{
+		Entity follow;
+		Vector3 position;
+		Vector2 orientation;
 		double fov = 60.0;
 	};
 
@@ -42,13 +48,6 @@ namespace game
 	{
 		Vector3 colour;
 		double alpha = 1.0;
-	};
-
-	struct TransformComponent
-	{
-		Vector3 position;
-		Vector3 rotation;
-		Vector3 scale{ 1.0, 1.0, 1.0 };
 	};
 
 

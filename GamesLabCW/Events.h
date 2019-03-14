@@ -13,5 +13,5 @@ namespace game::events
 	extern entt::dispatcher dispatcher;
 
 	//Events
-	struct QuitGame{};
+	struct QuitGame {};
 }
