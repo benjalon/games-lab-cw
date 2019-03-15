@@ -21,6 +21,9 @@ namespace game::systems
 
 		//Delta time (seconds since last update)
 		double dt;
+
+		//The registry in use
+		entt::registry<> &registry;
 	};
 
 	//Function representing a system, receiving dt, entity and arbitrary components

@@ -76,6 +76,48 @@ namespace game::systems
 	SYSTEM(KinematicSystem, TransformComponent, KinematicComponent);
 
 
+	//Detects collisions, updating pools and logging events
+	auto CollisionSystem = [](SceneInfo info, auto entity, SphereCollisionComponent &s1, TransformComponent &t1)
+	{
+		//Test against all other potentially colliding entities
+		//This could be improved with spatial partitioning
+		auto view = info.registry.view<SphereCollisionComponent, TransformComponent>();
+		for (auto other : view)
+		{
+			if (other == entity) continue;
+
+			auto &[s2, t2] = view.get<SphereCollisionComponent, TransformComponent>(other);
+
+			//Test if currently colliding (distance between centres less than sum of radii)
+			double d2 = std::pow(t2.position.x - t1.position.x, 2) +
+				std::pow(t2.position.y - t1.position.y, 2) +
+				std::pow(t2.position.z - t1.position.z, 2);
+
+			bool currently_colliding = d2 < std::pow(s1.radius + s2.radius, 2);
+			bool was_colliding = utility::contains(s1.colliding, other);
+
+			//Log entering of collision
+			if (currently_colliding && !was_colliding)
+			{
+				s1.colliding.insert(other);
+				s2.colliding.insert(entity);
+
+				std::cout << "Enter!" << std::endl;
+			}
+
+			//Log leaving of collision
+			if (!currently_colliding && was_colliding)
+			{
+				s1.colliding.erase(other);
+				s2.colliding.erase(entity);
+
+				std::cout << "Leave!" << std::endl;
+			}
+		}
+	};
+	SYSTEM(CollisionSystem, SphereCollisionComponent, TransformComponent);
+
+
 	//Makes a camera follow its target
 	auto MoveCameraSystem = [](SceneInfo info, auto entity, CameraComponent &c)
 	{
