@@ -72,7 +72,7 @@ void game::GameEngine::run()
 	scene_.instantiate("Model", m_water);
 
 	ModelComponent m_room; m_room.model_file = "models/Room/room.obj"; /*m_room.fragment_shader = "shaders/BlueSpirit.frag";*/
-	TransformComponent t_room; t_room.position.y = 20;
+	TransformComponent t_room; t_room.position.y = 10; t_room.scale = { 0.5, 0.5, 0.5 };
 	scene_.instantiate("Model", m_room, t_room, ColourComponent{ {0.2,0.2,0.2} });
 
 	TransformComponent t_sphere; t_sphere.position.y = 5; t_sphere.position.z = -10; t_sphere.scale = { 0.04, 0.04, 0.04 };
