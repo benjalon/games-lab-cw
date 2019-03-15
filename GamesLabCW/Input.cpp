@@ -10,6 +10,7 @@
 namespace game::input
 {
 	Vector2 cursor_pos;
+	bool cursor_centre = false;
 	std::unordered_set<Input> pressed;
 	std::unordered_set<Input> released;
 	std::unordered_set<Input> held;

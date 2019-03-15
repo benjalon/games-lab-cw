@@ -20,6 +20,9 @@ namespace game
 		entt::registry<> registry_;
 
 	public:
+		//Default constructor
+		Scene();
+
 		//Ticks all logic systems in this Scene
 		void tick(double dt);
 
@@ -59,6 +62,13 @@ namespace game
 		void add(Entity e, T component)
 		{
 			registry_.assign_or_replace<T>(e, component);
+		}
+
+		//Gets the given component of the given entity
+		template <typename T>
+		T &get(Entity e)
+		{
+			return registry_.get<T>(e);
 		}
 
 		//Destroys the given entity

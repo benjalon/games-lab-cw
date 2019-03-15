@@ -38,6 +38,13 @@ game::GameEngine::GameEngine(bool fullscreen, bool vsync, bool ground) :
 	glfwSetMouseButtonCallback(window_, mouse_button_callback);
 	glfwSetWindowSizeCallback(window_, window_size_callback);
 
+	//Set event handlers
+	events::dispatcher.sink<events::QuitGame>().connect<&GameEngine::quit>(this);
+
+	//Hide and initialise the cursor
+	glfwSetInputMode(window_, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+	input::cursor_centre = true;
+
 	//Enable v-sync
 	if (vsync) glfwSwapInterval(1);
 
@@ -64,7 +71,8 @@ game::GameEngine::GameEngine(bool fullscreen, bool vsync, bool ground) :
 void game::GameEngine::run()
 {
 	//EXAMPLE Instantiate a camera and models
-	scene_.instantiate("Camera", CameraComponent{ {0,6,5} });
+	auto player = scene_.instantiate("FirstPersonController", TransformComponent{ {0,6,5} , { 180,0,0 }});
+	scene_.instantiate("Camera", CameraComponent{ player });
   
 	/*scene_.instantiate("Model", ModelComponent{ "models/Plane/Plane.obj" }, ColourComponent{ {0.2,0.2,0.2} });*/
 
@@ -135,6 +143,11 @@ void game::GameEngine::draw()
 	glfwSwapBuffers(window_);
 }
 
+void game::GameEngine::quit(const events::QuitGame &)
+{
+	glfwSetWindowShouldClose(window_, true);
+}
+
 void game::GameEngine::key_callback(GLFWwindow *window, int key, int scancode, int action, int mods)
 {
 	if (key != GLFW_KEY_UNKNOWN)
@@ -154,7 +167,34 @@ void game::GameEngine::key_callback(GLFWwindow *window, int key, int scancode, i
 
 void game::GameEngine::cursor_position_callback(GLFWwindow *window, double x, double y)
 {
-	input::cursor_pos = { x, y };
+	//Get current window size
+	int width, height;
+	glfwGetWindowSize(window, &width, &height);
+
+	//Rescales the given xy coordinate to expected window dimensions
+	auto xy = [&](Vector2 &v)
+	{
+		v.x /= width; v.x *= WINDOW_WIDTH;
+		v.y /= height; v.y *= WINDOW_HEIGHT;
+	};
+
+	//Get current cursor position
+	Vector2 pos = { x, y };
+	xy(pos);
+
+	if (input::cursor_centre)
+	{
+		//Set cursor to middle
+		glfwSetCursorPos(window, width / 2.0, height / 2.0);
+
+		//Get offset from middle
+		Vector2 pos_mid;
+		glfwGetCursorPos(window, &pos_mid.x, &pos_mid.y);
+		xy(pos_mid);
+		input::cursor_pos = pos_mid - pos;
+	}
+	else
+		input::cursor_pos = pos;
 }
 
 void game::GameEngine::mouse_button_callback(GLFWwindow *window, int button, int action, int mods)
