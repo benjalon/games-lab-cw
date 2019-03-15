@@ -59,6 +59,14 @@ namespace game::systems
 	SYSTEM(FirstPersonControllerSystem, FirstPersonControllerComponent, TransformComponent, KinematicComponent);
 
 
+	//EXAMPLE Moveable sphere to demo collisions
+	auto MoveSphereSystem = [](auto info, auto entity, auto &, TransformComponent &t)
+	{
+		t.position.z += 2.0 * info.dt * (input::is_held(input::KEY_X) - input::is_held(input::KEY_Z));
+	};
+	SYSTEM(MoveSphereSystem, MoveSphere, TransformComponent);
+
+
 	//Basic kinematic system of calculus of motion
 	auto KinematicSystem = [](auto info, auto entity, auto &t, auto &k)
 	{

@@ -9,6 +9,7 @@
 #include "Systems.h"
 #include "Prototypes.h"
 #include "renderer/Renderer.h"
+#include "Utility.h"
 
 game::Scene::Scene()
 {
@@ -20,6 +21,46 @@ void game::Scene::tick(double dt)
 	//Invoke all systems
 	for (auto &s : systems::system_invokers)
 		s({ *this, dt }, registry_);
+
+	//Detect collisions
+	auto view = registry_.view<SphereCollisionComponent, TransformComponent>();
+	for (auto i = view.begin(); i != view.end(); ++i)
+	{
+		auto &[s1, t1] = view.get<SphereCollisionComponent, TransformComponent>(*i);
+
+		//Test against all remaining entities (avoids duplicate detection)
+		auto j = i;
+		for (++j; j != view.end(); ++j)
+		{
+			auto &[s2, t2] = view.get<SphereCollisionComponent, TransformComponent>(*j);
+
+			//Test if currently colliding (distance between centres less than sum of radii)
+			double d2 = std::pow(t2.position.x - t1.position.x, 2) +
+				std::pow(t2.position.y - t1.position.y, 2) +
+				std::pow(t2.position.z - t1.position.z, 2);
+
+			bool currently_colliding = d2 < std::pow(s1.radius + s2.radius, 2);
+			bool was_colliding = utility::contains(s1.colliding, *j);
+
+			//Log entering of collision
+			if (currently_colliding && !was_colliding)
+			{
+				s1.colliding.insert(*j);
+				s2.colliding.insert(*i);
+
+				std::cout << "Enter!" << std::endl;
+			}
+
+			//Log leaving of collision
+			if (!currently_colliding && was_colliding)
+			{
+				s1.colliding.erase(*j);
+				s2.colliding.erase(*i);
+
+				std::cout << "Leave!" << std::endl;
+			}
+		}
+	}
 }
 
 void game::Scene::draw()

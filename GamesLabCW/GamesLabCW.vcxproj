@@ -37,6 +37,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />
+    <None Include="models\sphere.nff" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

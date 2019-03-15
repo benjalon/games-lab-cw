@@ -6,6 +6,7 @@
 #pragma once
 
 #include <string>
+#include <unordered_set>
 
 #include "GameEngine.h"
 #include "Vector2.h"
@@ -84,4 +85,12 @@ namespace game
 		Vector3 velocity;
 		Vector3 acceleration;
 	};
+
+	struct SphereCollisionComponent
+	{
+		double radius;
+		std::unordered_set<Entity> colliding;
+	};
+
+	struct MoveSphere {};
 }

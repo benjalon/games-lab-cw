@@ -62,6 +62,7 @@ game::GameEngine::GameEngine(bool fullscreen, bool vsync, bool ground) :
 	renderer::load("models/Room/room.obj");
 	renderer::load("models/Water/water.obj");
 	renderer::load("models/Animation/mannequin.fbx");
+	renderer::load("models/sphere.nff");
 	renderer::finalise();
 
 	//Remove 'loading' from title
@@ -73,6 +74,12 @@ void game::GameEngine::run()
 	//EXAMPLE Instantiate a camera and models
 	auto player = scene_.instantiate("FirstPersonController", TransformComponent{ {0,2,5} , { 180,0,0 }});
 	scene_.instantiate("Camera", CameraComponent{ player });
+
+	auto s1 = scene_.instantiate("Model", ModelComponent{ "models/sphere.nff" }, ColourComponent{ {0.0,1.0,0.0} });
+	auto s2 = scene_.instantiate("Model", ModelComponent{ "models/sphere.nff" }, ColourComponent{ {0.0,1.0,0.0} }, TransformComponent{ {0,0,5} });
+	scene_.add(s1, SphereCollisionComponent{ 1.0 });
+	scene_.add(s2, SphereCollisionComponent{ 1.0 });
+	scene_.add(s2, MoveSphere());
   
 	/*scene_.instantiate("Model", ModelComponent{ "models/Plane/Plane.obj" }, ColourComponent{ {0.2,0.2,0.2} });*/
 
