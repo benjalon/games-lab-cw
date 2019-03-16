@@ -104,7 +104,7 @@ namespace game::systems
 			return;
 		}
 
-		/*static double t = 0;
+		static double t = 0;
 		t += info.dt;
 
 		std::vector<glm::mat4> Transforms;
@@ -117,7 +117,7 @@ namespace game::systems
 			glUniformMatrix4fv(
 				glGetUniformLocation(shader, "gBones[70]"),
 				1, TRUE, glm::value_ptr(Transforms[i]));
-		}*/
+		}
 	};
 	SYSTEM(AnimationSystem, ModelComponent);
 }

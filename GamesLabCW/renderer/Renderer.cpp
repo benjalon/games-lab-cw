@@ -636,7 +636,7 @@ namespace game::renderer
 		float TimeInTicks = TimeInSeconds * TicksPerSecond;
 		float AnimationTime = fmod(TimeInTicks, animation.scene->mAnimations[0]->mDuration);
 
-		ReadNodeHierarchy(AnimationTime, animation.scene, animation.scene->mRootNode, Identity);
+		ReadNodeHierarchy(AnimationTime, animation.scene, animation.scene->mRootNode, Identity); 
 
 		Transforms.resize(m_NumBones);
 
