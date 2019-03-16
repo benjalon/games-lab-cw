@@ -26,15 +26,15 @@
 namespace game::renderer
 {
 	//Returns the (potentially cached) shader using the given paramaters
-	GLuint get_shader(bool textured, bool normal_mapped, size_t n_ambient, size_t n_directional, size_t n_point,
+	GLuint get_shader(bool textured, bool normal_mapped, bool has_bones, size_t n_ambient, size_t n_directional, size_t n_point,
 		std::string vertex_shader, std::string fragment_shader)
 	{
-		using Args = std::tuple<bool, bool, size_t, size_t, size_t, std::string, std::string>;
+		using Args = std::tuple<bool, bool, bool, size_t, size_t, size_t, std::string, std::string>;
 
 		//Cache of parametrised shaders
 		static std::map<Args, Shader> shaders;
 
-		Args args = std::make_tuple(textured, normal_mapped, n_ambient, n_directional, n_point,
+		Args args = std::make_tuple(textured, normal_mapped, has_bones, n_ambient, n_directional, n_point,
 			vertex_shader, fragment_shader);
 
 		//If the requested shader already exists, return it
@@ -51,6 +51,7 @@ namespace game::renderer
 
 			if (textured) define(f, "TEXTURED");
 			if (normal_mapped) define(f, "NORMAL_MAPPED");
+			if (has_bones) define(v, "HAS_BONES");
 			define(f, "N_AMBIENT " + std::to_string(n_ambient));
 			define(f, "N_DIRECTIONAL " + std::to_string(n_directional));
 			define(f, "N_POINT " + std::to_string(n_point));
@@ -657,7 +658,7 @@ namespace game::renderer
 		glDepthFunc(GL_LESS);
 	}
 
-	void render_model(CameraComponent camera, ModelComponent model, ColourComponent c, TransformComponent t,
+	void render_model(CameraComponent camera, ModelComponent &model, ColourComponent c, TransformComponent t,
 		size_t n_ambient, AmbientLightComponent *ambients, size_t n_directional, DirectionalLightComponent *directionals,
 		size_t n_point, PointLightComponent *points)
 	{
@@ -670,7 +671,7 @@ namespace game::renderer
 		const Mesh &mesh = it->second;
 
 		//Determine and use appropriate shader
-		GLuint shader = get_shader(mesh.textured, mesh.normal_mapped, n_ambient, n_directional, n_point,
+		GLuint shader = get_shader(mesh.textured, mesh.normal_mapped, mesh.hasBones, n_ambient, n_directional, n_point,
 			model.vertex_shader, model.fragment_shader);
 		glUseProgram(shader);
 

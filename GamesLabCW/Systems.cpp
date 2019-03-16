@@ -104,10 +104,9 @@ namespace game::systems
 			return;
 		}
 
-		static double t = 0;
+		/*static double t = 0;
 		t += info.dt;
 
-		// if boned
 		std::vector<glm::mat4> Transforms;
 		GLuint shader;
 		renderer::BoneTransform(t, Transforms, shader, m.model_file);
@@ -115,14 +114,10 @@ namespace game::systems
 		for (unsigned int i = 0; i < Transforms.size(); i++) {
 			assert(i < 100);
 
-			if (i == 50) {
-				int j = 0;
-			}
-
 			glUniformMatrix4fv(
 				glGetUniformLocation(shader, "gBones[70]"),
 				1, TRUE, glm::value_ptr(Transforms[i]));
-		}
+		}*/
 	};
 	SYSTEM(AnimationSystem, ModelComponent);
 }

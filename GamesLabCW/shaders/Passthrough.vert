@@ -1,3 +1,5 @@
+//HAS_BONES 
+
 uniform mat4 projectionMatrix;
 uniform mat4 viewMatrix;
 uniform mat4 modelMatrix;
@@ -18,16 +20,22 @@ out mat3 v_mTBN;
 
 void main()
 {
-//	// Multiply each bone transformation by the particular weight
-//	// and combine them. 
-//   	mat4 BoneTransform = gBones[ BoneIDs[0] ] * Weights[0];
-//	BoneTransform += gBones[ BoneIDs[1] ] * Weights[1];
-//    BoneTransform += gBones[ BoneIDs[2] ] * Weights[2];
-//    BoneTransform += gBones[ BoneIDs[3] ] * Weights[3];
-//
-//	// Transformed vertex position 
-//	vec4 tPos = BoneTransform * vec4(in_Position, 1.0);
-//
+	#ifdef HAS_BONES
+		// Multiply each bone transformation by the particular weight
+		// and combine them. 
+	   	mat4 BoneTransform = gBones[ BoneIDs[0] ] * Weights[0];
+		BoneTransform += gBones[ BoneIDs[1] ] * Weights[1];
+	    BoneTransform += gBones[ BoneIDs[2] ] * Weights[2];
+	    BoneTransform += gBones[ BoneIDs[3] ] * Weights[3];
+	
+		// Transformed vertex position 
+		vec4 tPos = BoneTransform * vec4(in_Position, 1.0);
+		gl_Position = projectionMatrix * viewMatrix * modelMatrix * tPos;
+	#else
+		// Calculate the MVP position of this vertex for drawing
+		gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4( in_Position, 1.0 );
+	#endif
+
     v_mModel = modelMatrix;
 	v_vPosition = (modelMatrix * vec4(in_Position, 1.0)).xyz;
 	v_vTexcoord = in_TextureCoord;
@@ -42,6 +50,4 @@ void main()
 	
     v_mTBN = transpose(mat3(tangent, bitangent, v_vNormal));  
 
-	// Calculate the MVP position of this vertex for drawing
-	gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4( in_Position, 1.0 );
 }
