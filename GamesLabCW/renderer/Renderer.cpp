@@ -72,9 +72,6 @@ namespace game::renderer
 	//Global vertex buffer object
 	VBO vbo;
 
-	//Bone buffer object
-	GLuint bonebo;
-
 	//Global textures collection
 	std::vector<Texture> textures;
 	std::vector<Texture> normalMaps;
@@ -325,6 +322,8 @@ namespace game::renderer
 
 						// Insert bone data for particular vertex ID. A maximum of 4 bones can influence the same vertex. 
 						bones[VertexID].AddBoneData(BoneIndex, Weight);
+						vbo.add_data(&BoneIndex, sizeof(BoneIndex));
+						vbo.add_data(&Weight, sizeof(Weight));
 					}
 				}
 			}
@@ -422,19 +421,13 @@ namespace game::renderer
 		//Tangent vectors
 		glEnableVertexAttribArray(3);
 		glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(aiVector3D) + sizeof(aiVector2D), (void*)(2 * sizeof(aiVector3D) + sizeof(aiVector2D)));
-
-
-		// This is probably wrong
-		//Generate and bind VAO
-		glGenVertexArrays(1, &bonebo);
-		glBindVertexArray(bonebo);
-
-		//Bones
-		glEnableVertexAttribArray(4);
-		glVertexAttribPointer(0, 4, GL_INT, GL_FALSE, sizeof(VertexBoneData), (void*)0);
-		//Bone weights
-		glEnableVertexAttribArray(5);
-		glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(VertexBoneData), (void*)16);
+		
+		////Bones
+		//glEnableVertexAttribArray(4);
+		//glVertexAttribPointer(0, 4, GL_INT, GL_FALSE, 3 * sizeof(aiVector3D) + sizeof(aiVector2D) + 4 * sizeof(int) + 4 * sizeof(float), (void*)(3 * sizeof(aiVector3D) + sizeof(aiVector2D)));
+		////Bone weights
+		//glEnableVertexAttribArray(5);
+		//glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 3 * sizeof(aiVector3D) + sizeof(aiVector2D) + 4 * sizeof(int) + 4 * sizeof(float), (void*)(3 * sizeof(aiVector3D) + sizeof(aiVector2D) + 4 * sizeof(int)));
 
 		bones.clear();
 	}
@@ -624,7 +617,7 @@ namespace game::renderer
 		}
 	}
 
-	void BoneTransform(float TimeInSeconds, std::vector<glm::mat4>& Transforms, GLuint& shader, std::string file)
+	void BoneTransform(float TimeInSeconds, std::vector<glm::mat4>& Transforms, std::string file)
 	{
 		glm::mat4 Identity = glm::mat4(1);
 
@@ -636,7 +629,7 @@ namespace game::renderer
 		float TimeInTicks = TimeInSeconds * TicksPerSecond;
 		float AnimationTime = fmod(TimeInTicks, animation.scene->mAnimations[0]->mDuration);
 
-		ReadNodeHierarchy(AnimationTime, animation.scene, animation.scene->mRootNode, Identity); 
+		ReadNodeHierarchy(AnimationTime, animation.scene, animation.scene->mRootNode, Identity);
 
 		Transforms.resize(m_NumBones);
 
@@ -645,7 +638,13 @@ namespace game::renderer
 			Transforms[i] = m_BoneInfo[i].FinalTransformation;
 		}
 
-		shader = animation.shader;
+		for (unsigned int i = 0; i < Transforms.size(); i++) {
+			assert(i < 100);
+
+			glUniformMatrix4fv(
+				glGetUniformLocation(animation.shader, "gBones[70]"),
+				1, TRUE, glm::value_ptr(Transforms[i]));
+		}
 	}
 
 	void init()

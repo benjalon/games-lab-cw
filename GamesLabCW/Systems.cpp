@@ -104,20 +104,20 @@ namespace game::systems
 			return;
 		}
 
+		static double timeSinceLastUpdate;
 		static double t = 0;
 		t += info.dt;
 
-		std::vector<glm::mat4> Transforms;
-		GLuint shader;
-		renderer::BoneTransform(t, Transforms, shader, m.model_file);
-
-		for (unsigned int i = 0; i < Transforms.size(); i++) {
-			assert(i < 100);
-
-			glUniformMatrix4fv(
-				glGetUniformLocation(shader, "gBones[70]"),
-				1, TRUE, glm::value_ptr(Transforms[i]));
+		if (timeSinceLastUpdate < 1)
+		{
+			timeSinceLastUpdate += info.dt;
+			return;
 		}
+
+		timeSinceLastUpdate = 0;
+
+		std::vector<glm::mat4> Transforms;
+		renderer::BoneTransform(t, Transforms, m.model_file);
 	};
 	SYSTEM(AnimationSystem, ModelComponent);
 }
