@@ -100,8 +100,6 @@ namespace game::renderer
 	};
 	std::unordered_map<std::string, BoneAnimation> animations;
 
-	std::unordered_map<std::string, BoneAnimation> GetAnimations() { return animations; }
-
 	struct VertexBoneData
 	{
 		unsigned int IDs[4]; //!< An array of 4 bone Ids that influence a single vertex.
@@ -215,8 +213,6 @@ namespace game::renderer
 		std::cout << (scene ? "Loaded model " : "Could not load model ") << file << std::endl;
 		if (!scene) return;
 
-		m_GlobalInverseTransform = Mat4AssimpToGLM(scene->mRootNode->mTransformation);
-		m_GlobalInverseTransform = glm::inverse(m_GlobalInverseTransform);
 
 		//Create new model
 		Mesh &m = meshes.emplace(file, Mesh()).first->second;
@@ -226,6 +222,9 @@ namespace game::renderer
 		size_t totalVertices = 0;
 		size_t currentVertices = 0;
 		size_t prevTotal;
+
+		m_GlobalInverseTransform = Mat4AssimpToGLM(scene->mRootNode->mTransformation);
+		m_GlobalInverseTransform = glm::inverse(m_GlobalInverseTransform);
 
 		for (size_t i = 0; i < scene->mNumMeshes; i++)
 		{
@@ -670,18 +669,19 @@ namespace game::renderer
 		if (it == meshes.end()) return;
 		const Mesh &mesh = it->second;
 
-		model.hasBones = mesh.hasBones;
-
 		//Determine and use appropriate shader
 		GLuint shader = get_shader(mesh.textured, mesh.normal_mapped, n_ambient, n_directional, n_point,
 			model.vertex_shader, model.fragment_shader);
 		glUseProgram(shader);
 
-		// if boned
-		auto animationIt = animations.find(model.model_file);
-		if (animationIt == animations.end()) return;
-		BoneAnimation &animation = animationIt->second;
-		animation.shader = shader;
+		if (mesh.hasBones)
+		{
+			model.hasBones = true;
+			auto animationIt = animations.find(model.model_file);
+			if (animationIt == animations.end()) return;
+			BoneAnimation &animation = animationIt->second;
+			animation.shader = shader;
+		}
 
 		//Calculate MVP matrices
 		glm::mat4 p = proj_matrix(camera);

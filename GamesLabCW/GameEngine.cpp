@@ -55,7 +55,7 @@ game::GameEngine::GameEngine(bool fullscreen, bool vsync, bool ground) :
 	renderer::load("models/Room/room.obj");
 	//renderer::load("models/Water/water.obj");
 	//renderer::load("models/Animation/mannequin.fbx");
-	/*renderer::load("models/Minotaur/Minotaur@Jump.fbx");*/
+	renderer::load("models/Minotaur/Minotaur@Jump.fbx");
 	renderer::finalise();
 
 	//Remove 'loading' from title
@@ -84,9 +84,9 @@ void game::GameEngine::run()
 	//scene_.instantiate("Model", m_torus, t_torus);
  // 
 	//scene_.instantiate("Model", ModelComponent{ "models/Animation/mannequin.fbx" });
-/*
+
 	ModelComponent m_minotaur; m_minotaur.model_file = "models/Minotaur/Minotaur@Jump.fbx"; m_minotaur.fragment_shader = "shaders/BlueSpirit.frag";
-	scene_.instantiate("Model", m_minotaur);*/
+	scene_.instantiate("Model", m_minotaur);
 
 	scene_.instantiate("AmbientLight", AmbientLightComponent{ {1, 147.0 / 255.0, 41.0 / 255.0}, 0.01 });
 	scene_.instantiate("DirectionalLight", DirectionalLightComponent{ {1, 1, 1}, 1, {2,1,1} });
