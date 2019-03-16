@@ -28,6 +28,7 @@ namespace game
 		double shininess = 32.0;
 		std::string vertex_shader;
 		std::string fragment_shader;
+		bool hasBones = false;
 	};
 
 	struct ColourComponent

@@ -87,6 +87,7 @@ namespace game::renderer
 		size_t num_materials;
 		bool textured;
 		bool normal_mapped;
+		bool hasBones;
 	};
 
 	//Dictionary of meshes
@@ -191,20 +192,6 @@ namespace game::renderer
 		return dir;
 	}
 
-	// Recursively copy nodes
-	aiNode* recursivelyCopyNode(const aiNode* node)
-	{
-		aiNode* n = new aiNode(*node);
-		n->mChildren = new aiNode*[node->mNumChildren];
-
-		// Do the same for all the node's children. 
-		for (unsigned i = 0; i < node->mNumChildren; i++) {
-			n->mChildren[i] = recursivelyCopyNode(node->mChildren[i]);
-		}
-
-		return n;
-	}
-
 	void load(std::string file)
 	{
 		//Ensure model hasn't already been loaded
@@ -215,7 +202,7 @@ namespace game::renderer
 			vbo.create();
 
 		//Load model from file
-		Assimp::Importer imp;
+		static Assimp::Importer imp;
 		const aiScene *scene = imp.ReadFile(file,
 			aiProcess_CalcTangentSpace |
 			aiProcess_Triangulate |
@@ -286,32 +273,12 @@ namespace game::renderer
 
 			if (mesh->HasBones())
 			{
-				//m.boned = true;
+				m.hasBones = true;
 
 				BoneAnimation &b = animations.emplace(file, BoneAnimation()).first->second;
 
 				// Copy all the data from the scene 
-				aiScene* s = new aiScene(*scene);
-
-				// Horrible copy code
-				s->mAnimations = new aiAnimation*[scene->mNumAnimations];
-				for (int i = 0; i < scene->mNumAnimations; i++)
-				{
-					s->mAnimations[i] = new aiAnimation(*scene->mAnimations[i]);
-
-					s->mAnimations[i]->mChannels = new aiNodeAnim*[scene->mAnimations[i]->mNumChannels];
-					for (int j = 0; j < scene->mAnimations[i]->mNumChannels; j++)
-					{
-						s->mAnimations[i]->mChannels[j] = new aiNodeAnim(*scene->mAnimations[i]->mChannels[j]);
-
-						s->mAnimations[i]->mChannels[j]->mPositionKeys = new aiVectorKey(*scene->mAnimations[i]->mChannels[j]->mPositionKeys);
-						s->mAnimations[i]->mChannels[j]->mRotationKeys = new aiQuatKey(*scene->mAnimations[i]->mChannels[j]->mRotationKeys);
-						s->mAnimations[i]->mChannels[j]->mScalingKeys = new aiVectorKey(*scene->mAnimations[i]->mChannels[j]->mScalingKeys);
-					}
-				}
-
-				s->mRootNode = recursivelyCopyNode(scene->mRootNode);
-				b.scene = s;
+				b.scene = scene;
 				// End of horrible copy code
 
 				bones.resize(totalVertices);
@@ -584,9 +551,18 @@ namespace game::renderer
 		Out = Start + Factor * Delta;
 	}
 
+	glm::mat4 InitTranslationTransform(float x, float y, float z)
+	{
+		glm::mat4 m = glm::mat4(1);
+		m[0][3] = x;
+		m[1][3] = y;
+		m[2][3] = z;
+		return m;
+	}
+
 	void ReadNodeHierarchy(float AnimationTime, const aiScene* scene, const aiNode* pNode, const glm::mat4& ParentTransform)
 	{
-		glm::mat4 IdentityTest = glm::mat4();
+		glm::mat4 IdentityTest = glm::mat4(1);
 
 		// Obtain the name of the current node 
 		std::string NodeName(pNode->mName.data);
@@ -625,8 +601,9 @@ namespace game::renderer
 			// Interpolate translation and generate translation transformation matrix
 			aiVector3D Translation;
 			CalcInterpolatedTranslation(Translation, AnimationTime, pNodeAnim);
-			glm::mat4 TranslationM;
-			TranslationM = glm::translate(glm::vec3(Translation.x, Translation.y, Translation.z));
+
+
+			glm::mat4 TranslationM = InitTranslationTransform(Translation.x, Translation.y, Translation.z);
 
 			// Combine the above transformations
 			NodeTransformation = TranslationM * RotationM;/* *ScalingM;*/
@@ -649,7 +626,7 @@ namespace game::renderer
 
 	void BoneTransform(float TimeInSeconds, std::vector<glm::mat4>& Transforms, GLuint& shader, std::string file)
 	{
-		glm::mat4 Identity = glm::mat4();
+		glm::mat4 Identity = glm::mat4(1);
 
 		auto it = renderer::animations.find(file);
 		if (it == renderer::animations.end()) return;
@@ -692,6 +669,8 @@ namespace game::renderer
 		auto it = meshes.find(model.model_file);
 		if (it == meshes.end()) return;
 		const Mesh &mesh = it->second;
+
+		model.hasBones = mesh.hasBones;
 
 		//Determine and use appropriate shader
 		GLuint shader = get_shader(mesh.textured, mesh.normal_mapped, n_ambient, n_directional, n_point,

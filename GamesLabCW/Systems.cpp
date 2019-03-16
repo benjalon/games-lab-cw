@@ -99,13 +99,25 @@ namespace game::systems
 	//Animation system
 	auto AnimationSystem = [](auto info, auto entity, auto &m)
 	{
+		if (!m.hasBones)
+		{
+			return;
+		}
+
+		static double t = 0;
+		t += info.dt;
+
 		// if boned
 		std::vector<glm::mat4> Transforms;
 		GLuint shader;
-		renderer::BoneTransform(info.dt, Transforms, shader, m.model_file);
+		renderer::BoneTransform(t, Transforms, shader, m.model_file);
 
 		for (unsigned int i = 0; i < Transforms.size(); i++) {
 			assert(i < 100);
+
+			if (i == 50) {
+				int j = 0;
+			}
 
 			glUniformMatrix4fv(
 				glGetUniformLocation(shader, "gBones[70]"),
