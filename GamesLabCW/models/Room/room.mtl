@@ -1,5 +1,5 @@
 # Blender MTL File: 'room.blend'
-# Material Count: 8
+# Material Count: 9
 
 newmtl Material
 Ns 96.078431
@@ -10,7 +10,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd RockTile\RockTile1clr.jpg
+map_Kd StoneWall_02.png
 
 newmtl Material_NONE
 Ns 96.078431
@@ -22,7 +22,7 @@ Ni 1.000000
 d 1.000000
 illum 2
 
-newmtl Material_StoneWall_02.png
+newmtl Material_RockTile1clr.jpg
 Ns 96.078431
 Ka 1.000000 1.000000 1.000000
 Kd 0.640000 0.640000 0.640000
@@ -31,7 +31,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd StoneWall_02.png
+map_Kd RockTile\RockTile1clr.jpg
 
 newmtl None
 Ns 0
@@ -40,7 +40,7 @@ Kd 0.8 0.8 0.8
 Ks 0.8 0.8 0.8
 d 1
 illum 2
-map_Kd kamenje 1.tga
+map_Kd tiedyefur256.tga
 
 newmtl None_DarkBookmatchedFree.jpg
 Ns 0
@@ -69,11 +69,20 @@ d 1
 illum 2
 map_Kd Granite\granite_01_dif.tga
 
-newmtl None_tiedyefur256.tga
+newmtl None_kamenje_1.tga
 Ns 0
 Ka 0.000000 0.000000 0.000000
 Kd 0.8 0.8 0.8
 Ks 0.8 0.8 0.8
 d 1
 illum 2
-map_Kd tiedyefur256.tga
+map_Kd kamenje 1.tga
+
+newmtl None_plasmaring3.tga
+Ns 0
+Ka 0.000000 0.000000 0.000000
+Kd 0.8 0.8 0.8
+Ks 0.8 0.8 0.8
+d 1
+illum 2
+map_Kd plasmaring3.tga
