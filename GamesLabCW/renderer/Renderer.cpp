@@ -322,8 +322,6 @@ namespace game::renderer
 
 						// Insert bone data for particular vertex ID. A maximum of 4 bones can influence the same vertex. 
 						bones[VertexID].AddBoneData(BoneIndex, Weight);
-						vbo.add_data(&BoneIndex, sizeof(BoneIndex));
-						vbo.add_data(&Weight, sizeof(Weight));
 					}
 				}
 			}
@@ -404,6 +402,8 @@ namespace game::renderer
 		//Generate and bind VAO
 		glGenVertexArrays(1, &vao);
 		glBindVertexArray(vao);
+
+		//vbo.add_data(&bones[0], sizeof(bones[0]) * bones.size());
 
 		//Bind and upload VBO
 		vbo.bind();
