@@ -76,31 +76,47 @@ namespace game::systems
 	SYSTEM(KinematicSystem, TransformComponent, KinematicComponent);
 
 
-	//Detects collisions, updating pools and logging events
-	auto CollisionSystem = [](SceneInfo info, auto entity, SphereCollisionComponent &s1, TransformComponent &t1)
+	//Updates the spatial partitioning grid
+	auto SpatialGridSystem = [](SceneInfo info, auto entity, TransformComponent &t)
 	{
-		//Test against all other potentially colliding entities
-		//This could be improved with spatial partitioning
-		auto view = info.registry.view<SphereCollisionComponent, TransformComponent>();
-		for (auto other : view)
+		auto i = info.scene.spatial_grid.update(t.position, entity, t.last_index);
+		t.last_index = i;
+	};
+	SYSTEM(SpatialGridSystem, TransformComponent);
+
+
+	//Detects collisions, updating pools and logging events
+	auto CollisionSystem = [](SceneInfo info, auto entity, CollisionComponent &c1, TransformComponent &t1)
+	{
+		//Get set of all nearby entities
+		auto [begin, end] = info.scene.spatial_grid.get_cells_near(t1.position);
+
+		//Test against potentially colliding entities
+		for (auto it = begin; it != end; ++it)
 		{
+			Entity other = *it;
+
+			//Ignore self
 			if (other == entity) continue;
 
-			auto &[s2, t2] = view.get<SphereCollisionComponent, TransformComponent>(other);
+			//Ignore if not collidable
+			if (!info.registry.has<CollisionComponent>(other)) continue;
+
+			auto &[c2, t2] = info.registry.get<CollisionComponent, TransformComponent>(other);
 
 			//Test if currently colliding (distance between centres less than sum of radii)
 			double d2 = std::pow(t2.position.x - t1.position.x, 2) +
 				std::pow(t2.position.y - t1.position.y, 2) +
 				std::pow(t2.position.z - t1.position.z, 2);
 
-			bool currently_colliding = d2 < std::pow(s1.radius + s2.radius, 2);
-			bool was_colliding = utility::contains(s1.colliding, other);
+			bool currently_colliding = d2 < std::pow(c1.radius + c2.radius, 2);
+			bool was_colliding = utility::contains(c1.colliding, other);
 
 			//Log entering of collision
 			if (currently_colliding && !was_colliding)
 			{
-				s1.colliding.insert(other);
-				s2.colliding.insert(entity);
+				c1.colliding.insert(other);
+				c2.colliding.insert(entity);
 
 				std::cout << "Enter!" << std::endl;
 			}
@@ -108,14 +124,14 @@ namespace game::systems
 			//Log leaving of collision
 			if (!currently_colliding && was_colliding)
 			{
-				s1.colliding.erase(other);
-				s2.colliding.erase(entity);
+				c1.colliding.erase(other);
+				c2.colliding.erase(entity);
 
 				std::cout << "Leave!" << std::endl;
 			}
 		}
 	};
-	SYSTEM(CollisionSystem, SphereCollisionComponent, TransformComponent);
+	SYSTEM(CollisionSystem, CollisionComponent, TransformComponent);
 
 
 	//Makes a camera follow its target

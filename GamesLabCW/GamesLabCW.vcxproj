@@ -51,6 +51,7 @@
     <ClInclude Include="renderer\Texture.h" />
     <ClInclude Include="renderer\VBO.h" />
     <ClInclude Include="Scene.h" />
+    <ClInclude Include="SpatialGrid.h" />
     <ClInclude Include="Systems.h" />
     <ClInclude Include="Utility.h" />
     <ClInclude Include="Vector2.h" />

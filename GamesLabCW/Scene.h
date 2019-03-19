@@ -8,6 +8,8 @@
 
 #include <entt/entt.hpp>
 
+#include "SpatialGrid.h"
+
 namespace game
 {
 	//Numerical type representing individual entities
@@ -20,6 +22,9 @@ namespace game
 		entt::registry<> registry_;
 
 	public:
+		//Spatial partitioning grid of entities
+		SpatialGrid<Entity> spatial_grid;
+
 		//Default constructor
 		Scene();
 

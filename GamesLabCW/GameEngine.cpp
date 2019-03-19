@@ -77,8 +77,8 @@ void game::GameEngine::run()
 
 	auto s1 = scene_.instantiate("Model", ModelComponent{ "models/sphere.nff" }, ColourComponent{ {0.0,1.0,0.0} });
 	auto s2 = scene_.instantiate("Model", ModelComponent{ "models/sphere.nff" }, ColourComponent{ {0.0,1.0,0.0} }, TransformComponent{ {0,0,5} });
-	scene_.add(s1, SphereCollisionComponent{ 1.0 });
-	scene_.add(s2, SphereCollisionComponent{ 1.0 });
+	scene_.add(s1, CollisionComponent{ 1.0 });
+	scene_.add(s2, CollisionComponent{ 1.0 });
 	scene_.add(s2, MoveSphere());
   
 	/*scene_.instantiate("Model", ModelComponent{ "models/Plane/Plane.obj" }, ColourComponent{ {0.2,0.2,0.2} });*/

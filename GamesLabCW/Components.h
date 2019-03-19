@@ -11,6 +11,7 @@
 #include "GameEngine.h"
 #include "Vector2.h"
 #include "Vector3.h"
+#include "SpatialGrid.h"
 
 namespace game
 {
@@ -27,6 +28,8 @@ namespace game
 		Vector3 position;
 		Vector3 rotation;
 		Vector3 scale{ 1.0, 1.0, 1.0 };
+
+		SpatialGrid<Entity>::index_type last_index;
 	};
 
 	struct CameraComponent
@@ -86,7 +89,7 @@ namespace game
 		Vector3 acceleration;
 	};
 
-	struct SphereCollisionComponent
+	struct CollisionComponent
 	{
 		double radius;
 		std::unordered_set<Entity> colliding;
