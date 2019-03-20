@@ -38,8 +38,8 @@ void game::Scene::draw()
 
 	//Render all models in the scene for each camera
 	registry_.view<CameraComponent>().each([&](auto, auto &cam) {
-		registry_.view<ModelComponent, CubemapComponent, ColourComponent, TransformComponent>().each([&](auto, auto &m, auto &cm, auto &c, auto &t) {
-			renderer::render_model(cam, m, cm, c, t,
+		registry_.view<ModelComponent, ColourComponent, TransformComponent>().each([&](auto, auto &m, auto &c, auto &t) {
+			renderer::render_model(cam, m, c, t,
 				n_a, a, n_d, d, n_p, p);
 		});
 	});

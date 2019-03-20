@@ -10,17 +10,20 @@
 
 #include <iostream>
 
-game::Cubemap::Cubemap(std::string filenames[6])
+game::Cubemap::Cubemap(std::string modelPath, std::string texturePaths[6], bool skybox)
 {
+	path = modelPath;
+	Cubemap::skybox = skybox;
+
 	//Load cubemap from file
 	handle = SOIL_load_OGL_cubemap
 	(
-		filenames[0].c_str(),
-		filenames[1].c_str(),
-		filenames[2].c_str(),
-		filenames[3].c_str(),
-		filenames[4].c_str(),
-		filenames[5].c_str(),
+		texturePaths[0].c_str(),
+		texturePaths[1].c_str(),
+		texturePaths[2].c_str(),
+		texturePaths[3].c_str(),
+		texturePaths[4].c_str(),
+		texturePaths[5].c_str(),
 		SOIL_LOAD_RGB,
 		SOIL_CREATE_NEW_ID,
 		SOIL_FLAG_MIPMAPS
