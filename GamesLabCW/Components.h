@@ -44,6 +44,11 @@ namespace game
 		std::string fragment_shader;
 	};
 
+	struct CubemapComponent
+	{
+		unsigned int handle;
+	};
+
 	struct ColourComponent
 	{
 		Vector3 colour;

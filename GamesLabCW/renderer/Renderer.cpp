@@ -300,7 +300,7 @@ namespace game::renderer
 		glDepthFunc(GL_LESS);
 	}
 
-	void render_model(CameraComponent camera, ModelComponent model, ColourComponent c, TransformComponent t,
+	void render_model(CameraComponent camera, ModelComponent model, CubemapComponent cm, ColourComponent c, TransformComponent t,
 		size_t n_ambient, AmbientLightComponent *ambients, size_t n_directional, DirectionalLightComponent *directionals,
 		size_t n_point, PointLightComponent *points)
 	{
@@ -340,6 +340,11 @@ namespace game::renderer
 			glGetUniformLocation(shader, "modelMatrix"),
 			1, GL_FALSE, glm::value_ptr(m)
 		);
+
+		//Provide cubemap component (reflections, skyboxes etc.)
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, cm.handle);
+		glUniform1i(glGetUniformLocation(shader, "cubeSampler"), 0);
 
 		//Provide flat colour component
 		glUniform4f(

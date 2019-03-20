@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\glad\src\glad.c" />
+    <ClCompile Include="renderer\Cubemap.cpp" />
     <ClCompile Include="Events.cpp" />
     <ClCompile Include="GameEngine.cpp" />
     <ClCompile Include="Input.cpp" />
@@ -38,9 +39,11 @@
   <ItemGroup>
     <None Include="cpp.hint" />
     <None Include="packages.config" />
+    <None Include="shaders\Skybox.frag" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Components.h" />
+    <ClInclude Include="renderer\Cubemap.h" />
     <ClInclude Include="Events.h" />
     <ClInclude Include="GameEngine.h" />
     <ClInclude Include="Input.h" />
