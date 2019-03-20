@@ -89,7 +89,7 @@ void game::GameEngine::run()
 	Cubemap cm(paths);
 	CubemapComponent cm_skybox; cm_skybox.handle = cm.handle;
 
-	ModelComponent m_skybox; m_skybox.model_file = "models/Skybox/skybox.obj"; m_skybox.fragment_shader = "shaders/Skybox.frag";
+	ModelComponent m_skybox; m_skybox.model_file = "models/Skybox/skybox.obj"; m_skybox.vertex_shader = "shaders/Skybox.vert"; m_skybox.fragment_shader = "shaders/Skybox.frag";
 	scene_.instantiate("Model", m_skybox, cm_skybox);
 
 	scene_.instantiate("AmbientLight", AmbientLightComponent{ {1, 147.0 / 255.0, 41.0 / 255.0}, 0.01 });

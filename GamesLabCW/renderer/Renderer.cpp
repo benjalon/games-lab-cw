@@ -311,7 +311,7 @@ namespace game::renderer
 		auto it = meshes.find(model.model_file);
 		if (it == meshes.end()) return;
 		const Mesh &mesh = it->second;
-
+		
 		//Determine and use appropriate shader
 		GLuint shader = get_shader(mesh.textured, mesh.normal_mapped, n_ambient, n_directional, n_point,
 			model.vertex_shader, model.fragment_shader);
