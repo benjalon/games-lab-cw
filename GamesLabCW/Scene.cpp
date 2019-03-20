@@ -21,6 +21,9 @@ void game::Scene::tick(double dt)
 	//Invoke all systems
 	for (auto &s : systems::system_invokers)
 		s({ *this, dt, registry_ }, registry_);
+
+	//Broadcast all queued events
+	events::dispatcher.update();
 }
 
 void game::Scene::draw()

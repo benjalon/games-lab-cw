@@ -40,6 +40,8 @@ game::GameEngine::GameEngine(bool fullscreen, bool vsync, bool ground) :
 
 	//Set event handlers
 	events::dispatcher.sink<events::QuitGame>().connect<&GameEngine::quit>(this);
+	for (auto &r : events::responses)
+		r->log();
 
 	//Hide and initialise the cursor
 	glfwSetInputMode(window_, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);

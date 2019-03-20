@@ -118,7 +118,7 @@ namespace game::systems
 				c1.colliding.insert(other);
 				c2.colliding.insert(entity);
 
-				std::cout << "Enter!" << std::endl;
+				events::dispatcher.enqueue<events::EnterCollision>(entity, other);
 			}
 
 			//Log leaving of collision
@@ -127,7 +127,7 @@ namespace game::systems
 				c1.colliding.erase(other);
 				c2.colliding.erase(entity);
 
-				std::cout << "Leave!" << std::endl;
+				events::dispatcher.enqueue<events::LeaveCollision>(entity, other);
 			}
 		}
 	};
