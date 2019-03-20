@@ -73,15 +73,7 @@ namespace game::systems
 	{
 		TransformComponent &t = info.scene.get<TransformComponent>(c.follow);
 		c.position = t.position;
-
-		// UNDELETE THIS
-		/*c.orientation = { t.rotation.x, t.rotation.y };*/
-		// UNDELETE THIS
-
-		// DELETE THIS
-		c.orientation.x += utility::contains(input::held, input::KEY_Q) ? 0.3 * 2 : 0.0;
-		c.orientation.x += utility::contains(input::held, input::KEY_E) ? -0.3 * 2 : 0.0;
-		// DELETE THIS
+		c.orientation = { t.rotation.x, t.rotation.y };
 	};
 	SYSTEM(MoveCameraSystem, CameraComponent);
 }

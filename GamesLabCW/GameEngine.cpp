@@ -68,6 +68,7 @@ game::GameEngine::GameEngine(bool fullscreen, bool vsync, bool ground) :
 		"models/Skybox/hw_ruins/ruins_ft.tga",
 		"models/Skybox/hw_ruins/ruins_bk.tga" };
 	renderer::load_cubemap("models/Skybox/skybox.obj", paths, true);
+	renderer::load_cubemap("models/Water/water.obj", paths, false);
 
 	renderer::finalise();
 
