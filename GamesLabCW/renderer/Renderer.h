@@ -19,7 +19,10 @@ namespace game::renderer
 		size_t n_point, PointLightComponent *points);
 
 	//Loads the given model
-	void load(std::string file);
+	void load_model(std::string file);
+
+	// Load a cubemap for the specified model
+	void load_cubemap(std::string model_path, std::string paths[6], bool skybox = false);
 
 	//Finalises the loaded models
 	void finalise();
