@@ -297,7 +297,7 @@ namespace game::renderer
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glEnable(GL_DEPTH_TEST);
-		glDepthFunc(GL_LESS);
+		glDepthFunc(GL_LEQUAL);
 	}
 
 	void render_model(CameraComponent camera, ModelComponent model, CubemapComponent cm, ColourComponent c, TransformComponent t,
@@ -319,7 +319,7 @@ namespace game::renderer
 
 		//Calculate MVP matrices
 		glm::mat4 p = proj_matrix(camera);
-		glm::mat4 v = view_matrix(camera);
+		glm::mat4 v = glm::mat3(view_matrix(camera));
 
 		glm::mat4 m = glm::translate(glm::vec3(t.position)) *
 			glm::rotate(R(t.rotation.x), glm::vec3(1, 0, 0)) *

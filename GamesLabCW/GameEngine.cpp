@@ -56,9 +56,9 @@ game::GameEngine::GameEngine(bool fullscreen, bool vsync, bool ground) :
 	prototypes::register_prototypes();
 
 	//EXAMPLE Load models
-	renderer::load("models/Cyborg/cyborg.obj");
+	/*renderer::load("models/Cyborg/cyborg.obj");
 	renderer::load("models/Room/room.obj");
-	renderer::load("models/Water/water.obj");
+	renderer::load("models/Water/water.obj");*/
 	renderer::load("models/Skybox/skybox.obj");
 	renderer::finalise();
 
@@ -72,16 +72,16 @@ void game::GameEngine::run()
 	auto player = scene_.instantiate("FirstPersonController", TransformComponent{ {0,6,5} , { 180,0,0 }});
 	scene_.instantiate("Camera", CameraComponent{ player });
   
-	ModelComponent m_water; m_water.model_file = "models/Water/water.obj"; m_water.vertex_shader = "shaders/Water.vert"; m_water.fragment_shader = "shaders/Water.frag";
+	/*ModelComponent m_water; m_water.model_file = "models/Water/water.obj"; m_water.vertex_shader = "shaders/Water.vert"; m_water.fragment_shader = "shaders/Water.frag";
 	scene_.instantiate("Model", m_water);
 
 	ModelComponent m_room; m_room.model_file = "models/Room/room.obj";
 	TransformComponent t_room; t_room.position.y = 10; t_room.scale = { 0.5, 0.5, 0.5 };
-	scene_.instantiate("Model", m_room, t_room, ColourComponent{ {0.2,0.2,0.2} });
+	scene_.instantiate("Model", m_room, t_room, ColourComponent{ {0.2,0.2,0.2} });*/
 
 	std::string paths[6] = {
-		"models/Skybox/hw_ruins/ruins_rt.tga",
 		"models/Skybox/hw_ruins/ruins_lf.tga",
+		"models/Skybox/hw_ruins/ruins_rt.tga",
 		"models/Skybox/hw_ruins/ruins_up.tga",
 		"models/Skybox/hw_ruins/ruins_dn.tga",
 		"models/Skybox/hw_ruins/ruins_ft.tga",
@@ -89,8 +89,9 @@ void game::GameEngine::run()
 	Cubemap cm(paths);
 	CubemapComponent cm_skybox; cm_skybox.handle = cm.handle;
 
+	TransformComponent t_skybox; t_skybox.scale = { 20, 20, 20 };
 	ModelComponent m_skybox; m_skybox.model_file = "models/Skybox/skybox.obj"; m_skybox.vertex_shader = "shaders/Skybox.vert"; m_skybox.fragment_shader = "shaders/Skybox.frag";
-	scene_.instantiate("Model", m_skybox, cm_skybox);
+	scene_.instantiate("Model", m_skybox, cm_skybox, t_skybox);
 
 	scene_.instantiate("AmbientLight", AmbientLightComponent{ {1, 147.0 / 255.0, 41.0 / 255.0}, 0.01 });
 	scene_.instantiate("DirectionalLight", DirectionalLightComponent{ {1, 1, 1}, 1, {2,1,1} });
