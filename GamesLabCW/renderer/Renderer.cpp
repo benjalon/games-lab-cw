@@ -71,6 +71,7 @@ namespace game::renderer
 
 	//Global vertex buffer object
 	VBO vbo;
+	VBO bonebo;
 
 	//Global textures collection
 	std::vector<Texture> textures;
@@ -175,6 +176,21 @@ namespace game::renderer
 	glm::mat4 m_GlobalInverseTransform;
 	std::vector<VertexBoneData> bones;
 
+	GLint m_boneLocation[70]; //!< Bone uniform locations 
+
+
+
+	void initialiseBoneUniforms(GLuint shader)
+	{
+		for (unsigned int i = 0; i < m_NumBones; i++) {
+
+			char Name[128];
+			memset(Name, 0, sizeof(Name));
+			_snprintf_s(Name, sizeof(Name), "gBones[%d]", i);
+			m_boneLocation[i] = glGetUniformLocation(shader, Name);
+		}
+	}
+
 	//Utility function to remove the final path node from the given file path
 	std::string strip_last_path(std::string path)
 	{
@@ -196,6 +212,9 @@ namespace game::renderer
 		//Ensure VBO has been generated
 		if (!vbo.created())
 			vbo.create();
+
+		if (!bonebo.created())
+			bonebo.create();
 
 		//Load model from file
 		static Assimp::Importer imp;
@@ -403,8 +422,6 @@ namespace game::renderer
 		glGenVertexArrays(1, &vao);
 		glBindVertexArray(vao);
 
-		//vbo.add_data(&bones[0], sizeof(bones[0]) * bones.size());
-
 		//Bind and upload VBO
 		vbo.bind();
 		vbo.upload(GL_STATIC_DRAW);
@@ -421,13 +438,18 @@ namespace game::renderer
 		//Tangent vectors
 		glEnableVertexAttribArray(3);
 		glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(aiVector3D) + sizeof(aiVector2D), (void*)(2 * sizeof(aiVector3D) + sizeof(aiVector2D)));
-		
-		////Bones
-		//glEnableVertexAttribArray(4);
-		//glVertexAttribPointer(0, 4, GL_INT, GL_FALSE, 3 * sizeof(aiVector3D) + sizeof(aiVector2D) + 4 * sizeof(int) + 4 * sizeof(float), (void*)(3 * sizeof(aiVector3D) + sizeof(aiVector2D)));
-		////Bone weights
-		//glEnableVertexAttribArray(5);
-		//glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 3 * sizeof(aiVector3D) + sizeof(aiVector2D) + 4 * sizeof(int) + 4 * sizeof(float), (void*)(3 * sizeof(aiVector3D) + sizeof(aiVector2D) + 4 * sizeof(int)));
+
+		//Bind and upload VBO
+		bonebo.bind();
+		bonebo.add_data(&bones[0], sizeof(bones[0]) * bones.size());
+		bonebo.upload(GL_STATIC_DRAW);
+
+		//Bones
+		glEnableVertexAttribArray(4);
+		glVertexAttribPointer(4, 4, GL_INT, GL_TRUE, sizeof(VertexBoneData), (void*)0);
+		//Bone weights
+		glEnableVertexAttribArray(5);
+		glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(VertexBoneData), (void*)16);
 
 		bones.clear();
 	}
@@ -636,14 +658,10 @@ namespace game::renderer
 		// Populates transforms vector with new bone transformation matrices. 
 		for (unsigned int i = 0; i < m_NumBones; i++) {
 			Transforms[i] = m_BoneInfo[i].FinalTransformation;
-		}
 
-		for (unsigned int i = 0; i < Transforms.size(); i++) {
 			assert(i < 100);
 
-			glUniformMatrix4fv(
-				glGetUniformLocation(animation.shader, "gBones[70]"),
-				1, TRUE, glm::value_ptr(Transforms[i]));
+			glUniformMatrix4fv(m_boneLocation[i], 1, TRUE, glm::value_ptr(Transforms[i]));
 		}
 	}
 
@@ -681,6 +699,8 @@ namespace game::renderer
 			if (animationIt == animations.end()) return;
 			BoneAnimation &animation = animationIt->second;
 			animation.shader = shader;
+
+			initialiseBoneUniforms(shader);
 		}
 
 		//Calculate MVP matrices
