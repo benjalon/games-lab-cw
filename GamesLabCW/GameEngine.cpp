@@ -59,6 +59,7 @@ game::GameEngine::GameEngine(bool fullscreen, bool vsync, bool ground) :
 	renderer::load_model("models/Room/room.obj");
 	renderer::load_model("models/Water/water.obj");
 	renderer::load_model("models/Skybox/skybox.obj");
+	renderer::load_model("models/Torch/torch.obj");
 
 	std::string paths[6] = {
 		"models/Skybox/hw_ruins/ruins_lf.tga",
@@ -79,7 +80,7 @@ game::GameEngine::GameEngine(bool fullscreen, bool vsync, bool ground) :
 void game::GameEngine::run()
 {
 	//EXAMPLE Instantiate a camera and models
-	auto player = scene_.instantiate("FirstPersonController", TransformComponent{ {0,6,5} , { 180,0,0 }});
+	auto player = scene_.instantiate("FirstPersonController", TransformComponent{ {0,6,5} , { 180,0,0 } });
 	scene_.instantiate("Camera", CameraComponent{ player });
 
 	ModelComponent m_water; m_water.model_file = "models/Water/water.obj"; m_water.vertex_shader = "shaders/Water.vert"; m_water.fragment_shader = "shaders/Water.frag";
@@ -87,15 +88,35 @@ void game::GameEngine::run()
 
 	ModelComponent m_room; m_room.model_file = "models/Room/room.obj";
 	TransformComponent t_room; t_room.position.y = 10; t_room.scale = { 0.5, 0.5, 0.5 };
-	scene_.instantiate("Model", m_room, t_room, ColourComponent{ {0.2,0.2,0.2} });
+	scene_.instantiate("Model", m_room, t_room);
+
+	ModelComponent m_torch1; m_torch1.model_file = "models/Torch/torch.obj";
+	TransformComponent t_torch1; t_torch1.position = { 26, 0, -23 }; t_torch1.scale = { 5, 5, 5 };
+	scene_.instantiate("Model", m_torch1, t_torch1);
+	scene_.instantiate("PointLight", PointLightComponent{ {1, 147.0 / 255.0, 41.0 / 255.0}, 40, {26, 7, -23} });
+
+	ModelComponent m_torch2; m_torch2.model_file = "models/Torch/torch.obj";
+	TransformComponent t_torch2; t_torch2.position = { 26, 0, 23 }; t_torch2.scale = { 5, 5, 5 };
+	scene_.instantiate("Model", m_torch2, t_torch2);
+	scene_.instantiate("PointLight", PointLightComponent{ {1, 147.0 / 255.0, 41.0 / 255.0}, 40, {26, 7, 23} });
+
+	ModelComponent m_torch3; m_torch3.model_file = "models/Torch/torch.obj";
+	TransformComponent t_torch3; t_torch3.position = { -26, 6, -10 }; t_torch3.scale = { 5, 5, 5 };
+	scene_.instantiate("Model", m_torch3, t_torch3);
+	scene_.instantiate("PointLight", PointLightComponent{ {1, 147.0 / 255.0, 41.0 / 255.0}, 40, { -26, 13, -10 } });
+
+	ModelComponent m_torch4; m_torch4.model_file = "models/Torch/torch.obj";
+	TransformComponent t_torch4; t_torch4.position = { -26, 6, 10 }; t_torch4.scale = { 5, 5, 5 };
+	scene_.instantiate("Model", m_torch4, t_torch4);
+	scene_.instantiate("PointLight", PointLightComponent{ {1, 147.0 / 255.0, 41.0 / 255.0}, 40, { -26, 13, 10 } });
 
 	TransformComponent t_skybox; t_skybox.scale = { 20, 20, 20 };
 	ModelComponent m_skybox; m_skybox.model_file = "models/Skybox/skybox.obj"; m_skybox.vertex_shader = "shaders/Skybox.vert"; m_skybox.fragment_shader = "shaders/Skybox.frag";
 	scene_.instantiate("Model", m_skybox, t_skybox);
 
 	scene_.instantiate("AmbientLight", AmbientLightComponent{ {1, 147.0 / 255.0, 41.0 / 255.0}, 0.01 });
-	scene_.instantiate("DirectionalLight", DirectionalLightComponent{ {1, 1, 1}, 1, {2,1,1} });
-	scene_.instantiate("PointLight", PointLightComponent{ {1, 147.0 / 255.0, 41.0 / 255.0}, 1, {0,5,0} });
+	scene_.instantiate("DirectionalLight", DirectionalLightComponent{ {0, 0, 0}, 0, {0,0,0} });
+	/*scene_.instantiate("PointLight", PointLightComponent{ {1, 147.0 / 255.0, 41.0 / 255.0}, 1, {0,5,0} });*/
 
 	//Time of next update
 	double t_next = glfwGetTime();

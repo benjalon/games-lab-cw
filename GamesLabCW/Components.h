@@ -70,10 +70,10 @@ namespace game
 	{
 		Vector3 colour{ 1.0, 1.0, 1.0 };
 		double intensity = 1.0;
-		Vector3 position{ 2.0, 0.0, 0.0 };
-		double constant = 1.0;
-		double linear = 0.01;
-		double exponent = 0;
+		Vector3 position{ 0.0, 0.0, 0.0 };
+		double constant = 0;
+		double linear = 0;
+		double exponent = 1;
 	};
 
 
