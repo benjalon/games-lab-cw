@@ -10,7 +10,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd StoneWall_02.png
+map_Kd RockTile\RockTile1clr.jpg
 
 newmtl Material_NONE
 Ns 96.078431
@@ -22,7 +22,7 @@ Ni 1.000000
 d 1.000000
 illum 2
 
-newmtl Material_RockTile1clr.jpg
+newmtl Material_StoneWall_02.png
 Ns 96.078431
 Ka 1.000000 1.000000 1.000000
 Kd 0.640000 0.640000 0.640000
@@ -31,7 +31,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd RockTile\RockTile1clr.jpg
+map_Kd StoneWall_02.png
 
 newmtl None
 Ns 0
