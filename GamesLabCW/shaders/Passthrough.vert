@@ -20,6 +20,14 @@ out mat3 v_mTBN;
 
 void main()
 {
+    v_mModel = modelMatrix;
+	v_vPosition = (modelMatrix * vec4(in_Position, 1.0)).xyz;
+	v_vTexcoord = in_TextureCoord;
+
+	mat3 normalMatrix = transpose(inverse(mat3(modelMatrix)));
+
+	vec4 adjustedNormal;
+
 	#ifdef HAS_BONES
 		// Multiply each bone transformation by the particular weight
 		// and combine them. 
@@ -31,17 +39,16 @@ void main()
 		// Transformed vertex position 
 		vec4 tPos = BoneTransform * vec4(in_Position, 1.0);
 		gl_Position = (projectionMatrix * viewMatrix * modelMatrix) * tPos;
+		
+		adjustedNormal = BoneTransform *  vec4(in_Normal, 0.0);
 	#else
 		// Calculate the MVP position of this vertex for drawing
 		gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4( in_Position, 1.0 );
+
+		adjustedNormal = vec4(in_normal, 0.0);
 	#endif
-
-    v_mModel = modelMatrix;
-	v_vPosition = (modelMatrix * vec4(in_Position, 1.0)).xyz;
-	v_vTexcoord = in_TextureCoord;
-
-	mat3 normalMatrix = transpose(inverse(mat3(modelMatrix)));
-    v_vNormal = normalize(normalMatrix * in_Normal);
+	
+	v_vNormal = normalize(normalMatrix * adjustedNormal.xyz);
 
 	vec3 tangent = normalize(normalMatrix * in_Tangent);
     tangent = normalize(tangent - dot(tangent, v_vNormal) * v_vNormal);
