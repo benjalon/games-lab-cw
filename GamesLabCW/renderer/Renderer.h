@@ -7,6 +7,8 @@
 
 #include "../Components.h"
 
+#include "Texture.h"
+
 namespace game::renderer
 {
 	//Initialises the render system
@@ -21,8 +23,9 @@ namespace game::renderer
 	//Loads the given model
 	void load_model(std::string file);
 
-	// Load a cubemap for the specified model
-	void load_cubemap(std::string model_path, std::string paths[6], bool skybox = false);
+	// external textures for a given model
+	void load_external_texture(std::string path, std::string model_path, TextureType type);
+	void load_external_cubemap(std::string paths[6], std::string model_path, TextureType type, bool skybox);
 
 	//Finalises the loaded models
 	void finalise();

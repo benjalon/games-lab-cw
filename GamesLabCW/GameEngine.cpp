@@ -12,6 +12,7 @@
 #include "Prototypes.h"
 #include "renderer/Renderer.h"
 #include "Input.h"
+#include "renderer/Texture.h"
 
 game::GameEngine::GameEngine(bool fullscreen, bool vsync, bool ground) :
 	fullscreen_(fullscreen), vsync_(vsync), ground_(ground)
@@ -68,8 +69,8 @@ game::GameEngine::GameEngine(bool fullscreen, bool vsync, bool ground) :
 		"models/Skybox/hw_ruins/ruins_dn.tga",
 		"models/Skybox/hw_ruins/ruins_ft.tga",
 		"models/Skybox/hw_ruins/ruins_bk.tga" };
-	renderer::load_cubemap("models/Skybox/skybox.obj", paths, true);
-	renderer::load_cubemap("models/Water/water.obj", paths, false);
+	renderer::load_external_cubemap(paths, "models/Skybox/skybox.obj", TextureType::CUBE, true);
+	renderer::load_external_cubemap(paths, "models/Water/water.obj", TextureType::CUBE, false);
 
 	renderer::finalise();
 

@@ -20,7 +20,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\glad\src\glad.c" />
-    <ClCompile Include="renderer\Cubemap.cpp" />
     <ClCompile Include="Events.cpp" />
     <ClCompile Include="GameEngine.cpp" />
     <ClCompile Include="Input.cpp" />
@@ -45,7 +44,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Components.h" />
-    <ClInclude Include="renderer\Cubemap.h" />
     <ClInclude Include="Events.h" />
     <ClInclude Include="GameEngine.h" />
     <ClInclude Include="Input.h" />
