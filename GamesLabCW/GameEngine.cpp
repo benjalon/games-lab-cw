@@ -110,6 +110,9 @@ void game::GameEngine::run()
 	scene_.instantiate("Model", m_torch4, t_torch4);
 	scene_.instantiate("PointLight", PointLightComponent{ {1, 147.0 / 255.0, 41.0 / 255.0}, 40, { -26, 13, 10 } });
 
+	// Portal light
+	scene_.instantiate("PointLight", PointLightComponent{ {1, 105.0 / 255.0, 180.0 / 255.0}, 40, { 3, 3, 22} });
+
 	TransformComponent t_skybox; t_skybox.scale = { 20, 20, 20 };
 	ModelComponent m_skybox; m_skybox.model_file = "models/Skybox/skybox.obj"; m_skybox.vertex_shader = "shaders/Skybox.vert"; m_skybox.fragment_shader = "shaders/Skybox.frag";
 	scene_.instantiate("Model", m_skybox, t_skybox);
