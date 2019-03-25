@@ -11,19 +11,23 @@
 
 namespace game
 {
-	class VBO
+	class BO
 	{
 	private:
 		GLuint id_;
 		GLuint size_;
 		size_t current_size_;
 		bool data_uploaded_;
+		GLenum target;
 
 		std::vector<unsigned char> data_;
 
 	public:
 		//Default constructor
-		VBO();
+		BO();
+
+		//Constructor for alternate types of buffer
+		BO(GLenum target);
 
 		//Initialises vertex buffer object
 		void create(GLuint size = 0);
@@ -31,22 +35,22 @@ namespace game
 		//Destroys vertex buffer object, freeing memory
 		void remove();
 
-		//Returns the ID of the VBO
+		//Returns the ID of the BO
 		GLuint id() const;
 
-		//Queries if the VBO has been created
+		//Queries if the BO has been created
 		bool created() const;
 
-		//Returns the total size of data in the VBO
+		//Returns the total size of data in the BO
 		size_t size() const;
 
-		//Adds any amount of arbitrary byte data to VBO
+		//Adds any amount of arbitrary byte data to BO
 		void add_data(void *pData, size_t size);
 
-		//Binds the VBO
+		//Binds the BO
 		void bind() const;
 
-		//Uploads VBO data to GPU
+		//Uploads BO data to GPU
 		void upload(GLenum usage);
 	};
 }

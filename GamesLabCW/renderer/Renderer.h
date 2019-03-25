@@ -26,7 +26,4 @@ namespace game::renderer
 	// external textures for a given model
 	void load_external_texture(std::string path, std::string model_path, TextureType type);
 	void load_external_cubemap(std::string paths[6], std::string model_path, TextureType type, bool skybox);
-
-	//Finalises the loaded models
-	void finalise();
 }

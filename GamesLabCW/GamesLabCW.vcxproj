@@ -24,11 +24,12 @@
     <ClCompile Include="GameEngine.cpp" />
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="renderer\Mesh.cpp" />
     <ClCompile Include="Prototypes.cpp" />
     <ClCompile Include="renderer\Renderer.cpp" />
     <ClCompile Include="renderer\Shader.cpp" />
     <ClCompile Include="renderer\Texture.cpp" />
-    <ClCompile Include="renderer\VBO.cpp" />
+    <ClCompile Include="renderer\BO.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="Systems.cpp" />
     <ClCompile Include="Utility.cpp" />
@@ -47,11 +48,12 @@
     <ClInclude Include="Events.h" />
     <ClInclude Include="GameEngine.h" />
     <ClInclude Include="Input.h" />
+    <ClInclude Include="renderer\Mesh.h" />
     <ClInclude Include="Prototypes.h" />
     <ClInclude Include="renderer\Renderer.h" />
     <ClInclude Include="renderer\Shader.h" />
     <ClInclude Include="renderer\Texture.h" />
-    <ClInclude Include="renderer\VBO.h" />
+    <ClInclude Include="renderer\BO.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="Systems.h" />
     <ClInclude Include="Utility.h" />

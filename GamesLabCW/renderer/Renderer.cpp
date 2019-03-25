@@ -18,7 +18,8 @@
 #include <assimp/postprocess.h>
 
 #include "Shader.h"
-#include "VBO.h"
+#include "BO.h"
+#include "Mesh.h"
 
 //Quick conversion to radians
 #define R(x) glm::radians((float)x)
@@ -69,39 +70,13 @@ namespace game::renderer
 	GLuint vao;
 
 	//Global vertex buffer object
-	VBO vbo;
+	BO vbo;
+	BO ibo(GL_ELEMENT_ARRAY_BUFFER);
 
 	//Global textures collection
 	std::vector<Texture> textures;
 	std::vector<Texture> normalMaps;
 	std::map<std::string, Texture> external_textures;
-
-	//Represents data of a mesh
-	struct Mesh
-	{
-		std::vector<GLuint> mesh_starts;
-		std::vector<GLuint> mesh_sizes;
-		std::vector<GLuint> materials;
-		size_t num_materials;
-		bool textured;
-		bool normal_mapped;
-	};
-
-	//Dictionary of meshes
-	std::unordered_map<std::string, Mesh> meshes;
-
-	//Utility function to remove the final path node from the given file path
-	std::string strip_last_path(std::string path)
-	{
-		std::string dir = "";
-		for (int i = (int)path.size() - 1; i >= 0; i--)
-			if (path[i] == '\\' || path[i] == '/')
-			{
-				dir = path.substr(0, i + 1);
-				break;
-			}
-		return dir;
-	}
 
 	void load_external_texture(std::string path, std::string model_path, TextureType type)
 	{
@@ -118,14 +93,26 @@ namespace game::renderer
 		external_textures.emplace(model_path, cubemap); // Need to map this texture with a model, since it was loaded externally
 	}
 
+	struct Model
+	{
+		std::vector<Mesh> meshes;
+		bool textured;
+		bool normal_mapped;
+	};
+	//Dictionary of models
+	std::unordered_map<std::string, Model> models;
+
 	void load_model(std::string file)
 	{
 		//Ensure model hasn't already been loaded
-		if (meshes.find(file) != meshes.end()) return;
+		if (models.find(file) != models.end()) return;
 
-		//Ensure VBO has been generated
+		//Ensure vertex buffer has been generated
 		if (!vbo.created())
 			vbo.create();
+		//Ensure index buffer has been generated
+		if (!ibo.created())
+			ibo.create();
 
 		//Load model from file
 		Assimp::Importer imp;
@@ -140,142 +127,19 @@ namespace game::renderer
 		std::cout << (scene ? "Loaded model " : "Could not load model ") << file << std::endl;
 		if (!scene) return;
 
-		//Create new model
-		Mesh &m = meshes.emplace(file, Mesh()).first->second;
-
 		//Load all model data from aiScene
 		const size_t vertexTotalSize = sizeof(aiVector3D) * 3 + sizeof(aiVector2D);
 		size_t totalVertices = 0;
 
+		Model &model = models.emplace(file, Model()).first->second;
+
 		for (size_t i = 0; i < scene->mNumMeshes; i++)
 		{
-			aiMesh *mesh = scene->mMeshes[i];
-			size_t meshFaces = mesh->mNumFaces;
-			m.materials.push_back(mesh->mMaterialIndex);
-			size_t size0 = vbo.size();
-			m.mesh_starts.push_back((GLuint)size0 / vertexTotalSize);
-
-			for (size_t j = 0; j < meshFaces; j++)
-			{
-				const aiFace &face = mesh->mFaces[j];
-				for (int k = 0; k < 3; k++)
-				{
-					aiVector3D pos = (mesh->HasPositions()) ?
-						mesh->mVertices[face.mIndices[k]] :
-						aiVector3D(1.0f, 1.0f, 1.0f);
-					//WARNING - SHOULD THIS BE aiVector2D ???
-					aiVector3D uv = (mesh->GetNumUVChannels() > 0) ?
-						mesh->mTextureCoords[0][face.mIndices[k]] :
-						aiVector3D(1.0f, 1.0f, 1.0f);
-					aiVector3D normal = (mesh->HasNormals()) ?
-						mesh->mNormals[face.mIndices[k]] :
-						aiVector3D(1.0f, 1.0f, 1.0f);
-					aiVector3D tangent = (mesh->HasTangentsAndBitangents()) ?
-						mesh->mTangents[face.mIndices[k]] :
-						aiVector3D(1.0f, 1.0f, 1.0f);
-
-					vbo.add_data(&pos, sizeof(aiVector3D));
-					vbo.add_data(&uv, sizeof(aiVector2D));
-					vbo.add_data(&normal, sizeof(aiVector3D));
-					vbo.add_data(&tangent, sizeof(aiVector3D));
-				}
-			}
-
-			totalVertices += mesh->mNumVertices;
-			m.mesh_sizes.push_back((GLuint)(vbo.size() - size0) / vertexTotalSize);
+			aiMesh* meshData = scene->mMeshes[i];
+			Mesh loadedMesh = Mesh(vao, vbo, ibo, meshData, scene->mMaterials[meshData->mMaterialIndex]);
+			model.meshes.push_back(loadedMesh);
 		}
 
-		m.num_materials = scene->mNumMaterials;
-		std::vector<size_t> materialRemap(m.num_materials);
-
-		for (size_t i = 0; i < m.num_materials; i++)
-		{
-			const aiMaterial *material = scene->mMaterials[i];
-			int texIndex = 0;
-			aiString path;
-
-			if (material->GetTexture(aiTextureType_DIFFUSE, texIndex, &path) == AI_SUCCESS)
-			{
-				m.textured = true;
-				std::string fullPath = strip_last_path(file) + path.data;
-
-				int texFound = -1;
-				for (int j = 0; j < (int)textures.size(); j++)
-					if (fullPath == textures[j].path)
-					{
-						texFound = j;
-						break;
-					}
-				if (texFound != -1)
-					materialRemap[i] = texFound;
-				else
-				{
-					Texture t(fullPath, true);
-					materialRemap[i] = textures.size();
-					textures.push_back(t);
-				}
-			}
-		}
-
-
-		for (size_t i = 0; i < m.num_materials; i++)
-		{
-			const aiMaterial *material = scene->mMaterials[i];
-			int texIndex = 0;
-			aiString path;
-
-			if (material->GetTexture(aiTextureType_HEIGHT, texIndex, &path) == AI_SUCCESS) // Note assimp treats the way .obj stores normalmaps as heightmaps
-			{
-				m.normal_mapped = true;
-				std::string fullPath = strip_last_path(file) + path.data;
-
-				int normalFound = -1;
-				for (int j = 0; j < (int)normalMaps.size(); j++)
-					if (fullPath == normalMaps[j].path)
-					{
-						normalFound = j;
-						break;
-					}
-				if (normalFound != -1)
-					materialRemap[i] = normalFound;
-				else
-				{
-					Texture t(fullPath, true);
-					materialRemap[i] = normalMaps.size();
-					normalMaps.push_back(t);
-				}
-			}
-		}
-
-		for (int i = 0; i < (int)m.mesh_sizes.size(); i++)
-		{
-			int o = m.materials[i];
-			m.materials[i] = (GLuint)materialRemap[o];
-		}
-	}
-
-	void finalise()
-	{
-		//Generate and bind VAO
-		glGenVertexArrays(1, &vao);
-		glBindVertexArray(vao);
-
-		//Bind and upload VBO
-		vbo.bind();
-		vbo.upload(GL_STATIC_DRAW);
-
-		//Vertex positions
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(aiVector3D) + sizeof(aiVector2D), (void*)0);
-		//Texture coordinates
-		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 3 * sizeof(aiVector3D) + sizeof(aiVector2D), (void*)sizeof(aiVector3D));
-		//Normal vectors
-		glEnableVertexAttribArray(2);
-		glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(aiVector3D) + sizeof(aiVector2D), (void*)(sizeof(aiVector3D) + sizeof(aiVector2D)));
-		//Tangent vectors
-		glEnableVertexAttribArray(3);
-		glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(aiVector3D) + sizeof(aiVector2D), (void*)(2 * sizeof(aiVector3D) + sizeof(aiVector2D)));
 	}
 
 	//Calculates the projection matrix for a camera
@@ -314,44 +178,41 @@ namespace game::renderer
 		glEnable(GL_DEPTH_TEST);
 	}
 
-	void render_model(CameraComponent camera, ModelComponent model, ColourComponent c, TransformComponent t,
+	void render_model(CameraComponent camera, ModelComponent m, ColourComponent c, TransformComponent t,
 		size_t n_ambient, AmbientLightComponent *ambients, size_t n_directional, DirectionalLightComponent *directionals,
 		size_t n_point, PointLightComponent *points)
 	{
-		//Bind correct VAO
-		glBindVertexArray(vao);
-
 		//Get the model, aborting if not found
-		auto it = meshes.find(model.model_file);
-		if (it == meshes.end()) return;
-		const Mesh &mesh = it->second;
+		auto it = models.find(m.model_file);
+		if (it == models.end()) return;
+		const Model &model = it->second;
 
-		glm::mat4 v;
+		glm::mat4 vm;
 
-		auto tx_it = external_textures.find(model.model_file);
-		if (tx_it != external_textures.end() && tx_it->second.isSkybox)
-		{
-			// Skyboxes must be rendered behind everything else so disregard camera transform 
-			// and change depth setting
-		    glDepthFunc(GL_LEQUAL);
-			v = glm::mat3(view_matrix(camera));
-		}
-		else
-		{
-			// Regular render settings
-			glDepthFunc(GL_LESS);
-			v = view_matrix(camera);
-		}
-		
+		//auto tx_it = external_textures.find(m.model_file);
+		//if (tx_it != external_textures.end() && tx_it->second.isSkybox)
+		//{
+		//	// Skyboxes must be rendered behind everything else so disregard camera transform 
+		//	// and change depth setting
+		//    glDepthFunc(GL_LEQUAL);
+		//	vm = glm::mat3(view_matrix(camera));
+		//}
+		//else
+		//{
+		//	// Regular render settings
+		//	glDepthFunc(GL_LESS);
+			vm = view_matrix(camera);
+		//}
+		//
 		//Determine and use appropriate shader
-		GLuint shader = get_shader(mesh.textured, mesh.normal_mapped, n_ambient, n_directional, n_point,
-			model.vertex_shader, model.fragment_shader);
+		GLuint shader = get_shader(model.textured, model.normal_mapped, n_ambient, n_directional, n_point,
+			m.vertex_shader, m.fragment_shader);
 		glUseProgram(shader);
 
 		//Calculate MVP matrices
-		glm::mat4 p = proj_matrix(camera);
+		glm::mat4 pm = proj_matrix(camera);
 
-		glm::mat4 m = glm::translate(glm::vec3(t.position)) *
+		glm::mat4 mm = glm::translate(glm::vec3(t.position)) *
 			glm::rotate(R(t.rotation.x), glm::vec3(1, 0, 0)) *
 			glm::rotate(R(t.rotation.z), glm::vec3(0, 0, 1)) *
 			glm::rotate(R(t.rotation.y), glm::vec3(0, 1, 0)) *
@@ -360,157 +221,138 @@ namespace game::renderer
 		//Provide MVP matrices
 		glUniformMatrix4fv(
 			glGetUniformLocation(shader, "projectionMatrix"),
-			1, GL_FALSE, glm::value_ptr(p)
+			1, GL_FALSE, glm::value_ptr(pm)
 		);
 		glUniformMatrix4fv(
 			glGetUniformLocation(shader, "viewMatrix"),
-			1, GL_FALSE, glm::value_ptr(v)
+			1, GL_FALSE, glm::value_ptr(vm)
 		);
 		glUniformMatrix4fv(
 			glGetUniformLocation(shader, "modelMatrix"),
-			1, GL_FALSE, glm::value_ptr(m)
+			1, GL_FALSE, glm::value_ptr(mm)
 		);
 
-		if (tx_it != external_textures.end())
+		//if (tx_it != external_textures.end())
+		//{
+		//	const Texture &texture = tx_it->second;
+
+		//	glActiveTexture(GL_TEXTURE0);
+		//	switch (texture.type)
+		//	{
+		//	case TextureType::DIFFUSE:
+		//		glBindTexture(GL_TEXTURE_2D, texture.handle);
+		//		glUniform1i(glGetUniformLocation(shader, "texSampler"), 0);
+		//		break;
+		//	case TextureType::NORMAL:
+		//		glBindTexture(GL_TEXTURE_2D, texture.handle);
+		//		glUniform1i(glGetUniformLocation(shader, "normalSampler"), 0);
+		//		break;
+		//	case TextureType::SPECULAR:
+		//		// Not yet implemented
+		//		break;
+		//	case TextureType::CUBE:
+		//		glBindTexture(GL_TEXTURE_CUBE_MAP, texture.handle);
+		//		glUniform1i(glGetUniformLocation(shader, "cubeSampler"), 0);
+		//		break;
+
+		//	default:
+		//		break;
+		//	}
+		//	//Provide cubemap component (reflections, skyboxes etc.)
+		//}
+
+		////Provide flat colour component
+		//glUniform4f(
+		//	glGetUniformLocation(shader, "flatColour"),
+		//	(GLfloat)c.colour.x, (GLfloat)c.colour.y, (GLfloat)c.colour.z,
+		//	(GLfloat)c.alpha
+		//);
+
+		////Provide shininess value (used to determine how much specular highlighting the model will have)
+		//glUniform1f(
+		//	glGetUniformLocation(shader, "shininess"),
+		//	(GLfloat)m.shininess
+		//);
+
+		//// Provide camera position for eye calculations
+		//glUniform3f(
+		//	glGetUniformLocation(shader, "cameraPosition"),
+		//	(GLfloat)camera.position.x, (GLfloat)camera.position.y, (GLfloat)camera.position.z
+		//);
+
+		////Provide ambient lights information
+		//for (size_t i = 0; i < n_ambient; i++)
+		//{
+		//	std::string j = std::to_string(i);
+		//	glUniform3f(glGetUniformLocation(shader,
+		//		("ambientLights[" + j + "].colour").c_str()),
+		//		(GLfloat)ambients[i].colour.x,
+		//		(GLfloat)ambients[i].colour.y,
+		//		(GLfloat)ambients[i].colour.z);
+		//	glUniform1f(glGetUniformLocation(shader,
+		//		("ambientLights[" + j + "].intensity").c_str()),
+		//		(GLfloat)ambients[i].intensity);
+		//}
+
+		////Provide directional lights information
+		//for (size_t i = 0; i < n_directional; i++)
+		//{
+		//	std::string j = std::to_string(i);
+		//	glUniform3f(glGetUniformLocation(shader,
+		//		("directionalLights[" + j + "].colour").c_str()),
+		//		(GLfloat)directionals[i].colour.x,
+		//		(GLfloat)directionals[i].colour.y,
+		//		(GLfloat)directionals[i].colour.z);
+		//	glUniform1f(glGetUniformLocation(shader,
+		//		("directionalLights[" + j + "].intensity").c_str()),
+		//		(GLfloat)directionals[i].intensity);
+		//	glUniform3f(glGetUniformLocation(shader,
+		//		("directionalLights[" + j + "].direction").c_str()),
+		//		(GLfloat)directionals[i].direction.x,
+		//		(GLfloat)directionals[i].direction.y,
+		//		(GLfloat)directionals[i].direction.z);
+		//}
+
+		////Provide point lights information
+		//for (size_t i = 0; i < n_point; i++)
+		//{
+		//	std::string j = std::to_string(i);
+		//	glUniform3f(glGetUniformLocation(shader,
+		//		("pointLights[" + j + "].colour").c_str()),
+		//		(GLfloat)points[i].colour.x,
+		//		(GLfloat)points[i].colour.y,
+		//		(GLfloat)points[i].colour.z);
+		//	glUniform1f(glGetUniformLocation(shader,
+		//		("pointLights[" + j + "].intensity").c_str()),
+		//		(GLfloat)points[i].intensity);
+		//	glUniform3f(glGetUniformLocation(shader,
+		//		("pointLights[" + j + "].position").c_str()),
+		//		(GLfloat)points[i].position.x,
+		//		(GLfloat)points[i].position.y,
+		//		(GLfloat)points[i].position.z);
+		//	glUniform1f(glGetUniformLocation(shader,
+		//		("pointLights[" + j + "].constant").c_str()),
+		//		(GLfloat)points[i].constant);
+		//	glUniform1f(glGetUniformLocation(shader,
+		//		("pointLights[" + j + "].linear").c_str()),
+		//		(GLfloat)points[i].linear);
+		//	glUniform1f(glGetUniformLocation(shader,
+		//		("pointLights[" + j + "].exponent").c_str()),
+		//		(GLfloat)points[i].exponent);
+		//}
+
+		// Bind the indices from the array object
+		glBindVertexArray(vao);
+
+		ibo.bind(); // This should be unnecessary but for whatever reason the state isn't being kept
+
+		// Draw each mesh part of this current model
+		for (size_t i = 0; i < model.meshes.size(); i++)
 		{
-			const Texture &texture = tx_it->second;
-
-			glActiveTexture(GL_TEXTURE0);
-			switch (texture.type)
-			{
-			case TextureType::DIFFUSE:
-				glBindTexture(GL_TEXTURE_2D, texture.handle);
-				glUniform1i(glGetUniformLocation(shader, "texSampler"), 0);
-				break;
-			case TextureType::NORMAL:
-				glBindTexture(GL_TEXTURE_2D, texture.handle);
-				glUniform1i(glGetUniformLocation(shader, "normalSampler"), 0);
-				break;
-			case TextureType::SPECULAR:
-				// Not yet implemented
-				break;
-			case TextureType::CUBE:
-				glBindTexture(GL_TEXTURE_CUBE_MAP, texture.handle);
-				glUniform1i(glGetUniformLocation(shader, "cubeSampler"), 0);
-				break;
-
-			default:
-				break;
-			}
-			//Provide cubemap component (reflections, skyboxes etc.)
+			glDrawElements(GL_TRIANGLES, model.meshes[i].indices.size(), GL_UNSIGNED_INT, 0);
 		}
 
-		//Provide flat colour component
-		glUniform4f(
-			glGetUniformLocation(shader, "flatColour"),
-			(GLfloat)c.colour.x, (GLfloat)c.colour.y, (GLfloat)c.colour.z,
-			(GLfloat)c.alpha
-		);
-
-		//Provide shininess value (used to determine how much specular highlighting the model will have)
-		glUniform1f(
-			glGetUniformLocation(shader, "shininess"),
-			(GLfloat)model.shininess
-		);
-
-		// Provide camera position for eye calculations
-		glUniform3f(
-			glGetUniformLocation(shader, "cameraPosition"),
-			(GLfloat)camera.position.x, (GLfloat)camera.position.y, (GLfloat)camera.position.z
-		);
-
-		//Provide ambient lights information
-		for (size_t i = 0; i < n_ambient; i++)
-		{
-			std::string j = std::to_string(i);
-			glUniform3f(glGetUniformLocation(shader,
-				("ambientLights[" + j + "].colour").c_str()),
-				(GLfloat)ambients[i].colour.x,
-				(GLfloat)ambients[i].colour.y,
-				(GLfloat)ambients[i].colour.z);
-			glUniform1f(glGetUniformLocation(shader,
-				("ambientLights[" + j + "].intensity").c_str()),
-				(GLfloat)ambients[i].intensity);
-		}
-
-		//Provide directional lights information
-		for (size_t i = 0; i < n_directional; i++)
-		{
-			std::string j = std::to_string(i);
-			glUniform3f(glGetUniformLocation(shader,
-				("directionalLights[" + j + "].colour").c_str()),
-				(GLfloat)directionals[i].colour.x,
-				(GLfloat)directionals[i].colour.y,
-				(GLfloat)directionals[i].colour.z);
-			glUniform1f(glGetUniformLocation(shader,
-				("directionalLights[" + j + "].intensity").c_str()),
-				(GLfloat)directionals[i].intensity);
-			glUniform3f(glGetUniformLocation(shader,
-				("directionalLights[" + j + "].direction").c_str()),
-				(GLfloat)directionals[i].direction.x,
-				(GLfloat)directionals[i].direction.y,
-				(GLfloat)directionals[i].direction.z);
-		}
-
-		//Provide point lights information
-		for (size_t i = 0; i < n_point; i++)
-		{
-			std::string j = std::to_string(i);
-			glUniform3f(glGetUniformLocation(shader,
-				("pointLights[" + j + "].colour").c_str()),
-				(GLfloat)points[i].colour.x,
-				(GLfloat)points[i].colour.y,
-				(GLfloat)points[i].colour.z);
-			glUniform1f(glGetUniformLocation(shader,
-				("pointLights[" + j + "].intensity").c_str()),
-				(GLfloat)points[i].intensity);
-			glUniform3f(glGetUniformLocation(shader,
-				("pointLights[" + j + "].position").c_str()),
-				(GLfloat)points[i].position.x,
-				(GLfloat)points[i].position.y,
-				(GLfloat)points[i].position.z);
-			glUniform1f(glGetUniformLocation(shader,
-				("pointLights[" + j + "].constant").c_str()),
-				(GLfloat)points[i].constant);
-			glUniform1f(glGetUniformLocation(shader,
-				("pointLights[" + j + "].linear").c_str()),
-				(GLfloat)points[i].linear);
-			glUniform1f(glGetUniformLocation(shader,
-				("pointLights[" + j + "].exponent").c_str()),
-				(GLfloat)points[i].exponent);
-		}
-
-		//Draw the model
-		for (size_t i = 0; i < mesh.mesh_sizes.size(); i++)
-		{
-			int offset = 0;
-
-			//Bind texture if the model has them
-			if (mesh.textured)
-			{
-				Texture &t = textures[mesh.materials[i]];
-
-				glActiveTexture(GL_TEXTURE0);
-				glBindTexture(GL_TEXTURE_2D, t.handle);
-				glUniform1i(glGetUniformLocation(shader, "texSampler"), 0);
-
-				offset++;
-			}
-
-			// Bind model normal maps
-			if (mesh.normal_mapped)
-			{
-				Texture &n = normalMaps[mesh.materials[i]];
-
-				glActiveTexture(GL_TEXTURE0 + offset);
-				glBindTexture(GL_TEXTURE_2D, n.handle);
-				glUniform1i(glGetUniformLocation(shader, "normalSampler"), offset);
-
-				offset++;
-			}
-
-			//Draw the triangles
-			glDrawArrays(GL_TRIANGLES, mesh.mesh_starts[i], mesh.mesh_sizes[i]);
-		}
+		// Unbind
+		glBindVertexArray(0);
 	}
 }
