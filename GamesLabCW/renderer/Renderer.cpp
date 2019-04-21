@@ -100,7 +100,7 @@ namespace game::renderer
 	struct VertexBoneData
 	{
 		unsigned int IDs[4]; //!< An array of 4 bone Ids that influence a single vertex.
-		float Weights[4]; //!< An array of the weight influence per bone. 
+		float Weights[4]; //!< An array of the weight influence per bone.
 
 		VertexBoneData()
 		{
@@ -142,8 +142,8 @@ namespace game::renderer
 
 		BoneInfo()
 		{
-			/*BoneOffset = glm::mat4();
-			FinalTransformation = glm::mat4();*/
+			BoneOffset = glm::mat4();
+			FinalTransformation = glm::mat4();
 		}
 	};
 
@@ -173,21 +173,6 @@ namespace game::renderer
 	glm::mat4 GlobalTransformation; //!< Root node transformation. 
 	glm::mat4 m_GlobalInverseTransform;
 	std::vector<VertexBoneData> bones;
-
-	GLint m_boneLocation[70]; //!< Bone uniform locations 
-
-
-
-	void initialiseBoneUniforms(GLuint shader)
-	{
-		for (unsigned int i = 0; i < m_NumBones; i++) {
-
-			char Name[128];
-			memset(Name, 0, sizeof(Name));
-			_snprintf_s(Name, sizeof(Name), "gBones[%d]", i);
-			m_boneLocation[i] = glGetUniformLocation(shader, Name);
-		}
-	}
 
 	//Utility function to remove the final path node from the given file path
 	std::string strip_last_path(std::string path)
@@ -641,9 +626,25 @@ namespace game::renderer
 			Transforms[i] = m_BoneInfo[i].FinalTransformation;
 
 			assert(i < 100);
-
-			glUniformMatrix4fv(m_boneLocation[i], 1, TRUE, glm::value_ptr(Transforms[i]));
 		}
+
+
+		//TODO:
+		/*for (unsigned int i = 0; i < vertices.size(); ++i)
+		{
+			auto currentBone = bones[i];
+
+			glm::mat4 boneTransform = Transforms[currentBone.IDs[0]] * currentBone.Weights[0];
+			boneTransform += Transforms[currentBone.IDs[1]] * currentBone.Weights[1];
+			boneTransform += Transforms[currentBone.IDs[2]] * currentBone.Weights[2];
+			boneTransform += Transforms[currentBone.IDs[3]] * currentBone.Weights[3];
+			boneTransform = glm::transpose(boneTransform);
+
+			glm::vec4 inVertex = glm::vec4(vertices[i].position, 1);
+			vertices[i].position = glm::vec3(boneTransform * inVertex);
+		}
+
+		renderer::UpdateVertices(vertices);*/
 	}
 
 	void init()
@@ -680,7 +681,7 @@ namespace game::renderer
 			BoneAnimation &animation = animationIt->second;
 			animation.shader = shader;
 
-			initialiseBoneUniforms(shader);
+			// TODO: Delete this
 		}
 
 		//Calculate MVP matrices
