@@ -26,15 +26,15 @@
 namespace game::renderer
 {
 	//Returns the (potentially cached) shader using the given paramaters
-	GLuint get_shader(bool textured, bool normal_mapped, bool has_bones, size_t n_ambient, size_t n_directional, size_t n_point,
+	GLuint get_shader(bool textured, bool normal_mapped, size_t n_ambient, size_t n_directional, size_t n_point,
 		std::string vertex_shader, std::string fragment_shader)
 	{
-		using Args = std::tuple<bool, bool, bool, size_t, size_t, size_t, std::string, std::string>;
+		using Args = std::tuple<bool, bool, size_t, size_t, size_t, std::string, std::string>;
 
 		//Cache of parametrised shaders
 		static std::map<Args, Shader> shaders;
 
-		Args args = std::make_tuple(textured, normal_mapped, has_bones, n_ambient, n_directional, n_point,
+		Args args = std::make_tuple(textured, normal_mapped, n_ambient, n_directional, n_point,
 			vertex_shader, fragment_shader);
 
 		//If the requested shader already exists, return it
@@ -51,7 +51,6 @@ namespace game::renderer
 
 			if (textured) define(f, "TEXTURED");
 			if (normal_mapped) define(f, "NORMAL_MAPPED");
-			if (has_bones) define(v, "HAS_BONES");
 			define(f, "N_AMBIENT " + std::to_string(n_ambient));
 			define(f, "N_DIRECTIONAL " + std::to_string(n_directional));
 			define(f, "N_POINT " + std::to_string(n_point));
@@ -71,7 +70,6 @@ namespace game::renderer
 
 	//Global vertex buffer object
 	VBO vbo;
-	VBO bonebo;
 
 	//Global textures collection
 	std::vector<Texture> textures;
@@ -212,9 +210,6 @@ namespace game::renderer
 		//Ensure VBO has been generated
 		if (!vbo.created())
 			vbo.create();
-
-		if (!bonebo.created())
-			bonebo.create();
 
 		//Load model from file
 		static Assimp::Importer imp;
@@ -438,20 +433,6 @@ namespace game::renderer
 		//Tangent vectors
 		glEnableVertexAttribArray(3);
 		glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(aiVector3D) + sizeof(aiVector2D), (void*)(2 * sizeof(aiVector3D) + sizeof(aiVector2D)));
-
-		//Bind and upload VBO
-		bonebo.bind();
-		bonebo.add_data(&bones[0], sizeof(bones[0]) * bones.size());
-		bonebo.upload(GL_STATIC_DRAW);
-
-		//Bones
-		glEnableVertexAttribArray(4);
-		glVertexAttribPointer(4, 4, GL_INT, GL_TRUE, sizeof(VertexBoneData), (void*)0);
-		//Bone weights
-		glEnableVertexAttribArray(5);
-		glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(VertexBoneData), (void*)16);
-
-		bones.clear();
 	}
 
 	//Calculates the projection matrix for a camera
@@ -688,8 +669,7 @@ namespace game::renderer
 		const Mesh &mesh = it->second;
 
 		//Determine and use appropriate shader
-		GLuint shader = get_shader(mesh.textured, mesh.normal_mapped, mesh.hasBones, n_ambient, n_directional, n_point,
-			model.vertex_shader, model.fragment_shader);
+		GLuint shader = get_shader(mesh.textured, mesh.normal_mapped,n_ambient, n_directional, n_point, model.vertex_shader, model.fragment_shader);
 		glUseProgram(shader);
 
 		if (mesh.hasBones)
