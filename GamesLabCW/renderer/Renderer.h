@@ -7,6 +7,8 @@
 
 #include "../Components.h"
 
+#include "Texture.h"
+
 #include <assimp/scene.h>
 
 namespace game::renderer
@@ -21,7 +23,11 @@ namespace game::renderer
 		size_t n_point, PointLightComponent *points);
 
 	//Loads the given model
-	void load(std::string file);
+	void load_model(std::string file);
+
+	// external textures for a given model
+	void load_external_texture(std::string path, std::string model_path, TextureType type);
+	void load_external_cubemap(std::string paths[6], std::string model_path, TextureType type, bool skybox);
 
 	//Finalises the loaded models
 	void finalise();

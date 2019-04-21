@@ -12,6 +12,7 @@
 #include "Prototypes.h"
 #include "renderer/Renderer.h"
 #include "Input.h"
+#include "renderer/Texture.h"
 
 game::GameEngine::GameEngine(bool fullscreen, bool vsync, bool ground) :
 	fullscreen_(fullscreen), vsync_(vsync), ground_(ground)
@@ -38,6 +39,13 @@ game::GameEngine::GameEngine(bool fullscreen, bool vsync, bool ground) :
 	glfwSetMouseButtonCallback(window_, mouse_button_callback);
 	glfwSetWindowSizeCallback(window_, window_size_callback);
 
+	//Set event handlers
+	events::dispatcher.sink<events::QuitGame>().connect<&GameEngine::quit>(this);
+
+	//Hide and initialise the cursor
+	glfwSetInputMode(window_, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+	input::cursor_centre = true;
+
 	//Enable v-sync
 	if (vsync) glfwSwapInterval(1);
 
@@ -48,14 +56,23 @@ game::GameEngine::GameEngine(bool fullscreen, bool vsync, bool ground) :
 	prototypes::register_prototypes();
 
 	//EXAMPLE Load models
-	//renderer::load("models/Moon/moon.obj");
-	//renderer::load("models/torus.obj");
-	/*renderer::load("models/Plane/Plane.obj");*/
-	//renderer::load("models/Cyborg/cyborg.obj");
-	/*renderer::load("models/Room/room.obj");*/
-	//renderer::load("models/Water/water.obj");
-	//renderer::load("models/Animation/mannequin.fbx");
-	renderer::load("models/Minotaur/Minotaur@Jump.fbx");
+	renderer::load_model("models/Cyborg/cyborg.obj");
+	renderer::load_model("models/Room/room.obj");
+	renderer::load_model("models/Water/water.obj");
+	renderer::load_model("models/Skybox/skybox.obj");
+	renderer::load_model("models/Torch/torch.obj");
+	renderer::load_model("models/Minotaur/Minotaur@Jump.fbx");
+
+	std::string paths[6] = {
+		"models/Skybox/hw_ruins/ruins_lf.tga",
+		"models/Skybox/hw_ruins/ruins_rt.tga",
+		"models/Skybox/hw_ruins/ruins_up.tga",
+		"models/Skybox/hw_ruins/ruins_dn.tga",
+		"models/Skybox/hw_ruins/ruins_ft.tga",
+		"models/Skybox/hw_ruins/ruins_bk.tga" };
+	renderer::load_external_cubemap(paths, "models/Skybox/skybox.obj", TextureType::CUBE, true);
+	renderer::load_external_cubemap(paths, "models/Water/water.obj", TextureType::CUBE, false);
+
 	renderer::finalise();
 
 	//Remove 'loading' from title
@@ -65,32 +82,49 @@ game::GameEngine::GameEngine(bool fullscreen, bool vsync, bool ground) :
 void game::GameEngine::run()
 {
 	//EXAMPLE Instantiate a camera and models
-	scene_.instantiate("Camera", CameraComponent{ {0,2,5} });
-  
-	/*scene_.instantiate("Model", ModelComponent{ "models/Plane/Plane.obj" }, ColourComponent{ {0.2,0.2,0.2} });
-*/
-	//ModelComponent m_water; m_water.model_file = "models/Water/water.obj"; m_water.vertex_shader = "shaders/Water.vert"; m_water.fragment_shader = "shaders/Water.frag";
-	//scene_.instantiate("Model", m_water);
+	auto player = scene_.instantiate("FirstPersonController", TransformComponent{ {0,6,5} , { 180,0,0 } });
+	scene_.instantiate("Camera", CameraComponent{ player });
 
-	//ModelComponent m_room; m_room.model_file = "models/Room/room.obj"; /*m_room.fragment_shader = "shaders/BlueSpirit.frag";*/
-	//TransformComponent t_room; t_room.position.y = 5;
-	//scene_.instantiate("Model", m_room, t_room, ColourComponent{ {0.2,0.2,0.2} });
+	ModelComponent m_water; m_water.model_file = "models/Water/water.obj"; m_water.vertex_shader = "shaders/Water.vert"; m_water.fragment_shader = "shaders/Water.frag";
+	scene_.instantiate("Model", m_water);
 
-	//TransformComponent t_sphere; t_sphere.position.y = 5; t_sphere.position.z = -10; t_sphere.scale = { 0.04, 0.04, 0.04 };
-	//scene_.instantiate("Model", ModelComponent{ "models/Moon/moon.obj", 128 }, t_sphere);
- // 
-	//ModelComponent m_torus; m_torus.model_file = "models/torus.obj"; m_torus.fragment_shader = "shaders/BlueSpirit.frag";
-	//TransformComponent t_torus; t_torus.position.y = 1; t_torus.position.x = 5; t_torus.scale = { 0.04, 0.04, 0.04 };
-	//scene_.instantiate("Model", m_torus, t_torus);
- // 
-	//scene_.instantiate("Model", ModelComponent{ "models/Animation/mannequin.fbx" });
+	ModelComponent m_room; m_room.model_file = "models/Room/room.obj";
+	TransformComponent t_room; t_room.position.y = 10; t_room.scale = { 0.5, 0.5, 0.5 };
+	scene_.instantiate("Model", m_room, t_room);
 
 	ModelComponent m_minotaur; m_minotaur.model_file = "models/Minotaur/Minotaur@Jump.fbx"; m_minotaur.fragment_shader = "shaders/BlueSpirit.frag";
 	scene_.instantiate("Model", m_minotaur);
 
+	ModelComponent m_torch1; m_torch1.model_file = "models/Torch/torch.obj";
+	TransformComponent t_torch1; t_torch1.position = { 26, 0, -23 }; t_torch1.scale = { 5, 5, 5 };
+	scene_.instantiate("Model", m_torch1, t_torch1);
+	scene_.instantiate("PointLight", PointLightComponent{ {1, 147.0 / 255.0, 41.0 / 255.0}, 40, {26, 7, -23} });
+
+	ModelComponent m_torch2; m_torch2.model_file = "models/Torch/torch.obj";
+	TransformComponent t_torch2; t_torch2.position = { 26, 0, 23 }; t_torch2.scale = { 5, 5, 5 };
+	scene_.instantiate("Model", m_torch2, t_torch2);
+	scene_.instantiate("PointLight", PointLightComponent{ {1, 147.0 / 255.0, 41.0 / 255.0}, 40, {26, 7, 23} });
+
+	ModelComponent m_torch3; m_torch3.model_file = "models/Torch/torch.obj";
+	TransformComponent t_torch3; t_torch3.position = { -26, 6, -10 }; t_torch3.scale = { 5, 5, 5 };
+	scene_.instantiate("Model", m_torch3, t_torch3);
+	scene_.instantiate("PointLight", PointLightComponent{ {1, 147.0 / 255.0, 41.0 / 255.0}, 40, { -26, 13, -10 } });
+
+	ModelComponent m_torch4; m_torch4.model_file = "models/Torch/torch.obj";
+	TransformComponent t_torch4; t_torch4.position = { -26, 6, 10 }; t_torch4.scale = { 5, 5, 5 };
+	scene_.instantiate("Model", m_torch4, t_torch4);
+	scene_.instantiate("PointLight", PointLightComponent{ {1, 147.0 / 255.0, 41.0 / 255.0}, 40, { -26, 13, 10 } });
+
+	// Portal light
+	scene_.instantiate("PointLight", PointLightComponent{ {1, 105.0 / 255.0, 180.0 / 255.0}, 40, { 3, 3, 22} });
+
+	TransformComponent t_skybox; t_skybox.scale = { 20, 20, 20 };
+	ModelComponent m_skybox; m_skybox.model_file = "models/Skybox/skybox.obj"; m_skybox.vertex_shader = "shaders/Skybox.vert"; m_skybox.fragment_shader = "shaders/Skybox.frag";
+	scene_.instantiate("Model", m_skybox, t_skybox);
+
 	scene_.instantiate("AmbientLight", AmbientLightComponent{ {1, 147.0 / 255.0, 41.0 / 255.0}, 0.01 });
-	scene_.instantiate("DirectionalLight", DirectionalLightComponent{ {1, 1, 1}, 1, {2,1,1} });
-	scene_.instantiate("PointLight", PointLightComponent{ {1, 147.0 / 255.0, 41.0 / 255.0}, 1, {0,5,0} });
+	scene_.instantiate("DirectionalLight", DirectionalLightComponent{ {0, 0, 0}, 0, {0,0,0} });
+	/*scene_.instantiate("PointLight", PointLightComponent{ {1, 147.0 / 255.0, 41.0 / 255.0}, 1, {0,5,0} });*/
 
 	//Time of next update
 	double t_next = glfwGetTime();
@@ -139,6 +173,11 @@ void game::GameEngine::draw()
 	glfwSwapBuffers(window_);
 }
 
+void game::GameEngine::quit(const events::QuitGame &)
+{
+	glfwSetWindowShouldClose(window_, true);
+}
+
 void game::GameEngine::key_callback(GLFWwindow *window, int key, int scancode, int action, int mods)
 {
 	if (key != GLFW_KEY_UNKNOWN)
@@ -158,7 +197,34 @@ void game::GameEngine::key_callback(GLFWwindow *window, int key, int scancode, i
 
 void game::GameEngine::cursor_position_callback(GLFWwindow *window, double x, double y)
 {
-	input::cursor_pos = { x, y };
+	//Get current window size
+	int width, height;
+	glfwGetWindowSize(window, &width, &height);
+
+	//Rescales the given xy coordinate to expected window dimensions
+	auto xy = [&](Vector2 &v)
+	{
+		v.x /= width; v.x *= WINDOW_WIDTH;
+		v.y /= height; v.y *= WINDOW_HEIGHT;
+	};
+
+	//Get current cursor position
+	Vector2 pos = { x, y };
+	xy(pos);
+
+	if (input::cursor_centre)
+	{
+		//Set cursor to middle
+		glfwSetCursorPos(window, width / 2.0, height / 2.0);
+
+		//Get offset from middle
+		Vector2 pos_mid;
+		glfwGetCursorPos(window, &pos_mid.x, &pos_mid.y);
+		xy(pos_mid);
+		input::cursor_pos = pos_mid - pos;
+	}
+	else
+		input::cursor_pos = pos;
 }
 
 void game::GameEngine::mouse_button_callback(GLFWwindow *window, int button, int action, int mods)

@@ -18,7 +18,6 @@
 
 #include "Shader.h"
 #include "VBO.h"
-#include "Texture.h"
 
 //Quick conversion to radians
 #define R(x) glm::radians((float)x)
@@ -74,6 +73,7 @@ namespace game::renderer
 	//Global textures collection
 	std::vector<Texture> textures;
 	std::vector<Texture> normalMaps;
+	std::map<std::string, Texture> external_textures;
 
 	//Represents data of a mesh
 	struct Mesh
@@ -187,7 +187,22 @@ namespace game::renderer
 		return dir;
 	}
 
-	void load(std::string file)
+	void load_external_texture(std::string path, std::string model_path, TextureType type)
+	{
+		auto texture = Texture(path);
+		texture.type = type;
+		external_textures.emplace(model_path, texture); // Need to map this texture with a model, since it was loaded externally
+	}
+
+	void load_external_cubemap(std::string paths[6], std::string model_path, TextureType type, bool skybox)
+	{
+		auto cubemap = Texture(paths, skybox);
+		cubemap.type = type;
+		cubemap.isSkybox = skybox;
+		external_textures.emplace(model_path, cubemap); // Need to map this texture with a model, since it was loaded externally
+	}
+
+	void load_model(std::string file)
 	{
 		//Ensure model hasn't already been loaded
 		if (meshes.find(file) != meshes.end()) return;
@@ -654,7 +669,6 @@ namespace game::renderer
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glEnable(GL_DEPTH_TEST);
-		glDepthFunc(GL_LESS);
 	}
 
 	void render_model(CameraComponent camera, ModelComponent &model, ColourComponent c, TransformComponent t,
@@ -669,6 +683,23 @@ namespace game::renderer
 		if (it == meshes.end()) return;
 		const Mesh &mesh = it->second;
 
+		glm::mat4 v;
+
+		auto tx_it = external_textures.find(model.model_file);
+		if (tx_it != external_textures.end() && tx_it->second.isSkybox)
+		{
+			// Skyboxes must be rendered behind everything else so disregard camera transform 
+			// and change depth setting
+		    glDepthFunc(GL_LEQUAL);
+			v = glm::mat3(view_matrix(camera));
+		}
+		else
+		{
+			// Regular render settings
+			glDepthFunc(GL_LESS);
+			v = view_matrix(camera);
+		}
+		
 		//Determine and use appropriate shader
 		GLuint shader = get_shader(mesh.textured, mesh.normal_mapped,n_ambient, n_directional, n_point, model.vertex_shader, model.fragment_shader);
 		glUseProgram(shader);
@@ -686,7 +717,6 @@ namespace game::renderer
 
 		//Calculate MVP matrices
 		glm::mat4 p = proj_matrix(camera);
-		glm::mat4 v = view_matrix(camera);
 
 		glm::mat4 m = glm::translate(glm::vec3(t.position)) *
 			glm::rotate(R(t.rotation.x), glm::vec3(1, 0, 0)) *
@@ -707,6 +737,35 @@ namespace game::renderer
 			glGetUniformLocation(shader, "modelMatrix"),
 			1, GL_FALSE, glm::value_ptr(m)
 		);
+
+		if (tx_it != external_textures.end())
+		{
+			const Texture &texture = tx_it->second;
+
+			glActiveTexture(GL_TEXTURE0);
+			switch (texture.type)
+			{
+			case TextureType::DIFFUSE:
+				glBindTexture(GL_TEXTURE_2D, texture.handle);
+				glUniform1i(glGetUniformLocation(shader, "texSampler"), 0);
+				break;
+			case TextureType::NORMAL:
+				glBindTexture(GL_TEXTURE_2D, texture.handle);
+				glUniform1i(glGetUniformLocation(shader, "normalSampler"), 0);
+				break;
+			case TextureType::SPECULAR:
+				// Not yet implemented
+				break;
+			case TextureType::CUBE:
+				glBindTexture(GL_TEXTURE_CUBE_MAP, texture.handle);
+				glUniform1i(glGetUniformLocation(shader, "cubeSampler"), 0);
+				break;
+
+			default:
+				break;
+			}
+			//Provide cubemap component (reflections, skyboxes etc.)
+		}
 
 		//Provide flat colour component
 		glUniform4f(
