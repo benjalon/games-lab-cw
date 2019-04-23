@@ -48,10 +48,12 @@ Mesh Model::load_model(std::string file)
 
 	//Ensure VBO has been generated
 	glGenBuffers(1, &vbo);
+	glGenBuffers(1, &ebo);
 
 	//Load all model data from aiScene
 	size_t totalVertices = 0;
 	size_t currentVertices = 0;
+	size_t currentIndices = 0;
 	size_t prevTotal;
 
 	/*m_GlobalInverseTransform = Mat4AssimpToGLM(scene->mRootNode->mTransformation);
@@ -67,7 +69,9 @@ Mesh Model::load_model(std::string file)
 	{
 		aiMesh *mesh = scene->mMeshes[i];
 		m.materials.push_back(mesh->mMaterialIndex);
-		m.mesh_starts.push_back(currentVertices);
+		m.base_vertex.push_back(currentVertices);
+		m.base_index.push_back(currentIndices);
+		m.index_count.push_back(mesh->mNumFaces * 3);
 
 		for (size_t k = 0; k < mesh->mNumVertices; k++) {
 			aiVector3D pos = (mesh->HasPositions()) ?
@@ -94,7 +98,8 @@ Mesh Model::load_model(std::string file)
 
 		prevTotal = currentVertices;
 		currentVertices += mesh->mNumVertices;
-		m.mesh_sizes.push_back(currentVertices);
+		currentIndices += mesh->mNumFaces * 3;
+		m.vertex_count.push_back(currentVertices);
 
 		//if (mesh->HasBones())
 		//{
@@ -153,6 +158,16 @@ Mesh Model::load_model(std::string file)
 		//		}
 		//	}
 		//}
+
+
+		// Populate the indices array 
+		for (unsigned int i = 0; i < mesh->mNumFaces; i++) {
+			const aiFace& Face = mesh->mFaces[i];
+			assert(Face.mNumIndices == 3);
+			ebo_data.push_back(Face.mIndices[0]);
+			ebo_data.push_back(Face.mIndices[1]);
+			ebo_data.push_back(Face.mIndices[2]);
+		}
 
 	}
 
@@ -224,6 +239,8 @@ Mesh Model::load_model(std::string file)
 	//	m.materials[i] = (GLuint)materialRemap[o];
 	//}
 
+	// Vertex-related
+
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 	glBufferData(GL_ARRAY_BUFFER, vbo_data.size() * sizeof(VertexData), &vbo_data[0], GL_STATIC_DRAW);
 
@@ -240,8 +257,13 @@ Mesh Model::load_model(std::string file)
 	glEnableVertexAttribArray(3);
 	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(VertexData), (GLvoid*)offsetof(VertexData, tangent));
 
-	glBindVertexArray(0);
-	vbo_data.clear();
+	// TODO: CLEAR VBO DATA
+
+	// Index-related (to ensure correct draw order)
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(ebo_data[0]) * ebo_data.size(), &ebo_data[0], GL_STATIC_DRAW);
+
+	ebo_data.clear();
 
 	return m;
 }

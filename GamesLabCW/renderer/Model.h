@@ -9,8 +9,10 @@
 struct Mesh
 {
 	GLuint vao;
-	std::vector<GLuint> mesh_starts;
-	std::vector<GLuint> mesh_sizes;
+	std::vector<GLuint> base_vertex;
+	std::vector<GLuint> base_index;
+	std::vector<GLuint> index_count;
+	std::vector<GLuint> vertex_count;
 	std::vector<GLuint> materials;
 	size_t num_materials;
 
@@ -32,6 +34,8 @@ class Model
 private:
 	GLuint vbo;
 	std::vector<VertexData> vbo_data;
+	GLuint ebo; // Index buffer
+	std::vector<GLuint> ebo_data;
 
 public:
 	Model();
