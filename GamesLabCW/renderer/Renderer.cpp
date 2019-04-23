@@ -65,14 +65,10 @@ namespace game::renderer
 		}
 	}
 
-	
-	//Global textures collection
-	std::vector<Texture> textures;
-	std::vector<Texture> normalMaps;
 	std::map<std::string, Texture> external_textures;
 
 	//Dictionary of meshes
-	std::unordered_map<std::string, Mesh> meshes;
+	std::unordered_map<std::string, Model> models;
 
 	struct BoneAnimation
 	{
@@ -157,25 +153,24 @@ namespace game::renderer
 	glm::mat4 GlobalTransformation; //!< Root node transformation. 
 	glm::mat4 m_GlobalInverseTransform;
 	std::vector<VertexBoneData> bones;
-	
-	void load_external_texture(std::string path, std::string model_path, TextureType type)
-	{
-		auto texture = Texture(path);
-		texture.type = type;
-		external_textures.emplace(model_path, texture); // Need to map this texture with a model, since it was loaded externally
-	}
+	//
+	//void load_external_texture(std::string path, std::string model_path, TextureType type)
+	//{
+	//	auto texture = Texture(path);
+	//	texture.type = type;
+	//	external_textures.emplace(model_path, texture); // Need to map this texture with a model, since it was loaded externally
+	//}
 
-	void load_external_cubemap(std::string paths[6], std::string model_path, TextureType type, bool skybox)
-	{
-		auto cubemap = Texture(paths, skybox);
-		cubemap.type = type;
-		cubemap.isSkybox = skybox;
-		external_textures.emplace(model_path, cubemap); // Need to map this texture with a model, since it was loaded externally
-	}
+	//void load_external_cubemap(std::string paths[6], std::string model_path, TextureType type, bool skybox)
+	//{
+	//	auto cubemap = Texture(paths, skybox);
+	//	cubemap.type = type;
+	//	cubemap.isSkybox = skybox;
+	//	external_textures.emplace(model_path, cubemap); // Need to map this texture with a model, since it was loaded externally
+	//}
 
 	void load_model(std::string file) {
-		Model model = Model();
-		meshes.emplace(file, model.load_model(file)).first->second;
+		models.emplace(file, Model(file)).first->second;
 	}
 
 	void finalise() {
@@ -418,73 +413,51 @@ namespace game::renderer
 		glEnable(GL_DEPTH_TEST);
 	}
 
-	void render_model(CameraComponent camera, ModelComponent &model, ColourComponent c, TransformComponent t,
+	void render_model(CameraComponent camera, ModelComponent &m, ColourComponent c, TransformComponent t,
 		size_t n_ambient, AmbientLightComponent *ambients, size_t n_directional, DirectionalLightComponent *directionals,
 		size_t n_point, PointLightComponent *points)
 	{
 
 		//Get the model, aborting if not found
-		auto it = meshes.find(model.model_file);
-		if (it == meshes.end()) return;
-		const Mesh &mesh = it->second;
+		auto it = models.find(m.model_file);
+		if (it == models.end()) return;
+		Model &model = it->second;
 
-		//Bind correct VAO
-		glBindVertexArray(mesh.vao);
+		
+		//Determine and use appropriate shader
+		GLuint shader = get_shader(model.IsTextured(), model.IsNormalMapped(), n_ambient, n_directional, n_point, m.vertex_shader, m.fragment_shader);
+		glUseProgram(shader);
 
-		glm::mat4 v;
+		//if (model.IsAnimated())
+		//{
+		//	m.hasBones = true;
+		//	auto animationIt = animations.find(m.model_file);
+		//	if (animationIt == animations.end()) return;
+		//	BoneAnimation &animation = animationIt->second;
+		//	animation.shader = shader;
 
-		auto tx_it = external_textures.find(model.model_file);
+		//	// TODO: Delete this
+		//}
+
+		//Calculate MVP matrices
+		glm::mat4 matProj = proj_matrix(camera);
+
+		glm::mat4 matView;
+
+		auto tx_it = external_textures.find(m.model_file);
 		if (tx_it != external_textures.end() && tx_it->second.isSkybox)
 		{
 			// Skyboxes must be rendered behind everything else so disregard camera transform 
 			// and change depth setting
-		    glDepthFunc(GL_LEQUAL);
-			v = glm::mat3(view_matrix(camera));
+			glDepthFunc(GL_LEQUAL);
+			matView = glm::mat3(view_matrix(camera));
 		}
 		else
 		{
 			// Regular render settings
 			glDepthFunc(GL_LESS);
-			v = view_matrix(camera);
+			matView = view_matrix(camera);
 		}
-		
-		//Determine and use appropriate shader
-		GLuint shader = get_shader(mesh.textured, mesh.normal_mapped,n_ambient, n_directional, n_point, model.vertex_shader, model.fragment_shader);
-		glUseProgram(shader);
-
-		if (mesh.hasBones)
-		{
-			model.hasBones = true;
-			auto animationIt = animations.find(model.model_file);
-			if (animationIt == animations.end()) return;
-			BoneAnimation &animation = animationIt->second;
-			animation.shader = shader;
-
-			// TODO: Delete this
-		}
-
-		//Calculate MVP matrices
-		glm::mat4 p = proj_matrix(camera);
-
-		glm::mat4 m = glm::translate(glm::vec3(t.position)) *
-			glm::rotate(R(t.rotation.x), glm::vec3(1, 0, 0)) *
-			glm::rotate(R(t.rotation.z), glm::vec3(0, 0, 1)) *
-			glm::rotate(R(t.rotation.y), glm::vec3(0, 1, 0)) *
-			glm::scale(glm::vec3(t.scale));
-
-		//Provide MVP matrices
-		glUniformMatrix4fv(
-			glGetUniformLocation(shader, "projectionMatrix"),
-			1, GL_FALSE, glm::value_ptr(p)
-		);
-		glUniformMatrix4fv(
-			glGetUniformLocation(shader, "viewMatrix"),
-			1, GL_FALSE, glm::value_ptr(v)
-		);
-		glUniformMatrix4fv(
-			glGetUniformLocation(shader, "modelMatrix"),
-			1, GL_FALSE, glm::value_ptr(m)
-		);
 
 		if (tx_it != external_textures.end())
 		{
@@ -515,6 +488,26 @@ namespace game::renderer
 			//Provide cubemap component (reflections, skyboxes etc.)
 		}
 
+		glm::mat4 matModel = glm::translate(glm::vec3(t.position)) *
+			glm::rotate(R(t.rotation.x), glm::vec3(1, 0, 0)) *
+			glm::rotate(R(t.rotation.z), glm::vec3(0, 0, 1)) *
+			glm::rotate(R(t.rotation.y), glm::vec3(0, 1, 0)) *
+			glm::scale(glm::vec3(t.scale));
+
+		//Provide MVP matrices
+		glUniformMatrix4fv(
+			glGetUniformLocation(shader, "projectionMatrix"),
+			1, GL_FALSE, glm::value_ptr(matProj)
+		);
+		glUniformMatrix4fv(
+			glGetUniformLocation(shader, "viewMatrix"),
+			1, GL_FALSE, glm::value_ptr(matView)
+		);
+		glUniformMatrix4fv(
+			glGetUniformLocation(shader, "modelMatrix"),
+			1, GL_FALSE, glm::value_ptr(matModel)
+		);
+
 		//Provide flat colour component
 		glUniform4f(
 			glGetUniformLocation(shader, "flatColour"),
@@ -525,7 +518,7 @@ namespace game::renderer
 		//Provide shininess value (used to determine how much specular highlighting the model will have)
 		glUniform1f(
 			glGetUniformLocation(shader, "shininess"),
-			(GLfloat)model.shininess
+			(GLfloat)m.shininess
 		);
 
 		// Provide camera position for eye calculations
@@ -595,41 +588,6 @@ namespace game::renderer
 				(GLfloat)points[i].exponent);
 		}
 
-		// Drawing stuff
-		glBindVertexArray(mesh.vao);
-
-		//Draw the model
-		for (size_t i = 0; i < mesh.vertex_count.size(); i++)
-		{
-			int offset = 0;
-
-			//Bind texture if the model has them
-			if (mesh.textured)
-			{
-				Texture &t = textures[mesh.materials[i]];
-
-				glActiveTexture(GL_TEXTURE0);
-				glBindTexture(GL_TEXTURE_2D, t.handle);
-				glUniform1i(glGetUniformLocation(shader, "texSampler"), 0);
-
-				offset++;
-			}
-
-			// Bind model normal maps
-			if (mesh.normal_mapped)
-			{
-				Texture &n = normalMaps[mesh.materials[i]];
-
-				glActiveTexture(GL_TEXTURE0 + offset);
-				glBindTexture(GL_TEXTURE_2D, n.handle);
-				glUniform1i(glGetUniformLocation(shader, "normalSampler"), offset);
-
-				offset++;
-			}
-
-			glDrawElementsBaseVertex(GL_TRIANGLES, mesh.index_count[i], GL_UNSIGNED_INT, (void*)(sizeof(unsigned int) * mesh.base_index[i]), mesh.base_vertex[i]);
-		}
-
-		glBindVertexArray(0);
+		model.Render(shader);
 	}
 }

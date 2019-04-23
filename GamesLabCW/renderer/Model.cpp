@@ -16,7 +16,7 @@ namespace game
 		return dir;
 	}
 
-	Mesh Model::load_model(std::string file)
+	Model::Model(std::string file)
 	{
 		//Load model from file
 		static Assimp::Importer imp;
@@ -30,12 +30,10 @@ namespace game
 
 		//Abort if unsuccessful
 		std::cout << (scene ? "Loaded model " : "Could not load model ") << file << std::endl;
-		if (!scene) return Mesh();
+		if (!scene) return;
 
-		Mesh m = Mesh();
-
-		glGenVertexArrays(1, &m.vao);
-		glBindVertexArray(m.vao);
+		glGenVertexArrays(1, &vao);
+		glBindVertexArray(vao);
 		
 		vbo = VBO();
 		vbo.create();
@@ -61,10 +59,10 @@ namespace game
 		for (size_t i = 0; i < scene->mNumMeshes; i++)
 		{
 			aiMesh *mesh = scene->mMeshes[i];
-			m.materials.push_back(mesh->mMaterialIndex);
-			m.base_vertex.push_back(currentVertices);
-			m.base_index.push_back(currentIndices);
-			m.index_count.push_back(mesh->mNumFaces * 3);
+			materials.push_back(mesh->mMaterialIndex);
+			base_vertex.push_back(currentVertices);
+			base_index.push_back(currentIndices);
+			index_count.push_back(mesh->mNumFaces * 3);
 
 			for (size_t k = 0; k < mesh->mNumVertices; k++) {
 				aiVector3D pos = (mesh->HasPositions()) ?
@@ -92,7 +90,7 @@ namespace game
 			prevTotal = currentVertices;
 			currentVertices += mesh->mNumVertices;
 			currentIndices += mesh->mNumFaces * 3;
-			m.vertex_count.push_back(currentVertices);
+			vertex_count.push_back(currentVertices);
 
 			//if (mesh->HasBones())
 			//{
@@ -164,76 +162,73 @@ namespace game
 
 		}
 
-		//m.num_materials = scene->mNumMaterials;
-		//std::vector<size_t> materialRemap(m.num_materials);
+		num_materials = scene->mNumMaterials;
+		std::vector<size_t> materialRemap(num_materials);
 
-		//for (size_t i = 0; i < m.num_materials; i++)
-		//{
-		//	const aiMaterial *material = scene->mMaterials[i];
-		//	int texIndex = 0;
-		//	aiString path;
+		for (size_t i = 0; i < num_materials; i++)
+		{
+			const aiMaterial *material = scene->mMaterials[i];
+			int texIndex = 0;
+			aiString path;
 
-		//	if (material->GetTexture(aiTextureType_DIFFUSE, texIndex, &path) == AI_SUCCESS)
-		//	{
-		//		m.textured = true;
-		//		std::string fullPath = strip_last_path(file) + path.data;
+			if (material->GetTexture(aiTextureType_DIFFUSE, texIndex, &path) == AI_SUCCESS)
+			{
+				isTextured = true;
+				std::string fullPath = strip_last_path(file) + path.data;
 
-		//		int texFound = -1;
-		//		for (int j = 0; j < (int)textures.size(); j++)
-		//			if (fullPath == textures[j].path)
-		//			{
-		//				texFound = j;
-		//				break;
-		//			}
-		//		if (texFound != -1)
-		//			materialRemap[i] = texFound;
-		//		else
-		//		{
-		//			Texture t(fullPath, true);
-		//			materialRemap[i] = textures.size();
-		//			textures.push_back(t);
-		//		}
-		//	}
-		//}
+				int texFound = -1;
+				for (int j = 0; j < (int)textures.size(); j++)
+					if (fullPath == textures[j].path)
+					{
+						texFound = j;
+						break;
+					}
+				if (texFound != -1)
+					materialRemap[i] = texFound;
+				else
+				{
+					Texture t(fullPath, true);
+					textures.push_back(t);
+				}
+			}
+		}
 
 
-		//for (size_t i = 0; i < m.num_materials; i++)
-		//{
-		//	const aiMaterial *material = scene->mMaterials[i];
-		//	int texIndex = 0;
-		//	aiString path;
+		for (size_t i = 0; i < num_materials; i++)
+		{
+			const aiMaterial *material = scene->mMaterials[i];
+			int texIndex = 0;
+			aiString path;
 
-		//	if (material->GetTexture(aiTextureType_HEIGHT, texIndex, &path) == AI_SUCCESS) // Note assimp treats the way .obj stores normalmaps as heightmaps
-		//	{
-		//		m.normal_mapped = true;
-		//		std::string fullPath = strip_last_path(file) + path.data;
+			if (material->GetTexture(aiTextureType_HEIGHT, texIndex, &path) == AI_SUCCESS) // Note assimp treats the way .obj stores normalmaps as heightmaps
+			{
+				isNormalMapped = true;
+				std::string fullPath = strip_last_path(file) + path.data;
 
-		//		int normalFound = -1;
-		//		for (int j = 0; j < (int)normalMaps.size(); j++)
-		//			if (fullPath == normalMaps[j].path)
-		//			{
-		//				normalFound = j;
-		//				break;
-		//			}
-		//		if (normalFound != -1)
-		//			materialRemap[i] = normalFound;
-		//		else
-		//		{
-		//			Texture t(fullPath, true);
-		//			materialRemap[i] = normalMaps.size();
-		//			normalMaps.push_back(t);
-		//		}
-		//	}
-		//}
+				int normalFound = -1;
+				for (int j = 0; j < (int)normalMaps.size(); j++)
+					if (fullPath == normalMaps[j].path)
+					{
+						normalFound = j;
+						break;
+					}
+				if (normalFound != -1)
+					materialRemap[i] = normalFound;
+				else
+				{
+					Texture t(fullPath, true);
+					normalMaps.push_back(t);
+				}
+			}
+		}
 
-		//for (int i = 0; i < (int)m.mesh_sizes.size(); i++)
-		//{
-		//	int o = m.materials[i];
-		//	m.materials[i] = (GLuint)materialRemap[o];
-		//}
+		for (int i = 0; i < (int)index_count.size(); i++)
+		{
+			int o = materials[i];
+			materials[i] = (GLuint)materialRemap[o];
+		}
 
 		// Vertex-related
-
 		vbo.bind();
 		vbo.upload(GL_STATIC_DRAW);
 
@@ -253,7 +248,45 @@ namespace game
 		// Index-related (to ensure correct draw order)
 		ebo.bind();
 		ebo.upload(GL_STATIC_DRAW);
+	}
 
-		return m;
+	void Model::Render(GLuint shader)
+	{
+		// Drawing stuff
+		glBindVertexArray(vao);
+
+		//Draw the model
+		for (size_t i = 0; i < vertex_count.size(); i++)
+		{
+			int offset = 0;
+
+			//Bind texture if the model has them
+			if (isTextured)
+			{
+				Texture &t = textures[materials[i]];
+
+				glActiveTexture(GL_TEXTURE0);
+				glBindTexture(GL_TEXTURE_2D, t.handle);
+				glUniform1i(glGetUniformLocation(shader, "texSampler"), 0);
+
+				offset++;
+			}
+
+			// Bind model normal maps
+			if (isNormalMapped)
+			{
+				Texture &n = normalMaps[materials[i]];
+
+				glActiveTexture(GL_TEXTURE0 + offset);
+				glBindTexture(GL_TEXTURE_2D, n.handle);
+				glUniform1i(glGetUniformLocation(shader, "normalSampler"), offset);
+
+				offset++;
+			}
+
+			glDrawElementsBaseVertex(GL_TRIANGLES, index_count[i], GL_UNSIGNED_INT, (void*)(sizeof(unsigned int) * base_index[i]), base_vertex[i]);
+		}
+
+		glBindVertexArray(0);
 	}
 }

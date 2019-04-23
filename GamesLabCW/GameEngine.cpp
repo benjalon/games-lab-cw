@@ -56,14 +56,14 @@ game::GameEngine::GameEngine(bool fullscreen, bool vsync, bool ground) :
 	prototypes::register_prototypes();
 
 	//EXAMPLE Load models
-	//renderer::load_model("models/Cyborg/cyborg.obj");
-	renderer::load_model("models/Room/room.obj");
+	renderer::load_model("models/Cyborg/cyborg.obj");
+    renderer::load_model("models/Room/room.obj");
 	renderer::load_model("models/Water/water.obj");
-	renderer::load_model("models/Skybox/skybox.obj");
+	//renderer::load_model("models/Skybox/skybox.obj");
 	renderer::load_model("models/Torch/torch.obj");
 	renderer::load_model("models/Minotaur/Minotaur@Jump.fbx");
 
-	std::string paths[6] = {
+	/*std::string paths[6] = {
 		"models/Skybox/hw_ruins/ruins_lf.tga",
 		"models/Skybox/hw_ruins/ruins_rt.tga",
 		"models/Skybox/hw_ruins/ruins_up.tga",
@@ -71,7 +71,7 @@ game::GameEngine::GameEngine(bool fullscreen, bool vsync, bool ground) :
 		"models/Skybox/hw_ruins/ruins_ft.tga",
 		"models/Skybox/hw_ruins/ruins_bk.tga" };
 	renderer::load_external_cubemap(paths, "models/Skybox/skybox.obj", TextureType::CUBE, true);
-	renderer::load_external_cubemap(paths, "models/Water/water.obj", TextureType::CUBE, false);
+	renderer::load_external_cubemap(paths, "models/Water/water.obj", TextureType::CUBE, false);*/
 
 	renderer::finalise();
 
@@ -118,9 +118,9 @@ void game::GameEngine::run()
 	// Portal light
 	scene_.instantiate("PointLight", PointLightComponent{ {1, 105.0 / 255.0, 180.0 / 255.0}, 40, { 3, 3, 22} });
 
-	TransformComponent t_skybox; t_skybox.scale = { 20, 20, 20 };
+	/*TransformComponent t_skybox; t_skybox.scale = { 20, 20, 20 };
 	ModelComponent m_skybox; m_skybox.model_file = "models/Skybox/skybox.obj"; m_skybox.vertex_shader = "shaders/Skybox.vert"; m_skybox.fragment_shader = "shaders/Skybox.frag";
-	scene_.instantiate("Model", m_skybox, t_skybox);
+	scene_.instantiate("Model", m_skybox, t_skybox);*/
 
 	scene_.instantiate("AmbientLight", AmbientLightComponent{ {1, 147.0 / 255.0, 41.0 / 255.0}, 0.01 });
 	scene_.instantiate("DirectionalLight", DirectionalLightComponent{ {0, 0, 0}, 0, {0,0,0} });
