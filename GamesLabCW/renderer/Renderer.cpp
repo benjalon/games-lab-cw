@@ -77,10 +77,7 @@ namespace game::renderer
 
 	//Global vertex buffer object
 	GLuint vbo;
-	//std::vector<unsigned char> vbo_data;
 	std::vector<VertexData> vbo_data;
-	//size_t vbo_size = 0;
-	bool vbo_created = false;
 
 	//Global textures collection
 	std::vector<Texture> textures;
@@ -219,11 +216,11 @@ namespace game::renderer
 		//Ensure model hasn't already been loaded
 		if (meshes.find(file) != meshes.end()) return;
 
+		glGenVertexArrays(1, &vao);
+		glBindVertexArray(vao);
+
 		//Ensure VBO has been generated
-		if (!vbo_created) {
-			glGenBuffers(1, &vbo);
-			vbo_created = true;
-		}
+		glGenBuffers(1, &vbo);
 
 		//Load model from file
 		static Assimp::Importer imp;
@@ -244,7 +241,6 @@ namespace game::renderer
 		Mesh &m = meshes.emplace(file, Mesh()).first->second;
 
 		//Load all model data from aiScene
-		const size_t vertexTotalSize = sizeof(aiVector3D) * 3 + sizeof(aiVector2D);
 		size_t totalVertices = 0;
 		size_t currentVertices = 0;
 		size_t prevTotal;
@@ -261,36 +257,30 @@ namespace game::renderer
 		for (size_t i = 0; i < scene->mNumMeshes; i++)
 		{
 			aiMesh *mesh = scene->mMeshes[i];
-			size_t meshFaces = mesh->mNumFaces;
 			m.materials.push_back(mesh->mMaterialIndex);
 			m.mesh_starts.push_back(currentVertices);
 
-			for (size_t j = 0; j < meshFaces; j++)
-			{
-				const aiFace &face = mesh->mFaces[j];
-				for (int k = 0; k < 3; k++)
-				{
-					aiVector3D pos = (mesh->HasPositions()) ?
-						mesh->mVertices[face.mIndices[k]] :
-						aiVector3D(1.0f, 1.0f, 1.0f);
-					//WARNING - SHOULD THIS BE aiVector2D ???
-					aiVector3D uv = (mesh->GetNumUVChannels() > 0) ?
-						mesh->mTextureCoords[0][face.mIndices[k]] :
-						aiVector3D(1.0f, 1.0f, 1.0f);
-					aiVector3D normal = (mesh->HasNormals()) ?
-						mesh->mNormals[face.mIndices[k]] :
-						aiVector3D(1.0f, 1.0f, 1.0f);
-					aiVector3D tangent = (mesh->HasTangentsAndBitangents()) ?
-						mesh->mTangents[face.mIndices[k]] :
-						aiVector3D(1.0f, 1.0f, 1.0f);
+			for (size_t k = 0; k < mesh->mNumVertices; k++) {
+				aiVector3D pos = (mesh->HasPositions()) ?
+					mesh->mVertices[k] :
+					aiVector3D(1.0f, 1.0f, 1.0f);
+				//WARNING - SHOULD THIS BE aiVector2D ???
+				aiVector3D uv = (mesh->GetNumUVChannels() > 0) ?
+					mesh->mTextureCoords[0][k] :
+					aiVector3D(1.0f, 1.0f, 1.0f);
+				aiVector3D normal = (mesh->HasNormals()) ?
+					mesh->mNormals[k] :
+					aiVector3D(1.0f, 1.0f, 1.0f);
+				aiVector3D tangent = (mesh->HasTangentsAndBitangents()) ?
+					mesh->mTangents[k] :
+					aiVector3D(1.0f, 1.0f, 1.0f);
 
-					VertexData vertexData;
-					vertexData.pos = pos;
-					vertexData.uv = uv;
-					vertexData.normal = normal;
-					vertexData.tangent = tangent;
-					vbo_data.push_back(vertexData);
-				}
+				VertexData vertexData;
+				vertexData.pos = pos;
+				vertexData.uv = uv;
+				vertexData.normal = normal;
+				vertexData.tangent = tangent;
+				vbo_data.push_back(vertexData);
 			}
 
 			prevTotal = currentVertices;
@@ -424,31 +414,30 @@ namespace game::renderer
 			int o = m.materials[i];
 			m.materials[i] = (GLuint)materialRemap[o];
 		}
-	}
 
-	void finalise()
-	{
-		//Generate and bind VAO
-		glGenVertexArrays(1, &vao);
-		glBindVertexArray(vao);
-
-		//Bind and upload VBO
 		glBindBuffer(GL_ARRAY_BUFFER, vbo);
 		glBufferData(GL_ARRAY_BUFFER, vbo_data.size() * sizeof(VertexData), &vbo_data[0], GL_STATIC_DRAW);
-		vbo_data.clear();
 
 		//Vertex positions
 		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void*)0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexData), (GLvoid*)offsetof(VertexData, pos));
 		//Texture coordinates
 		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void*)sizeof(aiVector3D));
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(VertexData), (GLvoid*)offsetof(VertexData, uv));
 		//Normal vectors
 		glEnableVertexAttribArray(2);
-		glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void*)(sizeof(aiVector3D) + sizeof(aiVector2D)));
+		glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(VertexData), (GLvoid*)offsetof(VertexData, normal));
 		//Tangent vectors
 		glEnableVertexAttribArray(3);
-		glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void*)(2 * sizeof(aiVector3D) + sizeof(aiVector2D)));
+		glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(VertexData), (GLvoid*)offsetof(VertexData, tangent));
+
+		glBindVertexArray(0);
+		vbo_data.clear();
+	}
+
+
+	void finalise() {
+		// TODO DELETE THIS
 	}
 
 	//Calculates the projection matrix for a camera
@@ -893,7 +882,9 @@ namespace game::renderer
 			}
 
 			//Draw the triangles
+			glBindVertexArray(vao);
 			glDrawArrays(GL_TRIANGLES, mesh.mesh_starts[i], mesh.mesh_sizes[i]);
+			glBindVertexArray(vao);
 		}
 	}
 }
