@@ -67,10 +67,19 @@ namespace game::renderer
 	//Global vertex array object
 	GLuint vao;
 
+	struct VertexData
+	{
+		aiVector3D pos;
+		aiVector3D uv;
+		aiVector3D normal;
+		aiVector3D tangent;
+	};
+
 	//Global vertex buffer object
 	GLuint vbo;
-	std::vector<unsigned char> vbo_data;
-	size_t vbo_size = 0;
+	//std::vector<unsigned char> vbo_data;
+	std::vector<VertexData> vbo_data;
+	//size_t vbo_size = 0;
 	bool vbo_created = false;
 
 	//Global textures collection
@@ -254,8 +263,7 @@ namespace game::renderer
 			aiMesh *mesh = scene->mMeshes[i];
 			size_t meshFaces = mesh->mNumFaces;
 			m.materials.push_back(mesh->mMaterialIndex);
-			size_t size0 = vbo_size;
-			m.mesh_starts.push_back((GLuint)size0 / vertexTotalSize);
+			m.mesh_starts.push_back(currentVertices);
 
 			for (size_t j = 0; j < meshFaces; j++)
 			{
@@ -276,23 +284,18 @@ namespace game::renderer
 						mesh->mTangents[face.mIndices[k]] :
 						aiVector3D(1.0f, 1.0f, 1.0f);
 
-					vbo_data.insert(vbo_data.end(), (unsigned char*)&pos, (unsigned char*)&pos + sizeof(aiVector3D));
-					vbo_size += sizeof(aiVector3D);
-
-					vbo_data.insert(vbo_data.end(), (unsigned char*)&uv, (unsigned char*)&uv + sizeof(aiVector2D));
-					vbo_size += sizeof(aiVector2D);
-
-					vbo_data.insert(vbo_data.end(), (unsigned char*)&normal, (unsigned char*)&normal + sizeof(aiVector3D));
-					vbo_size += sizeof(aiVector3D);
-
-					vbo_data.insert(vbo_data.end(), (unsigned char*)&tangent, (unsigned char*)&tangent + sizeof(aiVector3D));
-					vbo_size += sizeof(aiVector3D);
+					VertexData vertexData;
+					vertexData.pos = pos;
+					vertexData.uv = uv;
+					vertexData.normal = normal;
+					vertexData.tangent = tangent;
+					vbo_data.push_back(vertexData);
 				}
 			}
 
 			prevTotal = currentVertices;
 			currentVertices += mesh->mNumVertices;
-			m.mesh_sizes.push_back((GLuint)(vbo_size - size0) / vertexTotalSize);
+			m.mesh_sizes.push_back(currentVertices);
 
 			if (mesh->HasBones())
 			{
@@ -431,21 +434,21 @@ namespace game::renderer
 
 		//Bind and upload VBO
 		glBindBuffer(GL_ARRAY_BUFFER, vbo);
-		glBufferData(GL_ARRAY_BUFFER, vbo_data.size(), &vbo_data[0], GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, vbo_data.size() * sizeof(VertexData), &vbo_data[0], GL_STATIC_DRAW);
 		vbo_data.clear();
 
 		//Vertex positions
 		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(aiVector3D) + sizeof(aiVector2D), (void*)0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void*)0);
 		//Texture coordinates
 		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 3 * sizeof(aiVector3D) + sizeof(aiVector2D), (void*)sizeof(aiVector3D));
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void*)sizeof(aiVector3D));
 		//Normal vectors
 		glEnableVertexAttribArray(2);
-		glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(aiVector3D) + sizeof(aiVector2D), (void*)(sizeof(aiVector3D) + sizeof(aiVector2D)));
+		glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void*)(sizeof(aiVector3D) + sizeof(aiVector2D)));
 		//Tangent vectors
 		glEnableVertexAttribArray(3);
-		glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(aiVector3D) + sizeof(aiVector2D), (void*)(2 * sizeof(aiVector3D) + sizeof(aiVector2D)));
+		glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void*)(2 * sizeof(aiVector3D) + sizeof(aiVector2D)));
 	}
 
 	//Calculates the projection matrix for a camera
