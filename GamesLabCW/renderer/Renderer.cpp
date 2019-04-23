@@ -413,9 +413,9 @@ namespace game::renderer
 	{
 		//Configure OpenGL
 		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-		//glEnable(GL_BLEND);
+		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		//glEnable(GL_DEPTH_TEST);
+		glEnable(GL_DEPTH_TEST);
 	}
 
 	void render_model(CameraComponent camera, ModelComponent &model, ColourComponent c, TransformComponent t,
@@ -595,7 +595,7 @@ namespace game::renderer
 				(GLfloat)points[i].exponent);
 		}
 
-		//Draw the triangles
+		// Drawing stuff
 		glBindVertexArray(mesh.vao);
 
 		//Draw the model
@@ -627,13 +627,7 @@ namespace game::renderer
 				offset++;
 			}
 
-			glDrawElementsBaseVertex(GL_TRIANGLES,
-				mesh.index_count[i],
-				GL_UNSIGNED_INT,
-				(void*)(sizeof(unsigned int) * mesh.base_index[i]),
-				mesh.base_vertex[i]);
-
-			//glDrawArrays(GL_TRIANGLES, mesh.base_vertex[i], mesh.vertex_count[i]);
+			glDrawElementsBaseVertex(GL_TRIANGLES, mesh.index_count[i], GL_UNSIGNED_INT, (void*)(sizeof(unsigned int) * mesh.base_index[i]), mesh.base_vertex[i]);
 		}
 
 		glBindVertexArray(0);
