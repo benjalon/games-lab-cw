@@ -68,7 +68,10 @@ namespace game::renderer
 	GLuint vao;
 
 	//Global vertex buffer object
-	VBO vbo;
+	GLuint vbo;
+	std::vector<unsigned char> vbo_data;
+	size_t vbo_size = 0;
+	bool vbo_created = false;
 
 	//Global textures collection
 	std::vector<Texture> textures;
@@ -208,8 +211,10 @@ namespace game::renderer
 		if (meshes.find(file) != meshes.end()) return;
 
 		//Ensure VBO has been generated
-		if (!vbo.created())
-			vbo.create();
+		if (!vbo_created) {
+			glGenBuffers(1, &vbo);
+			vbo_created = true;
+		}
 
 		//Load model from file
 		static Assimp::Importer imp;
@@ -249,7 +254,7 @@ namespace game::renderer
 			aiMesh *mesh = scene->mMeshes[i];
 			size_t meshFaces = mesh->mNumFaces;
 			m.materials.push_back(mesh->mMaterialIndex);
-			size_t size0 = vbo.size();
+			size_t size0 = vbo_size;
 			m.mesh_starts.push_back((GLuint)size0 / vertexTotalSize);
 
 			for (size_t j = 0; j < meshFaces; j++)
@@ -271,16 +276,23 @@ namespace game::renderer
 						mesh->mTangents[face.mIndices[k]] :
 						aiVector3D(1.0f, 1.0f, 1.0f);
 
-					vbo.add_data(&pos, sizeof(aiVector3D));
-					vbo.add_data(&uv, sizeof(aiVector2D));
-					vbo.add_data(&normal, sizeof(aiVector3D));
-					vbo.add_data(&tangent, sizeof(aiVector3D));
+					vbo_data.insert(vbo_data.end(), (unsigned char*)&pos, (unsigned char*)&pos + sizeof(aiVector3D));
+					vbo_size += sizeof(aiVector3D);
+
+					vbo_data.insert(vbo_data.end(), (unsigned char*)&uv, (unsigned char*)&uv + sizeof(aiVector2D));
+					vbo_size += sizeof(aiVector2D);
+
+					vbo_data.insert(vbo_data.end(), (unsigned char*)&normal, (unsigned char*)&normal + sizeof(aiVector3D));
+					vbo_size += sizeof(aiVector3D);
+
+					vbo_data.insert(vbo_data.end(), (unsigned char*)&tangent, (unsigned char*)&tangent + sizeof(aiVector3D));
+					vbo_size += sizeof(aiVector3D);
 				}
 			}
 
 			prevTotal = currentVertices;
 			currentVertices += mesh->mNumVertices;
-			m.mesh_sizes.push_back((GLuint)(vbo.size() - size0) / vertexTotalSize);
+			m.mesh_sizes.push_back((GLuint)(vbo_size - size0) / vertexTotalSize);
 
 			if (mesh->HasBones())
 			{
@@ -418,8 +430,9 @@ namespace game::renderer
 		glBindVertexArray(vao);
 
 		//Bind and upload VBO
-		vbo.bind();
-		vbo.upload(GL_STATIC_DRAW);
+		glBindBuffer(GL_ARRAY_BUFFER, vbo);
+		glBufferData(GL_ARRAY_BUFFER, vbo_data.size(), &vbo_data[0], GL_STATIC_DRAW);
+		vbo_data.clear();
 
 		//Vertex positions
 		glEnableVertexAttribArray(0);
