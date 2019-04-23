@@ -18,6 +18,7 @@
 
 #include "Shader.h"
 #include "VBO.h"
+#include "Model.h"
 
 //Quick conversion to radians
 #define R(x) glm::radians((float)x)
@@ -64,37 +65,11 @@ namespace game::renderer
 		}
 	}
 
-	//Global vertex array object
-	GLuint vao;
-
-	struct VertexData
-	{
-		aiVector3D pos;
-		aiVector3D uv;
-		aiVector3D normal;
-		aiVector3D tangent;
-	};
-
-	//Global vertex buffer object
-	GLuint vbo;
-	std::vector<VertexData> vbo_data;
-
+	
 	//Global textures collection
 	std::vector<Texture> textures;
 	std::vector<Texture> normalMaps;
 	std::map<std::string, Texture> external_textures;
-
-	//Represents data of a mesh
-	struct Mesh
-	{
-		std::vector<GLuint> mesh_starts;
-		std::vector<GLuint> mesh_sizes;
-		std::vector<GLuint> materials;
-		size_t num_materials;
-		bool textured;
-		bool normal_mapped;
-		bool hasBones;
-	};
 
 	//Dictionary of meshes
 	std::unordered_map<std::string, Mesh> meshes;
@@ -182,20 +157,7 @@ namespace game::renderer
 	glm::mat4 GlobalTransformation; //!< Root node transformation. 
 	glm::mat4 m_GlobalInverseTransform;
 	std::vector<VertexBoneData> bones;
-
-	//Utility function to remove the final path node from the given file path
-	std::string strip_last_path(std::string path)
-	{
-		std::string dir = "";
-		for (int i = (int)path.size() - 1; i >= 0; i--)
-			if (path[i] == '\\' || path[i] == '/')
-			{
-				dir = path.substr(0, i + 1);
-				break;
-			}
-		return dir;
-	}
-
+	
 	void load_external_texture(std::string path, std::string model_path, TextureType type)
 	{
 		auto texture = Texture(path);
@@ -211,230 +173,10 @@ namespace game::renderer
 		external_textures.emplace(model_path, cubemap); // Need to map this texture with a model, since it was loaded externally
 	}
 
-	void load_model(std::string file)
-	{
-		//Ensure model hasn't already been loaded
-		if (meshes.find(file) != meshes.end()) return;
-
-		glGenVertexArrays(1, &vao);
-		glBindVertexArray(vao);
-
-		//Ensure VBO has been generated
-		glGenBuffers(1, &vbo);
-
-		//Load model from file
-		static Assimp::Importer imp;
-		const aiScene *scene = imp.ReadFile(file,
-			aiProcess_CalcTangentSpace |
-			aiProcess_Triangulate |
-			aiProcess_JoinIdenticalVertices |
-			aiProcess_SortByPType |
-			aiProcess_LimitBoneWeights
-		);
-
-		//Abort if unsuccessful
-		std::cout << (scene ? "Loaded model " : "Could not load model ") << file << std::endl;
-		if (!scene) return;
-
-
-		//Create new model
-		Mesh &m = meshes.emplace(file, Mesh()).first->second;
-
-		//Load all model data from aiScene
-		size_t totalVertices = 0;
-		size_t currentVertices = 0;
-		size_t prevTotal;
-
-		m_GlobalInverseTransform = Mat4AssimpToGLM(scene->mRootNode->mTransformation);
-		m_GlobalInverseTransform = glm::inverse(m_GlobalInverseTransform);
-
-		for (size_t i = 0; i < scene->mNumMeshes; i++)
-		{
-			aiMesh *mesh = scene->mMeshes[i];
-			totalVertices += mesh->mNumVertices;
-		}
-
-		for (size_t i = 0; i < scene->mNumMeshes; i++)
-		{
-			aiMesh *mesh = scene->mMeshes[i];
-			m.materials.push_back(mesh->mMaterialIndex);
-			m.mesh_starts.push_back(currentVertices);
-
-			for (size_t k = 0; k < mesh->mNumVertices; k++) {
-				aiVector3D pos = (mesh->HasPositions()) ?
-					mesh->mVertices[k] :
-					aiVector3D(1.0f, 1.0f, 1.0f);
-				//WARNING - SHOULD THIS BE aiVector2D ???
-				aiVector3D uv = (mesh->GetNumUVChannels() > 0) ?
-					mesh->mTextureCoords[0][k] :
-					aiVector3D(1.0f, 1.0f, 1.0f);
-				aiVector3D normal = (mesh->HasNormals()) ?
-					mesh->mNormals[k] :
-					aiVector3D(1.0f, 1.0f, 1.0f);
-				aiVector3D tangent = (mesh->HasTangentsAndBitangents()) ?
-					mesh->mTangents[k] :
-					aiVector3D(1.0f, 1.0f, 1.0f);
-
-				VertexData vertexData;
-				vertexData.pos = pos;
-				vertexData.uv = uv;
-				vertexData.normal = normal;
-				vertexData.tangent = tangent;
-				vbo_data.push_back(vertexData);
-			}
-
-			prevTotal = currentVertices;
-			currentVertices += mesh->mNumVertices;
-			m.mesh_sizes.push_back(currentVertices);
-
-			if (mesh->HasBones())
-			{
-				m.hasBones = true;
-
-				BoneAnimation &b = animations.emplace(file, BoneAnimation()).first->second;
-
-				// Copy all the data from the scene 
-				b.scene = scene;
-				// End of horrible copy code
-
-				bones.resize(totalVertices);
-
-				// Loop through all bones in the Assimp mesh.
-				for (unsigned int i = 0; i < mesh->mNumBones; i++) {
-
-					unsigned int BoneIndex = 0;
-
-					// Obtain the bone name.
-					std::string BoneName(mesh->mBones[i]->mName.data);
-
-					// If bone isn't already in the map. 
-					if (m_BoneMapping.find(BoneName) == m_BoneMapping.end()) {
-
-						// Set the bone ID to be the current total number of bones. 
-						BoneIndex = m_NumBones;
-
-						// Increment total bones. 
-						m_NumBones++;
-
-						// Push new bone info into bones vector. 
-						BoneInfo bi;
-						m_BoneInfo.push_back(bi);
-					}
-					else {
-						// Bone ID is already in map. 
-						BoneIndex = m_BoneMapping[BoneName];
-					}
-
-					m_BoneMapping[BoneName] = BoneIndex;
-
-					// Obtains the offset matrix which transforms the bone from mesh space into bone space. 
-					m_BoneInfo[BoneIndex].BoneOffset = Mat4AssimpToGLM(mesh->mBones[i]->mOffsetMatrix);
-
-
-					// Iterate over all the affected vertices by this bone i.e weights. 
-					for (unsigned int j = 0; j < mesh->mBones[i]->mNumWeights; j++) {
-
-						// Obtain an index to the affected vertex within the array of vertices.
-						unsigned int VertexID = prevTotal + mesh->mBones[i]->mWeights[j].mVertexId;
-						// The value of how much this bone influences the vertex. 
-						float Weight = mesh->mBones[i]->mWeights[j].mWeight;
-
-						// Insert bone data for particular vertex ID. A maximum of 4 bones can influence the same vertex. 
-						bones[VertexID].AddBoneData(BoneIndex, Weight);
-					}
-				}
-			}
-
-		}
-
-		m.num_materials = scene->mNumMaterials;
-		std::vector<size_t> materialRemap(m.num_materials);
-
-		for (size_t i = 0; i < m.num_materials; i++)
-		{
-			const aiMaterial *material = scene->mMaterials[i];
-			int texIndex = 0;
-			aiString path;
-
-			if (material->GetTexture(aiTextureType_DIFFUSE, texIndex, &path) == AI_SUCCESS)
-			{
-				m.textured = true;
-				std::string fullPath = strip_last_path(file) + path.data;
-
-				int texFound = -1;
-				for (int j = 0; j < (int)textures.size(); j++)
-					if (fullPath == textures[j].path)
-					{
-						texFound = j;
-						break;
-					}
-				if (texFound != -1)
-					materialRemap[i] = texFound;
-				else
-				{
-					Texture t(fullPath, true);
-					materialRemap[i] = textures.size();
-					textures.push_back(t);
-				}
-			}
-		}
-
-
-		for (size_t i = 0; i < m.num_materials; i++)
-		{
-			const aiMaterial *material = scene->mMaterials[i];
-			int texIndex = 0;
-			aiString path;
-
-			if (material->GetTexture(aiTextureType_HEIGHT, texIndex, &path) == AI_SUCCESS) // Note assimp treats the way .obj stores normalmaps as heightmaps
-			{
-				m.normal_mapped = true;
-				std::string fullPath = strip_last_path(file) + path.data;
-
-				int normalFound = -1;
-				for (int j = 0; j < (int)normalMaps.size(); j++)
-					if (fullPath == normalMaps[j].path)
-					{
-						normalFound = j;
-						break;
-					}
-				if (normalFound != -1)
-					materialRemap[i] = normalFound;
-				else
-				{
-					Texture t(fullPath, true);
-					materialRemap[i] = normalMaps.size();
-					normalMaps.push_back(t);
-				}
-			}
-		}
-
-		for (int i = 0; i < (int)m.mesh_sizes.size(); i++)
-		{
-			int o = m.materials[i];
-			m.materials[i] = (GLuint)materialRemap[o];
-		}
-
-		glBindBuffer(GL_ARRAY_BUFFER, vbo);
-		glBufferData(GL_ARRAY_BUFFER, vbo_data.size() * sizeof(VertexData), &vbo_data[0], GL_STATIC_DRAW);
-
-		//Vertex positions
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexData), (GLvoid*)offsetof(VertexData, pos));
-		//Texture coordinates
-		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(VertexData), (GLvoid*)offsetof(VertexData, uv));
-		//Normal vectors
-		glEnableVertexAttribArray(2);
-		glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(VertexData), (GLvoid*)offsetof(VertexData, normal));
-		//Tangent vectors
-		glEnableVertexAttribArray(3);
-		glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(VertexData), (GLvoid*)offsetof(VertexData, tangent));
-
-		glBindVertexArray(0);
-		vbo_data.clear();
+	void load_model(std::string file) {
+		Model model = Model();
+		meshes.emplace(file, model.load_model(file)).first->second;
 	}
-
 
 	void finalise() {
 		// TODO DELETE THIS
@@ -680,13 +422,14 @@ namespace game::renderer
 		size_t n_ambient, AmbientLightComponent *ambients, size_t n_directional, DirectionalLightComponent *directionals,
 		size_t n_point, PointLightComponent *points)
 	{
-		//Bind correct VAO
-		glBindVertexArray(vao);
 
 		//Get the model, aborting if not found
 		auto it = meshes.find(model.model_file);
 		if (it == meshes.end()) return;
 		const Mesh &mesh = it->second;
+
+		//Bind correct VAO
+		glBindVertexArray(mesh.vao);
 
 		glm::mat4 v;
 
@@ -882,9 +625,9 @@ namespace game::renderer
 			}
 
 			//Draw the triangles
-			glBindVertexArray(vao);
+			glBindVertexArray(mesh.vao);
 			glDrawArrays(GL_TRIANGLES, mesh.mesh_starts[i], mesh.mesh_sizes[i]);
-			glBindVertexArray(vao);
+			glBindVertexArray(0);
 		}
 	}
 }
