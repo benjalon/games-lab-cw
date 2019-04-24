@@ -18,12 +18,16 @@ namespace game
 		GLuint size_;
 		size_t current_size_;
 		bool data_uploaded_;
+		GLenum target;
 
 		std::vector<unsigned char> data_;
 
 	public:
 		//Default constructor
 		VBO();
+		
+		//Constructor for alternate types of buffer
+		VBO(GLenum target);
 
 		//Initialises vertex buffer object
 		void create(GLuint size = 0);

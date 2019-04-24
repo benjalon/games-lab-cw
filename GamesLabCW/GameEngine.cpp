@@ -57,7 +57,7 @@ game::GameEngine::GameEngine(bool fullscreen, bool vsync, bool ground) :
 
 	//EXAMPLE Load models
 	renderer::load_model("models/Cyborg/cyborg.obj");
-	renderer::load_model("models/Room/room.obj");
+    renderer::load_model("models/Room/room.obj");
 	renderer::load_model("models/Water/water.obj");
 	renderer::load_model("models/Skybox/skybox.obj");
 	renderer::load_model("models/Torch/torch.obj");
@@ -70,10 +70,8 @@ game::GameEngine::GameEngine(bool fullscreen, bool vsync, bool ground) :
 		"models/Skybox/hw_ruins/ruins_dn.tga",
 		"models/Skybox/hw_ruins/ruins_ft.tga",
 		"models/Skybox/hw_ruins/ruins_bk.tga" };
-	renderer::load_external_cubemap(paths, "models/Skybox/skybox.obj", TextureType::CUBE, true);
-	renderer::load_external_cubemap(paths, "models/Water/water.obj", TextureType::CUBE, false);
-
-	renderer::finalise();
+	renderer::load_external_map(paths, "models/Skybox/skybox.obj", TextureType::CUBE, true);
+	renderer::load_external_map(paths, "models/Water/water.obj", TextureType::CUBE, false);
 
 	//Remove 'loading' from title
 	glfwSetWindowTitle(window_, WINDOW_TITLE.c_str());
@@ -92,8 +90,8 @@ void game::GameEngine::run()
 	TransformComponent t_room; t_room.position.y = 10; t_room.scale = { 0.5, 0.5, 0.5 };
 	scene_.instantiate("Model", m_room, t_room);
 
-	ModelComponent m_minotaur; m_minotaur.model_file = "models/Minotaur/Minotaur@Jump.fbx"; m_minotaur.fragment_shader = "shaders/BlueSpirit.frag";
-	scene_.instantiate("Model", m_minotaur);
+	/*ModelComponent m_minotaur; m_minotaur.model_file = "models/Minotaur/Minotaur@Jump.fbx"; m_minotaur.fragment_shader = "shaders/BlueSpirit.frag";
+	scene_.instantiate("Model", m_minotaur);*/
 
 	ModelComponent m_torch1; m_torch1.model_file = "models/Torch/torch.obj";
 	TransformComponent t_torch1; t_torch1.position = { 26, 0, -23 }; t_torch1.scale = { 5, 5, 5 };
