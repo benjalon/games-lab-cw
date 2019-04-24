@@ -34,20 +34,18 @@ namespace game
 		VBO vbo; // Vertex buffer: stores vertex related stuff like positions and normals
 		VBO ebo; // Indices: tracks the draw order so that vertices aren't reused
 
-		// Buffer data
+		// Buffer data: all of the vertices (including positions, uv, normal data etc.) and indices in the model
 		std::vector<VertexData> vertices;
 		std::vector<unsigned int> indices;
 
-		// Mesh-related
-		std::vector<GLuint> baseVertex;
-		std::vector<GLuint> baseIndex;
-		std::vector<GLuint> indexCount;
+		// Drawing related stuff: since one model can have multiple meshes, we need to track where to start drawing from and for how long
+		std::vector<GLuint> baseVertices;
+		std::vector<GLuint> baseIndices;
+		std::vector<GLuint> indexCounts;
 
-		// Textures and maps
-		std::vector<GLuint> materials;
-		std::vector<size_t> materialRemap;
-
-		std::vector<Texture> diffuseMaps;
+		// Texture loading
+		std::vector<GLuint> materialIDs; // Diffuse, normal etc. maps are all recorded in the same group of materials and have to be indexed
+		std::vector<Texture> diffuseMaps; // AKA textures
 		std::vector<Texture> normalMaps;
 
 		// Switches
@@ -57,7 +55,8 @@ namespace game
 
 		void Model::loadMeshes(const aiScene *scene);
 		void Model::loadMaterials(const aiScene *scene, std::string filePath);
-		void Model::createTexture(int materialIndex, std::string path, std::vector<Texture> &textures);
+		void Model::createTexture(int materialIndex, std::string path, std::vector<Texture> &textures, std::vector<GLuint> &materialMapper);
+		void Model::setupBuffers();
 
 		std::string stripPath(std::string path);
 	public:
