@@ -25,9 +25,21 @@
 
 namespace game::renderer
 {
+	std::unordered_map<std::string, Model> models;
+	std::map<std::string, Texture> externalTextures;
+
+	void init()
+	{
+		//Configure OpenGL
+		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glEnable(GL_DEPTH_TEST);
+	}
+
 	//Returns the (potentially cached) shader using the given paramaters
-	GLuint get_shader(bool textured, bool normal_mapped, size_t n_ambient, size_t n_directional, size_t n_point,
-		std::string vertex_shader, std::string fragment_shader)
+	GLuint get_shader(
+		bool textured, bool normal_mapped, size_t n_ambient, size_t n_directional, size_t n_point, std::string vertex_shader, std::string fragment_shader)
 	{
 		using Args = std::tuple<bool, bool, size_t, size_t, size_t, std::string, std::string>;
 
@@ -65,36 +77,10 @@ namespace game::renderer
 		}
 	}
 
-	std::map<std::string, Texture> external_textures;
-
-	void load_external_texture(std::string path, std::string model_path, TextureType type)
-	{
-		auto texture = Texture(path);
-		texture.type = type;
-		external_textures.emplace(model_path, texture); // Need to map this texture with a model, since it was loaded externally
-	}
-
-	void load_external_cubemap(std::string paths[6], std::string model_path, TextureType type, bool skybox)
-	{
-		auto cubemap = Texture(paths, skybox);
-		cubemap.type = type;
-		cubemap.isSkybox = skybox;
-		external_textures.emplace(model_path, cubemap); // Need to map this texture with a model, since it was loaded externally
-	}
-
-	std::unordered_map<std::string, Model> models;
-	void load_model(std::string file) {
-		models.emplace(file, Model(file)).first->second;
-	}
-
 	//Calculates the projection matrix for a camera
 	glm::mat4 proj_matrix(CameraComponent camera)
 	{
-		return glm::infinitePerspective(
-			R(camera.fov),
-			(float)ASPECT_RATIO_VAL,
-			0.1f
-		);
+		return glm::infinitePerspective(R(camera.fov), (float)ASPECT_RATIO_VAL, 0.1f);
 	}
 
 	//Calculates the view matrix for a camera
@@ -107,22 +93,26 @@ namespace game::renderer
 		glm::vec3 right = camera.orientation.direction_hv_right();
 		glm::vec3 up = glm::cross(right, dir);
 
-		return glm::lookAt(
-			glm::vec3(camera.position),
-			glm::vec3(camera.position) + dir,
-			up
-		);
+		return glm::lookAt(glm::vec3(camera.position), glm::vec3(camera.position) + dir, up);
 	}
 
-	
+	void load_model(std::string file) {
+		models.emplace(file, Model(file)).first->second;
+	}
 
-	void init()
+	void load_external_map(std::string path, std::string model_path, TextureType type)
 	{
-		//Configure OpenGL
-		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		glEnable(GL_DEPTH_TEST);
+		auto texture = Texture(path);
+		texture.type = type;
+		externalTextures.emplace(model_path, texture); // Need to map this texture with a model, since it was loaded externally
+	}
+
+	void load_external_map(std::string paths[6], std::string model_path, TextureType type, bool skybox)
+	{
+		auto cubemap = Texture(paths, skybox);
+		cubemap.type = type;
+		cubemap.isSkybox = skybox;
+		externalTextures.emplace(model_path, cubemap); // Need to map this texture with a model, since it was loaded externally
 	}
 
 	void render_model(CameraComponent camera, ModelComponent &m, ColourComponent c, TransformComponent t,
@@ -145,8 +135,8 @@ namespace game::renderer
 
 		glm::mat4 matView;
 
-		auto tx_it = external_textures.find(m.model_file);
-		if (tx_it != external_textures.end() && tx_it->second.isSkybox)
+		auto tx_it = externalTextures.find(m.model_file);
+		if (tx_it != externalTextures.end() && tx_it->second.isSkybox)
 		{
 			// Skyboxes must be rendered behind everything else so disregard camera transform 
 			// and change depth setting
@@ -160,7 +150,7 @@ namespace game::renderer
 			matView = view_matrix(camera);
 		}
 
-		if (tx_it != external_textures.end())
+		if (tx_it != externalTextures.end())
 		{
 			const Texture &texture = tx_it->second;
 

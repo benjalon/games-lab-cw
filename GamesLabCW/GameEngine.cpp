@@ -70,8 +70,8 @@ game::GameEngine::GameEngine(bool fullscreen, bool vsync, bool ground) :
 		"models/Skybox/hw_ruins/ruins_dn.tga",
 		"models/Skybox/hw_ruins/ruins_ft.tga",
 		"models/Skybox/hw_ruins/ruins_bk.tga" };
-	renderer::load_external_cubemap(paths, "models/Skybox/skybox.obj", TextureType::CUBE, true);
-	renderer::load_external_cubemap(paths, "models/Water/water.obj", TextureType::CUBE, false);
+	renderer::load_external_map(paths, "models/Skybox/skybox.obj", TextureType::CUBE, true);
+	renderer::load_external_map(paths, "models/Water/water.obj", TextureType::CUBE, false);
 
 	//Remove 'loading' from title
 	glfwSetWindowTitle(window_, WINDOW_TITLE.c_str());
