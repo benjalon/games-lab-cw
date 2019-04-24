@@ -188,6 +188,7 @@ namespace game
 				else
 				{
 					Texture t(fullPath, true);
+					materialRemap[i] = textures.size();
 					textures.push_back(t);
 				}
 			}
@@ -217,6 +218,7 @@ namespace game
 				else
 				{
 					Texture t(fullPath, true);
+					materialRemap[i] = textures.size();
 					normalMaps.push_back(t);
 				}
 			}
