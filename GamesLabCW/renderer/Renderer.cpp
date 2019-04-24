@@ -67,114 +67,24 @@ namespace game::renderer
 
 	std::map<std::string, Texture> external_textures;
 
-	//Dictionary of meshes
+	void load_external_texture(std::string path, std::string model_path, TextureType type)
+	{
+		auto texture = Texture(path);
+		texture.type = type;
+		external_textures.emplace(model_path, texture); // Need to map this texture with a model, since it was loaded externally
+	}
+
+	void load_external_cubemap(std::string paths[6], std::string model_path, TextureType type, bool skybox)
+	{
+		auto cubemap = Texture(paths, skybox);
+		cubemap.type = type;
+		cubemap.isSkybox = skybox;
+		external_textures.emplace(model_path, cubemap); // Need to map this texture with a model, since it was loaded externally
+	}
+
 	std::unordered_map<std::string, Model> models;
-
-	struct BoneAnimation
-	{
-		const aiScene *scene;
-		GLuint shader;
-	};
-	std::unordered_map<std::string, BoneAnimation> animations;
-
-	struct VertexBoneData
-	{
-		unsigned int IDs[4]; //!< An array of 4 bone Ids that influence a single vertex.
-		float Weights[4]; //!< An array of the weight influence per bone.
-
-		VertexBoneData()
-		{
-			// 0's out the arrays. 
-			Reset();
-		}
-
-		void Reset()
-		{
-			memset(IDs, 0, 4 * sizeof(IDs[0]));
-			memset(Weights, 0, 4 * sizeof(Weights[0]));
-		}
-
-		void AddBoneData(unsigned int BoneID, float Weight)
-		{
-			for (unsigned int i = 0; i < 4; i++) {
-
-				// Check to see if there are any empty weight values. 
-				if (Weights[i] == 0.0) {
-					// Add ID of bone. 
-					IDs[i] = BoneID;
-
-					// Set the vertex weight influence for this bone ID. 
-					Weights[i] = Weight;
-					return;
-				}
-
-			}
-			// should never get here - more bones than we have space for
-			assert(0);
-		}
-	};
-
-	// Stores bone information
-	struct BoneInfo
-	{
-		glm::mat4 FinalTransformation; // Final transformation to apply to vertices 
-		glm::mat4 BoneOffset; // Initial offset from local to bone space. 
-
-		BoneInfo()
-		{
-			BoneOffset = glm::mat4();
-			FinalTransformation = glm::mat4();
-		}
-	};
-
-	glm::mat4 Mat3AssimpToGLM(aiMatrix3x3 mat)
-	{
-		glm::mat4 m;
-		m[0][0] = mat.a1; m[0][1] = mat.a2; m[0][2] = mat.a3; m[0][3] = 0.0f;
-		m[1][0] = mat.b1; m[1][1] = mat.b2; m[1][2] = mat.b3; m[1][3] = 0.0f;
-		m[2][0] = mat.c1; m[2][1] = mat.c2; m[2][2] = mat.c3; m[2][3] = 0.0f;
-		m[3][0] = 0.0f; m[3][1] = 0.0f; m[3][2] = 0.0f; m[3][3] = 1.0f;
-		return m;
-	}
-
-	glm::mat4 Mat4AssimpToGLM(aiMatrix4x4 mat)
-	{
-		glm::mat4 m;
-		m[0][0] = mat.a1; m[0][1] = mat.a2; m[0][2] = mat.a3; m[0][3] = mat.a4;
-		m[1][0] = mat.b1; m[1][1] = mat.b2; m[1][2] = mat.b3; m[1][3] = mat.b4;
-		m[2][0] = mat.c1; m[2][1] = mat.c2; m[2][2] = mat.c3; m[2][3] = mat.c4;
-		m[3][0] = mat.d1; m[3][1] = mat.d2; m[3][2] = mat.d3; m[3][3] = mat.d4;
-		return m;
-	}
-
-	unsigned int m_NumBones = 0; //!< Total number of bones in the model. 
-	std::map<std::string, unsigned int> m_BoneMapping; //!< Map of bone names to ids
-	std::vector<BoneInfo> m_BoneInfo; //!< Array containing bone information such as offset matrix and final transformation. 
-	glm::mat4 GlobalTransformation; //!< Root node transformation. 
-	glm::mat4 m_GlobalInverseTransform;
-	std::vector<VertexBoneData> bones;
-	//
-	//void load_external_texture(std::string path, std::string model_path, TextureType type)
-	//{
-	//	auto texture = Texture(path);
-	//	texture.type = type;
-	//	external_textures.emplace(model_path, texture); // Need to map this texture with a model, since it was loaded externally
-	//}
-
-	//void load_external_cubemap(std::string paths[6], std::string model_path, TextureType type, bool skybox)
-	//{
-	//	auto cubemap = Texture(paths, skybox);
-	//	cubemap.type = type;
-	//	cubemap.isSkybox = skybox;
-	//	external_textures.emplace(model_path, cubemap); // Need to map this texture with a model, since it was loaded externally
-	//}
-
 	void load_model(std::string file) {
 		models.emplace(file, Model(file)).first->second;
-	}
-
-	void finalise() {
-		// TODO DELETE THIS
 	}
 
 	//Calculates the projection matrix for a camera
@@ -204,205 +114,7 @@ namespace game::renderer
 		);
 	}
 
-	unsigned int FindRotation(float AnimationTime, const aiNodeAnim* pNodeAnim)
-	{
-		// Check if there are rotation keyframes. 
-		assert(pNodeAnim->mNumRotationKeys > 0);
-
-		// Find the rotation key just before the current animation time and return the index. 
-		for (unsigned int i = 0; i < pNodeAnim->mNumRotationKeys - 1; i++) {
-			if (AnimationTime < (float)pNodeAnim->mRotationKeys[i + 1].mTime) {
-				return i;
-			}
-		}
-		assert(0);
-
-		return 0;
-	}
-
-	unsigned int FindTranslation(float AnimationTime, const aiNodeAnim* pNodeAnim)
-	{
-		assert(pNodeAnim->mNumPositionKeys > 0);
-
-		// Find the translation key just before the current animation time and return the index. 
-		for (unsigned int i = 0; i < pNodeAnim->mNumPositionKeys - 1; i++) {
-			if (AnimationTime < (float)pNodeAnim->mPositionKeys[i + 1].mTime) {
-				return i;
-			}
-		}
-		assert(0);
-
-		return 0;
-	}
-
-	void CalcInterpolatedRotation(aiQuaternion& Out, float AnimationTime, const aiNodeAnim* pNodeAnim)
-	{
-		// we need at least two values to interpolate...
-		if (pNodeAnim->mNumRotationKeys == 1) {
-			Out = pNodeAnim->mRotationKeys[0].mValue;
-			return;
-		}
-		// Obtain the current rotation keyframe. 
-		unsigned int RotationIndex = FindRotation(AnimationTime, pNodeAnim);
-
-		// Calculate the next rotation keyframe and check bounds. 
-		unsigned int NextRotationIndex = (RotationIndex + 1);
-		assert(NextRotationIndex < pNodeAnim->mNumRotationKeys);
-
-		// Calculate delta time, i.e time between the two keyframes.
-		float DeltaTime = pNodeAnim->mRotationKeys[NextRotationIndex].mTime - pNodeAnim->mRotationKeys[RotationIndex].mTime;
-
-		// Calculate the elapsed time within the delta time.  
-		float Factor = (AnimationTime - (float)pNodeAnim->mRotationKeys[RotationIndex].mTime) / DeltaTime;
-		//assert(Factor >= 0.0f && Factor <= 1.0f);
-
-		// Obtain the quaternions values for the current and next keyframe. 
-		const aiQuaternion& StartRotationQ = pNodeAnim->mRotationKeys[RotationIndex].mValue;
-		const aiQuaternion& EndRotationQ = pNodeAnim->mRotationKeys[NextRotationIndex].mValue;
-
-		// Interpolate between them using the Factor. 
-		aiQuaternion::Interpolate(Out, StartRotationQ, EndRotationQ, Factor);
-
-		// Normalise and set the reference. 
-		Out = Out.Normalize();
-	}
-
-	void CalcInterpolatedTranslation(aiVector3D& Out, float AnimationTime, const aiNodeAnim* pNodeAnim)
-	{
-		// we need at least two values to interpolate...
-		if (pNodeAnim->mNumPositionKeys == 1) {
-			Out = pNodeAnim->mPositionKeys[0].mValue;
-			return;
-		}
-
-
-		unsigned int PositionIndex = FindTranslation(AnimationTime, pNodeAnim);
-		unsigned int NextPositionIndex = (PositionIndex + 1);
-		assert(NextPositionIndex < pNodeAnim->mNumPositionKeys);
-		float DeltaTime = pNodeAnim->mPositionKeys[NextPositionIndex].mTime - pNodeAnim->mPositionKeys[PositionIndex].mTime;
-		float Factor = (AnimationTime - (float)pNodeAnim->mPositionKeys[PositionIndex].mTime) / DeltaTime;
-		//assert(Factor >= 0.0f && Factor <= 1.0f);
-		const aiVector3D& Start = pNodeAnim->mPositionKeys[PositionIndex].mValue;
-		const aiVector3D& End = pNodeAnim->mPositionKeys[NextPositionIndex].mValue;
-
-		aiVector3D Delta = End - Start;
-		Out = Start + Factor * Delta;
-	}
-
-	glm::mat4 InitTranslationTransform(float x, float y, float z)
-	{
-		glm::mat4 m = glm::mat4(1);
-		m[0][3] = x;
-		m[1][3] = y;
-		m[2][3] = z;
-		return m;
-	}
-
-	void ReadNodeHierarchy(float AnimationTime, const aiScene* scene, const aiNode* pNode, const glm::mat4& ParentTransform)
-	{
-		glm::mat4 IdentityTest = glm::mat4(1);
-
-		// Obtain the name of the current node 
-		std::string NodeName(pNode->mName.data);
-
-		// Use the first animation 
-		const aiAnimation* pAnimation = scene->mAnimations[0];
-
-		// Obtain transformation relative to node's parent. 
-		glm::mat4 NodeTransformation = Mat4AssimpToGLM(pNode->mTransformation);
-
-		const aiNodeAnim* pNodeAnim = NULL;
-
-		// Find the animation channel of the current node. 
-		for (unsigned i = 0; i < pAnimation->mNumChannels; i++) {
-			const aiNodeAnim* pNodeAnimIndex = pAnimation->mChannels[i];
-
-			// If there is a match for a channel with the current node's name, then we've found the animation channel. 
-			if (std::string(pNodeAnimIndex->mNodeName.data) == NodeName) {
-				pNodeAnim = pNodeAnimIndex;
-			}
-		}
-
-		if (pNodeAnim) {
-
-			//// Interpolate scaling and generate scaling transformation matrix
-			//aiVector3D Scaling;
-			//CalcInterpolatedScaling(Scaling, AnimationTime, pNodeAnim);
-			//Matrix4f ScalingM;
-			//ScalingM.InitScaleTransform(Scaling.x, Scaling.y, Scaling.z);
-
-			// Interpolate rotation and generate rotation transformation matrix
-			aiQuaternion RotationQ;
-			CalcInterpolatedRotation(RotationQ, AnimationTime, pNodeAnim);
-			glm::mat4 RotationM = Mat3AssimpToGLM(RotationQ.GetMatrix());
-
-			// Interpolate translation and generate translation transformation matrix
-			aiVector3D Translation;
-			CalcInterpolatedTranslation(Translation, AnimationTime, pNodeAnim);
-
-
-			glm::mat4 TranslationM = InitTranslationTransform(Translation.x, Translation.y, Translation.z);
-
-			// Combine the above transformations
-			NodeTransformation = TranslationM * RotationM;/* *ScalingM;*/
-		}
-
-		glm::mat4 GlobalTransformation = ParentTransform * NodeTransformation;
-
-		// Apply the final transformation to the indexed bone in the array. 
-		if (m_BoneMapping.find(NodeName) != m_BoneMapping.end()) {
-			unsigned int BoneIndex = m_BoneMapping[NodeName];
-			m_BoneInfo[BoneIndex].FinalTransformation = m_GlobalInverseTransform * GlobalTransformation *
-				m_BoneInfo[BoneIndex].BoneOffset;
-		}
-
-		// Do the same for all the node's children. 
-		for (unsigned i = 0; i < pNode->mNumChildren; i++) {
-			ReadNodeHierarchy(AnimationTime, scene, pNode->mChildren[i], GlobalTransformation);
-		}
-	}
-
-	void BoneTransform(float TimeInSeconds, std::vector<glm::mat4>& Transforms, std::string file)
-	{
-		glm::mat4 Identity = glm::mat4(1);
-
-		auto it = renderer::animations.find(file);
-		if (it == renderer::animations.end()) return;
-		const renderer::BoneAnimation &animation = it->second;
-
-		float TicksPerSecond = animation.scene->mAnimations[0]->mTicksPerSecond;
-		float TimeInTicks = TimeInSeconds * TicksPerSecond;
-		float AnimationTime = fmod(TimeInTicks, animation.scene->mAnimations[0]->mDuration);
-
-		ReadNodeHierarchy(AnimationTime, animation.scene, animation.scene->mRootNode, Identity);
-
-		Transforms.resize(m_NumBones);
-
-		// Populates transforms vector with new bone transformation matrices. 
-		for (unsigned int i = 0; i < m_NumBones; i++) {
-			Transforms[i] = m_BoneInfo[i].FinalTransformation;
-
-			assert(i < 100);
-		}
-
-
-		//TODO:
-		/*for (unsigned int i = 0; i < vertices.size(); ++i)
-		{
-			auto currentBone = bones[i];
-
-			glm::mat4 boneTransform = Transforms[currentBone.IDs[0]] * currentBone.Weights[0];
-			boneTransform += Transforms[currentBone.IDs[1]] * currentBone.Weights[1];
-			boneTransform += Transforms[currentBone.IDs[2]] * currentBone.Weights[2];
-			boneTransform += Transforms[currentBone.IDs[3]] * currentBone.Weights[3];
-			boneTransform = glm::transpose(boneTransform);
-
-			glm::vec4 inVertex = glm::vec4(vertices[i].position, 1);
-			vertices[i].position = glm::vec3(boneTransform * inVertex);
-		}
-
-		renderer::UpdateVertices(vertices);*/
-	}
+	
 
 	void init()
 	{
@@ -427,17 +139,6 @@ namespace game::renderer
 		//Determine and use appropriate shader
 		GLuint shader = get_shader(model.IsTextured(), model.IsNormalMapped(), n_ambient, n_directional, n_point, m.vertex_shader, m.fragment_shader);
 		glUseProgram(shader);
-
-		//if (model.IsAnimated())
-		//{
-		//	m.hasBones = true;
-		//	auto animationIt = animations.find(m.model_file);
-		//	if (animationIt == animations.end()) return;
-		//	BoneAnimation &animation = animationIt->second;
-		//	animation.shader = shader;
-
-		//	// TODO: Delete this
-		//}
 
 		//Calculate MVP matrices
 		glm::mat4 matProj = proj_matrix(camera);

@@ -102,7 +102,7 @@ namespace game::systems
 		timeSinceLastUpdate = 0;
 
 		std::vector<glm::mat4> Transforms;
-		renderer::BoneTransform(t, Transforms, m.model_file);
+		//renderer::BoneTransform(t, Transforms, m.model_file);
 	};
 	SYSTEM(AnimationSystem, ModelComponent);
 }
