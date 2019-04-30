@@ -2,6 +2,8 @@
 
 #include "../Components.h"
 
+#include <map>
+
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
@@ -20,6 +22,48 @@ namespace game
 		glm::vec2 uv;
 		glm::vec3 normal;
 		glm::vec3 tangent;
+	};
+
+	struct VertexBoneData
+	{
+		unsigned int ids[4];
+		float weights[4];
+
+		VertexBoneData()
+		{
+			Reset();
+		}
+
+		void Reset()
+		{
+			memset(ids, 0, 4 * sizeof(ids[0]));
+			memset(weights, 0, 4 * sizeof(weights[0]));
+		}
+
+		void AddBoneData(unsigned int BoneID, float Weight)
+		{
+			for (unsigned int i = 0; i < 4; i++) {
+				if (weights[i] == 0.0) {
+					ids[i] = BoneID;
+					weights[i] = Weight;
+					return;
+				}
+
+			}
+			assert(0);
+		}
+	};
+
+	struct BoneInfo
+	{
+		glm::mat4 finalTransformation; // Final transformation to apply to vertices 
+		glm::mat4 boneOffset; // Initial offset from local to bone space.
+
+		BoneInfo()
+		{
+			boneOffset = glm::mat4();
+			finalTransformation = glm::mat4();
+		}
 	};
 
 	/*
@@ -43,6 +87,14 @@ namespace game
 		std::vector<GLuint> baseIndices;
 		std::vector<GLuint> indexCounts;
 
+		// Bone related
+		std::vector<VertexBoneData> bones;
+		std::vector<BoneInfo> boneInfos;
+		std::map<std::string, unsigned int> boneMapper;
+		unsigned int boneCount = 0;
+		glm::mat4 globalTransform;
+		glm::mat4 globalInverseTransform;
+
 		// Texture loading
 		std::vector<GLuint> materialIDs; // Diffuse, normal etc. maps are all recorded in the same group of materials and have to be indexed
 		std::vector<Texture> diffuseMaps; // AKA textures
@@ -57,6 +109,26 @@ namespace game
 		void Model::loadMaterials(const aiScene *scene, std::string filePath);
 		void Model::createTexture(int materialIndex, std::string path, std::vector<Texture> &textures, std::vector<GLuint> &materialMapper);
 		void Model::setupBuffers();
+
+		glm::mat4 MatAssimpToGLM(aiMatrix3x3 mat) 
+		{ 
+			glm::mat4 m;
+			m[0][0] = mat.a1; m[0][1] = mat.a2; m[0][2] = mat.a3; m[0][3] = 0.0f;
+			m[1][0] = mat.b1; m[1][1] = mat.b2; m[1][2] = mat.b3; m[1][3] = 0.0f;
+			m[2][0] = mat.c1; m[2][1] = mat.c2; m[2][2] = mat.c3; m[2][3] = 0.0f;
+			m[3][0] = 0.0f; m[3][1] = 0.0f; m[3][2] = 0.0f; m[3][3] = 1.0f;
+			return m;
+		}
+
+		glm::mat4 MatAssimpToGLM(aiMatrix4x4 mat)
+		{
+			glm::mat4 m;
+			m[0][0] = mat.a1; m[0][1] = mat.a2; m[0][2] = mat.a3; m[0][3] = mat.a4;
+			m[1][0] = mat.b1; m[1][1] = mat.b2; m[1][2] = mat.b3; m[1][3] = mat.b4;
+			m[2][0] = mat.c1; m[2][1] = mat.c2; m[2][2] = mat.c3; m[2][3] = mat.c4;
+			m[3][0] = mat.d1; m[3][1] = mat.d2; m[3][2] = mat.d3; m[3][3] = mat.d4;
+			return m;
+		}
 
 		std::string stripPath(std::string path);
 	public:

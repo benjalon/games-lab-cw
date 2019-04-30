@@ -18,6 +18,12 @@ namespace game
 		std::cout << (scene ? "Loaded model " : "Could not load model ") << modelPath << std::endl;
 		if (!scene) return;
 
+		if (scene->HasAnimations())
+		{
+			globalInverseTransform = MatAssimpToGLM(scene->mRootNode->mTransformation);
+			glm::inverse(globalInverseTransform);
+		}
+
 		loadMeshes(scene);
 		loadMaterials(scene, modelPath);
 		setupBuffers();
@@ -27,6 +33,15 @@ namespace game
 	{
 		size_t currentVertices = 0;
 		size_t currentIndices = 0;
+
+		// Prepare bones storage if needed
+		if (scene->HasAnimations()) {
+			size_t totalVertices = 0;
+			for (size_t i = 0; i < scene->mNumMeshes; i++) {
+				totalVertices += scene->mMeshes[i]->mNumVertices;
+			}
+			bones.resize(totalVertices);
+		}
 
 		for (size_t i = 0; i < scene->mNumMeshes; i++)
 		{
@@ -55,6 +70,38 @@ namespace game
 				vertices.push_back(vertexData);
 			}
 			currentVertices += mesh->mNumVertices;
+
+			// Load bones if this mesh part has them
+			if (mesh->HasBones()) {
+				for (unsigned int j = 0; j < mesh->mNumBones; j++) 
+				{
+					unsigned int boneID = 0;
+
+					std::string BoneName(mesh->mBones[j]->mName.data);
+
+					if (boneMapper.find(BoneName) == boneMapper.end()) 
+					{
+						boneID = boneCount;
+						boneCount++;
+
+						BoneInfo boneInfo;
+						boneInfos.push_back(boneInfo);
+					}
+					else {
+						boneID = boneMapper[BoneName];
+					}
+
+					boneMapper[BoneName] = boneID;
+					boneInfos[boneID].boneOffset = MatAssimpToGLM(mesh->mBones[j]->mOffsetMatrix);
+
+					for (unsigned int k = 0; k < mesh->mBones[j]->mNumWeights; k++) 
+					{
+						unsigned int VertexID = baseVertices[i] + mesh->mBones[j]->mWeights[k].mVertexId;
+						float Weight = mesh->mBones[j]->mWeights[k].mWeight;
+						bones[VertexID].AddBoneData(boneID, Weight);
+					}
+				}
+			}
 
 			// Populate element buffer object (indices)
 			for (size_t j = 0; j < mesh->mNumFaces; j++) {
