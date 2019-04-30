@@ -90,8 +90,9 @@ void game::GameEngine::run()
 	TransformComponent t_room; t_room.position.y = 10; t_room.scale = { 0.5, 0.5, 0.5 };
 	scene_.instantiate("Model", m_room, t_room);
 
-	/*ModelComponent m_minotaur; m_minotaur.model_file = "models/Minotaur/Minotaur@Jump.fbx"; m_minotaur.fragment_shader = "shaders/BlueSpirit.frag";
-	scene_.instantiate("Model", m_minotaur);*/
+	ModelComponent m_minotaur; m_minotaur.model_file = "models/Minotaur/Minotaur@Jump.fbx"; m_minotaur.fragment_shader = "shaders/BlueSpirit.frag";
+	TransformComponent t_minotaur; t_minotaur.scale = { 0.15, 0.15, 0.15 }; t_minotaur.position = { 0, 9, -15 }; t_minotaur.rotation = { 90, 180, 180 };
+	scene_.instantiate("Model", m_minotaur, t_minotaur);
 
 	ModelComponent m_torch1; m_torch1.model_file = "models/Torch/torch.obj";
 	TransformComponent t_torch1; t_torch1.position = { 26, 0, -23 }; t_torch1.scale = { 5, 5, 5 };
