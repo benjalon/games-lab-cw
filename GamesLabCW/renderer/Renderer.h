@@ -31,4 +31,6 @@ namespace game::renderer
 		size_t n_ambient, AmbientLightComponent *ambients,
 		size_t n_directional, DirectionalLightComponent *directionals,
 		size_t n_point, PointLightComponent *points);
+
+	void animate_model(double time, std::string model_file);
 };

@@ -24,6 +24,7 @@
     <ClCompile Include="GameEngine.cpp" />
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Math3D.cpp" />
     <ClCompile Include="renderer\Model.cpp" />
     <ClCompile Include="Prototypes.cpp" />
     <ClCompile Include="renderer\Renderer.cpp" />
@@ -48,6 +49,7 @@
     <ClInclude Include="Events.h" />
     <ClInclude Include="GameEngine.h" />
     <ClInclude Include="Input.h" />
+    <ClInclude Include="Math3D.h" />
     <ClInclude Include="renderer\Model.h" />
     <ClInclude Include="Prototypes.h" />
     <ClInclude Include="renderer\Renderer.h" />

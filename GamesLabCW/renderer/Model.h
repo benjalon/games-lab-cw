@@ -10,6 +10,7 @@
 
 #include "Texture.h"
 #include "VBO.h"
+#include "../Math3D.h"
 
 namespace game
 {
@@ -56,13 +57,13 @@ namespace game
 
 	struct BoneInfo
 	{
-		glm::mat4 finalTransformation; // Final transformation to apply to vertices 
-		glm::mat4 boneOffset; // Initial offset from local to bone space.
+		Matrix4f finalTransformation; // Final transformation to apply to vertices 
+		Matrix4f boneOffset; // Initial offset from local to bone space.
 
 		BoneInfo()
 		{
-			boneOffset = glm::mat4();
-			finalTransformation = glm::mat4();
+			boneOffset.SetZero();
+			finalTransformation.SetZero();
 		}
 	};
 
@@ -88,12 +89,13 @@ namespace game
 		std::vector<GLuint> indexCounts;
 
 		// Bone related
+		const aiScene* scene;
 		std::vector<VertexBoneData> bones;
 		std::vector<BoneInfo> boneInfos;
 		std::map<std::string, unsigned int> boneMapper;
 		unsigned int boneCount = 0;
-		glm::mat4 globalTransform;
-		glm::mat4 globalInverseTransform;
+		Matrix4f globalTransform;
+		Matrix4f globalInverseTransform;
 
 		// Texture loading
 		std::vector<GLuint> materialIDs; // Diffuse, normal etc. maps are all recorded in the same group of materials and have to be indexed
@@ -103,14 +105,20 @@ namespace game
 		// Switches
 		bool isTextured = false;
 		bool isNormalMapped = false;
-		bool isAnimated = false;
 
 		void Model::loadMeshes(const aiScene *scene);
 		void Model::loadMaterials(const aiScene *scene, std::string filePath);
 		void Model::createTexture(int materialIndex, std::string path, std::vector<Texture> &textures, std::vector<GLuint> &materialMapper);
 		void Model::setupBuffers();
+		void Model::readNodeHierarchy(float animationTime, const aiNode* node, const Matrix4f& ParentTransform);
+		void Model::CalcInterpolatedRotation(aiQuaternion& Out, float AnimationTime, const aiNodeAnim* pNodeAnim);
+		void Model::CalcInterpolatedTranslation(aiVector3D& Out, float AnimationTime, const aiNodeAnim* pNodeAnim);
+		unsigned int Model::FindRotation(float AnimationTime, const aiNodeAnim* pNodeAnim);
+		unsigned int Model::FindTranslation(float AnimationTime, const aiNodeAnim* pNodeAnim);
+		//Matrix4f Model::InitTranslationTransform(float x, float y, float z);
+		void Model::updateVertices(); // Only necessary for CPU bone animation
 
-		glm::mat4 MatAssimpToGLM(aiMatrix3x3 mat) 
+		/*glm::mat4 MatAssimpToGLM(aiMatrix3x3 mat) 
 		{ 
 			glm::mat4 m;
 			m[0][0] = mat.a1; m[0][1] = mat.a2; m[0][2] = mat.a3; m[0][3] = 0.0f;
@@ -128,16 +136,18 @@ namespace game
 			m[2][0] = mat.c1; m[2][1] = mat.c2; m[2][2] = mat.c3; m[2][3] = mat.c4;
 			m[3][0] = mat.d1; m[3][1] = mat.d2; m[3][2] = mat.d3; m[3][3] = mat.d4;
 			return m;
-		}
+		}*/
 
-		std::string stripPath(std::string path);
+		std::string Model::stripPath(std::string path);
+		glm::mat4 Model::Matrix4fToGLM(Matrix4f mat);
 	public:
 		Model::Model(std::string path);
 
 		void Model::Render(GLuint shaderProgram);
+		void Model::Animate(double time);
 
 		const bool Model::IsTextured() { return isTextured; }
 		const bool Model::IsNormalMapped() { return isNormalMapped; }
-		const bool Model::IsAnimated() { return isAnimated; }
+		const bool Model::IsAnimated() { return bones.size() > 0; }
 	};
 }

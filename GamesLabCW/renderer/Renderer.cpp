@@ -125,6 +125,7 @@ namespace game::renderer
 		if (it == models.end()) return;
 		Model &model = it->second;
 
+		m.isAnimated = model.IsAnimated();
 		
 		//Determine and use appropriate shader
 		GLuint shader = get_shader(model.IsTextured(), model.IsNormalMapped(), n_ambient, n_directional, n_point, m.vertex_shader, m.fragment_shader);
@@ -280,5 +281,15 @@ namespace game::renderer
 		}
 
 		model.Render(shader);
+	}
+
+	void animate_model(double time, std::string model_file) 
+	{
+		//Get the model, aborting if not found
+		auto it = models.find(model_file);
+		if (it == models.end()) return;
+		Model &model = it->second;
+
+		model.Animate(time);
 	}
 }

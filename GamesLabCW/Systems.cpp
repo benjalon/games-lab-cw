@@ -84,7 +84,7 @@ namespace game::systems
 	//Animation system
 	auto AnimationSystem = [](auto info, auto entity, auto &m)
 	{
-		/*if (!m.hasBones)
+		if (!m.isAnimated)
 		{
 			return;
 		}
@@ -93,7 +93,7 @@ namespace game::systems
 		static double t = 0;
 		t += info.dt;
 
-		if (timeSinceLastUpdate < 1)
+		if (timeSinceLastUpdate < 0.2)
 		{
 			timeSinceLastUpdate += info.dt;
 			return;
@@ -101,8 +101,7 @@ namespace game::systems
 
 		timeSinceLastUpdate = 0;
 
-		std::vector<glm::mat4> Transforms;*/
-		//renderer::BoneTransform(t, Transforms, m.model_file);
+		renderer::animate_model(t, m.model_file);
 	};
 	SYSTEM(AnimationSystem, ModelComponent);
 }
