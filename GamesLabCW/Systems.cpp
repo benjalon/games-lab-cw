@@ -5,8 +5,12 @@
 
 #include "Systems.h"
 
+#include <glm/gtc/type_ptr.hpp>
+
 #include "Input.h"
 #include "Utility.h"
+#include "renderer/Renderer.h"
+
 
 std::vector<game::systems::SystemInvoker> game::systems::system_invokers;
 
@@ -76,4 +80,29 @@ namespace game::systems
 		c.orientation = { t.rotation.x, t.rotation.y };
 	};
 	SYSTEM(MoveCameraSystem, CameraComponent);
+
+	//Animation system
+	auto AnimationSystem = [](auto info, auto entity, auto &m)
+	{
+		// Currently animation isn't finished
+		//if (!m.isAnimated)
+		{
+			return;
+		}
+
+		static double timeSinceLastUpdate;
+		static double t = 0;
+		t += info.dt;
+
+		if (timeSinceLastUpdate < 0.2)
+		{
+			timeSinceLastUpdate += info.dt;
+			return;
+		}
+
+		timeSinceLastUpdate = 0;
+
+		renderer::animate_model(t, m.model_file);
+	};
+	SYSTEM(AnimationSystem, ModelComponent);
 }

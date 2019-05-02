@@ -51,13 +51,19 @@
     <ClCompile Include="renderer\Texture.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="renderer\VBO.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Input.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Events.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="renderer\VBO.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="renderer\Model.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Math3D.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -102,13 +108,19 @@
     <ClInclude Include="renderer\Texture.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="renderer\VBO.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Input.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Events.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\VBO.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\Model.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Math3D.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

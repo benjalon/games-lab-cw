@@ -6,45 +6,56 @@
 
 #include "VBO.h"
 
-game::VBO::VBO() : id_(0), data_uploaded_(false) {}
-
-void game::VBO::create(GLuint size)
+namespace game
 {
-	glGenBuffers(1, &id_);
-	data_.reserve(size);
-	this->size_ = size;
-	current_size_ = 0;
-}
+	VBO::VBO() : id_(0), data_uploaded_(false), target(GL_ARRAY_BUFFER) {}
 
-void game::VBO::remove()
-{
-	glDeleteBuffers(1, &id_);
-	data_uploaded_ = false;
-	data_.clear();
-}
+	VBO::VBO(GLenum target) : id_(0), data_uploaded_(false) { VBO::target = target; }
 
-GLuint game::VBO::id() const { return id_; }
-
-bool game::VBO::created() const { return id_ != 0; }
-
-size_t game::VBO::size() const { return current_size_; }
-
-void game::VBO::add_data(void *pData, size_t size)
-{
-	data_.insert(data_.end(), (unsigned char*)pData, (unsigned char*)pData + size);
-	current_size_ += size;
-}
-
-void game::VBO::bind() const
-{
-	glBindBuffer(GL_ARRAY_BUFFER, id_);
-}
-
-void game::VBO::upload(GLenum usage)
-{
-	if (!data_.empty())
+	void VBO::create(GLuint size)
 	{
-		glBufferData(GL_ARRAY_BUFFER, data_.size(), &data_[0], usage);
+		if (created()) {
+			return;
+		}
+
+		glGenBuffers(1, &id_);
+		data_.reserve(size);
+		this->size_ = size;
+		current_size_ = 0;
+	}
+
+	void VBO::remove()
+	{
+		glDeleteBuffers(1, &id_);
+		data_uploaded_ = false;
+		data_.clear();
+	}
+
+	GLuint VBO::id() const { return id_; }
+
+	bool VBO::created() const { return id_ != 0; }
+
+	size_t VBO::size() const { return current_size_; }
+
+	void VBO::add_data(void *pData, size_t size)
+	{
+		data_.insert(data_.end(), (unsigned char*)pData, (unsigned char*)pData + size);
+		current_size_ += size;
+	}
+
+	void VBO::bind() const
+	{
+		glBindBuffer(target, id_);
+	}
+
+	void VBO::upload(GLenum usage)
+	{
+		if (data_.empty())
+		{
+			return;
+		}
+
+		glBufferData(target, data_.size(), &data_[0], usage);
 		data_uploaded_ = true;
 		data_.clear();
 	}

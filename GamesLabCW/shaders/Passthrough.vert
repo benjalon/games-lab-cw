@@ -15,7 +15,7 @@ out mat3 v_mTBN;
 
 void main()
 {
-    v_mModel = modelMatrix;
+	v_mModel = modelMatrix;
 	v_vPosition = (modelMatrix * vec4(in_Position, 1.0)).xyz;
 	v_vTexcoord = in_TextureCoord;
 
