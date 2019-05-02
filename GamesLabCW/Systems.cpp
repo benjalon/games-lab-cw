@@ -84,7 +84,8 @@ namespace game::systems
 	//Animation system
 	auto AnimationSystem = [](auto info, auto entity, auto &m)
 	{
-		if (!m.isAnimated)
+		// Currently animation isn't finished
+		//if (!m.isAnimated)
 		{
 			return;
 		}
