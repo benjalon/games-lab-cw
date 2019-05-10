@@ -7,11 +7,66 @@
 
 #include <entt/entt.hpp>
 
+#include "Scene.h"
+
 namespace game::events
 {
+	/* CUSTOM-DEFINED EVENTS */
+
+	//Instructs the game engine to quit
+	struct QuitGame {};
+
+	//Represents two entities entering a collision
+	struct EnterCollision
+	{
+		Entity a;
+		Entity b;
+	};
+
+	//Represents two entities leaving a collision
+	struct LeaveCollision
+	{
+		Entity a;
+		Entity b;
+	};
+
+
+
+	/* EVENTS AND RESPONSES IMPLEMENTATION */
+
 	//Global event dispatcher
 	extern entt::dispatcher dispatcher;
 
-	//Events
-	struct QuitGame {};
+	//Base class for responses
+	struct ResponseBase
+	{
+		virtual void log() = 0;
+	};
+
+	//Collection of responses ready for logging
+	extern std::vector<std::unique_ptr<ResponseBase>> responses;
+
+	//Derived class registering themselves with the event dispatcher
+	template <typename T, auto Function>
+	struct Response : ResponseBase
+	{
+		void log() override
+		{
+			dispatcher.sink<T>().connect<Function>();
+		}
+	};
+
+	//Auxiliary class to create responses ready for logging
+	template <typename T, auto Function>
+	struct ResponseLogger
+	{
+		ResponseLogger()
+		{
+			responses.push_back(std::make_unique<Response<T, Function>>());
+		}
+	};
 }
+
+//Registers a function as a response to an event
+#define RESPONSE(name, ev) \
+	ResponseLogger<ev, &name> RES_##name

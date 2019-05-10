@@ -5,3 +5,6 @@
 
 #define PROTOTYPE(name, ...) \
 	register_prototype<__VA_ARGS__>(#name)
+
+#define RESPONSE(name, ev) \
+	ResponseLogger<ev, &name> RES_##name

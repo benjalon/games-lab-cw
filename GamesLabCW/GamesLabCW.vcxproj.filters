@@ -73,6 +73,7 @@
     <None Include="shaders\Skybox.vert" />
     <None Include="shaders\Reflection.frag" />
     <None Include="shaders\Skybox.frag" />
+    <None Include="models\sphere.nff" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GameEngine.h">
@@ -121,6 +122,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Math3D.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SpatialGrid.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

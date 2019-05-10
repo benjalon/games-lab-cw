@@ -63,6 +63,14 @@ namespace game::systems
 	SYSTEM(FirstPersonControllerSystem, FirstPersonControllerComponent, TransformComponent, KinematicComponent);
 
 
+	//EXAMPLE Moveable sphere to demo collisions
+	auto MoveSphereSystem = [](auto info, auto entity, auto &, TransformComponent &t)
+	{
+		t.position.z += 2.0 * info.dt * (input::is_held(input::KEY_X) - input::is_held(input::KEY_Z));
+	};
+	SYSTEM(MoveSphereSystem, MoveSphere, TransformComponent);
+
+
 	//Basic kinematic system of calculus of motion
 	auto KinematicSystem = [](auto info, auto entity, auto &t, auto &k)
 	{
@@ -70,6 +78,64 @@ namespace game::systems
 		t.position += k.velocity * info.dt;
 	};
 	SYSTEM(KinematicSystem, TransformComponent, KinematicComponent);
+
+
+	//Updates the spatial partitioning grid
+	auto SpatialGridSystem = [](SceneInfo info, auto entity, TransformComponent &t)
+	{
+		auto i = info.scene.spatial_grid.update(t.position, entity, t.last_index);
+		t.last_index = i;
+	};
+	SYSTEM(SpatialGridSystem, TransformComponent);
+
+
+	//Detects collisions, updating pools and logging events
+	auto CollisionSystem = [](SceneInfo info, auto entity, CollisionComponent &c1, TransformComponent &t1)
+	{
+		//Get set of all nearby entities
+		auto [begin, end] = info.scene.spatial_grid.get_cells_near(t1.position);
+
+		//Test against potentially colliding entities
+		for (auto it = begin; it != end; ++it)
+		{
+			Entity other = *it;
+
+			//Ignore self
+			if (other == entity) continue;
+
+			//Ignore if not collidable
+			if (!info.registry.has<CollisionComponent>(other)) continue;
+
+			auto &[c2, t2] = info.registry.get<CollisionComponent, TransformComponent>(other);
+
+			//Test if currently colliding (distance between centres less than sum of radii)
+			double d2 = std::pow(t2.position.x - t1.position.x, 2) +
+				std::pow(t2.position.y - t1.position.y, 2) +
+				std::pow(t2.position.z - t1.position.z, 2);
+
+			bool currently_colliding = d2 < std::pow(c1.radius + c2.radius, 2);
+			bool was_colliding = utility::contains(c1.colliding, other);
+
+			//Log entering of collision
+			if (currently_colliding && !was_colliding)
+			{
+				c1.colliding.insert(other);
+				c2.colliding.insert(entity);
+
+				events::dispatcher.enqueue<events::EnterCollision>(entity, other);
+			}
+
+			//Log leaving of collision
+			if (!currently_colliding && was_colliding)
+			{
+				c1.colliding.erase(other);
+				c2.colliding.erase(entity);
+
+				events::dispatcher.enqueue<events::LeaveCollision>(entity, other);
+			}
+		}
+	};
+	SYSTEM(CollisionSystem, CollisionComponent, TransformComponent);
 
 
 	//Makes a camera follow its target
