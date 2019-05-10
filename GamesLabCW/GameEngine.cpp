@@ -14,6 +14,8 @@
 #include "Input.h"
 #include "renderer/Texture.h"
 
+#include "procedural_generation/procedural_generation.h"
+
 game::GameEngine::GameEngine(bool fullscreen, bool vsync, bool ground) :
 	fullscreen_(fullscreen), vsync_(vsync), ground_(ground)
 {
@@ -56,6 +58,8 @@ game::GameEngine::GameEngine(bool fullscreen, bool vsync, bool ground) :
 
 	//Load entity prototypes
 	prototypes::register_prototypes();
+
+	procgen::generate_maze();
 
 	//EXAMPLE Load models
 	renderer::load_model("models/Cyborg/cyborg.obj");
