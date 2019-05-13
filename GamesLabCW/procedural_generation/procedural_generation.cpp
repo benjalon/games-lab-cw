@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <set>
+#include <unordered_set>
 #include <stack>
 #include <random>
 #include <iostream>
@@ -42,9 +43,9 @@ namespace game::procgen
 		//Prints out an ASCII representation of the grid
 		void print() const
 		{
-			for (int x = 0; x < size_; x++)
+			for (int y = 0; y < size_; y++)
 			{
-				for (int y = 0; y < size_; y++)
+				for (int x = 0; x < size_; x++)
 					std::cout << (grid_[coords_to_index(x, y)].solid ? "#" : " ");
 
 				std::cout << std::endl;
@@ -93,7 +94,7 @@ namespace game::procgen
 						unvisited_neighbours.emplace_back(x+i, y);
 					}
 				for (int i = -2; i <= 2; i += 4)
-					if (y + i > 0 && utility::contains(remaining, { x, y+i }))
+					if (y+i > 0 && utility::contains(remaining, { x, y+i }))
 					{
 						unvisited_neighbours.emplace_back(x, y+i);
 					}
@@ -116,7 +117,7 @@ namespace game::procgen
 					y = neighbour.second;
 					grid_[coords_to_index(x, y)].solid = false;
 					remaining.erase({ x, y });
-					path.emplace( x, y );
+					path.emplace(x, y);
 				}
 				else
 				{
@@ -127,17 +128,78 @@ namespace game::procgen
 				}
 			}
 		}
+
+		//Increase the sparsity by retracting n dead ends
+		void sparsify(int n)
+		{
+			if (n < 1) return;
+
+			//Returns true if the given cell is a dead end
+			auto is_dead_end = [this](size_t i)
+			{
+				auto [x, y] = index_to_coords(i);
+				int num_solid = 0;
+				if (x + 1 < size_ && grid_[coords_to_index(x + 1, y)].solid) num_solid++;
+				if (x - 1 >= 0 && grid_[coords_to_index(x - 1, y)].solid) num_solid++;
+				if (y + 1 < size_ && grid_[coords_to_index(x, y + 1)].solid) num_solid++;
+				if (y - 1 >= 0 && grid_[coords_to_index(x, y - 1)].solid) num_solid++;
+
+				return !grid_[i].solid && num_solid == 3;
+			};
+
+			//Set of dead ends
+			std::unordered_set<size_t> dead_ends;
+
+			//Find all dead ends
+			for (size_t i = 0; i < grid_.size(); i++)
+				if (is_dead_end(i))
+					dead_ends.emplace(i);
+
+			std::default_random_engine rng;
+			rng.seed(std::random_device()());
+
+			//Erase n dead ends
+			for (int i = 0; i < n; i++)
+			{
+				//Select random dead end
+				std::uniform_int_distribution<> dist(0, dead_ends.size() - 1);
+				auto it = dead_ends.begin();
+				std::advance(it, dist(rng));
+
+				//Make solid
+				auto [x, y] = index_to_coords(*it);
+				grid_[*it].solid = true;
+				dead_ends.erase(it);
+
+				//Log neighbours if new dead ends
+				if (is_dead_end(coords_to_index(x + 1, y)))
+					dead_ends.emplace(coords_to_index(x + 1, y));
+				if (is_dead_end(coords_to_index(x - 1, y)))
+					dead_ends.emplace(coords_to_index(x - 1, y));
+				if (is_dead_end(coords_to_index(x, y + 1)))
+					dead_ends.emplace(coords_to_index(x, y + 1));
+				if (is_dead_end(coords_to_index(x, y - 1)))
+					dead_ends.emplace(coords_to_index(x, y - 1));
+			}
+		}
 	};
 
 	void generate_maze()
 	{
+		//Parameters
+		const size_t GRID_SIZE = 21;
+		const int SPARSIFICATION = 120;
+
 		//Prepare fully-solid grid
-		const size_t GRID_SIZE = 31;
 		Grid g(GRID_SIZE);
 
 		//Depth-first perfect maze generation
 		g.generate_maze();
 
+		//Retract dead ends to increase sparsity
+		g.sparsify(SPARSIFICATION);
+
+		//Debug -- print result
 		g.print();
 	}
 }
