@@ -83,7 +83,8 @@ void game::GameEngine::run()
 {
 	//EXAMPLE Instantiate a camera and models
 	auto player = scene_.instantiate("FirstPersonController", TransformComponent{ {0,6,5} , { 180,0,0 } });
-	scene_.instantiate("Camera", CameraComponent{ player });
+	auto camera = CameraComponent{ player };
+	scene_.instantiate("Camera", camera);
 
 	ModelComponent m_water; m_water.model_file = "models/Water/water.obj"; m_water.vertex_shader = "shaders/Water.vert"; m_water.fragment_shader = "shaders/Water.frag";
 	scene_.instantiate("Model", m_water);
@@ -94,7 +95,7 @@ void game::GameEngine::run()
 
 	ModelComponent m_minotaur; m_minotaur.model_file = "models/Minotaur/Minotaur@Jump.fbx"; m_minotaur.fragment_shader = "shaders/BlueSpirit.frag";
 	TransformComponent t_minotaur; t_minotaur.scale = { 0.15, 0.15, 0.15 }; t_minotaur.position = { 0, 9, -15 }; t_minotaur.rotation = { 90, 180, 180 };
-	scene_.instantiate("AIModel", m_minotaur, t_minotaur);
+	scene_.instantiate("AIModel", m_minotaur, t_minotaur, camera);
 
 	ModelComponent m_torch1; m_torch1.model_file = "models/Torch/torch.obj";
 	TransformComponent t_torch1; t_torch1.position = { 26, 0, -23 }; t_torch1.scale = { 5, 5, 5 };

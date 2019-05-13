@@ -10,6 +10,8 @@
 #include "Input.h"
 #include "Utility.h"
 #include "renderer/Renderer.h"
+#include <iostream>
+using namespace std;
 
 
 std::vector<game::systems::SystemInvoker> game::systems::system_invokers;
@@ -172,11 +174,48 @@ namespace game::systems
 	};
 	SYSTEM(AnimationSystem, ModelComponent);
 
-	auto AISystem = [](SceneInfo info, Entity entity, ModelComponent &m, ColourComponent &c, TransformComponent &t, KinematicComponent &k)
+	auto AISystem = [](SceneInfo info, Entity entity, ModelComponent &m, ColourComponent &colour, TransformComponent &t, KinematicComponent &k, AIComponent &a, CameraComponent &c)
 	{
-	    k.velocity.x += 1;
+		//goal: rotate t on the z axis.
+
+		/*if (input::is_held(input::KEY_LEFT_CONTROL))
+		{
+			t.rotation.z += 1;
+		}*/
+
+		// Get the positions of both Entities
+		Vector3 cameraPos = c.position;
+		Vector3 enemyPos = t.position;
+
+
+		// Calculate the vector that points from playerPos directly to enemyPos
+		Vector3 fromPlayerToEnemy = cameraPos - enemyPos;
+
+		fromPlayerToEnemy = Vector3(glm::normalize(fromPlayerToEnemy.ToGLM()));
+
+
+		// and Normalize the vector
+		//fromPlayerToEnemy.Normalize();
+
+		// Get the current heading of the player (this should already be Normalized)
+		//Vector3 playerHeading = Vector3(glm::normalize(fromPlayerToEnemy.ToGLM()));
+		//Vector3 playerHeading = Vector3(glm::normalize(t.rotation.ToGLM()));
+		glm::vec3 playerHeading = glm::radians(t.rotation.ToGLM());
+
+		// Now calculate the Dot product between the two (Normalized) vectors, playerHeading and fromPlayerToEnemy
+		// Note: this process is different between 2-dimensional and 3-dimensional vectors, 
+		//  so I'll just represent this process by a function
+		float radiansToRotate = glm::dot(playerHeading, fromPlayerToEnemy.ToGLM());
+
+		// Apply this rotation to the player
+		//player.Rotate(radiansToRotate);
+
+		t.rotation.z = glm::degrees(radiansToRotate);
+
+		cout << t.rotation.z << endl;
+		
 	};
-	SYSTEM(AISystem, ModelComponent, ColourComponent, TransformComponent, KinematicComponent);
+	SYSTEM(AISystem, ModelComponent, ColourComponent, TransformComponent, KinematicComponent, AIComponent, CameraComponent);
 
 
 }
