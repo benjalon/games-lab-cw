@@ -173,12 +173,13 @@ namespace game::systems
 	SYSTEM(AnimationSystem, ModelComponent);
 
 	//Key collision system
-	auto KeySystem = [](auto info, auto entity, ModelComponent &m, ColourComponent &c, CollisionComponent &collision, TransformComponent &t, KeyComponent &k)
+	auto KeySystem = [](auto info, auto entity, ModelComponent &m, ColourComponent &c, CollisionComponent &collision, TransformComponent &t, KeyComponent &k, PointLightComponent &pl)
 	{
 		if (!k.pickedUp && collision.colliding.size() > 0) {
 			k.pickedUp = true;
+			pl.intensity = 0;
 			t.position = k.destination;
 		}
 	};
-	SYSTEM(KeySystem, ModelComponent, ColourComponent, CollisionComponent, TransformComponent, KeyComponent);
+	SYSTEM(KeySystem, ModelComponent, ColourComponent, CollisionComponent, TransformComponent, KeyComponent, PointLightComponent);
 }
