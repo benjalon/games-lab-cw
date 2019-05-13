@@ -20,6 +20,12 @@ namespace game
 	struct GameStateComponent {};
 	struct FirstPersonControllerComponent {};
 
+	// Tracks how many keys are picked up, and where in the game they should be rendered
+	struct KeyComponent
+	{
+		bool pickedUp = false;
+		Vector3 destination;
+	};
 
 	/* CAMERAS AND RENDERING */
 
