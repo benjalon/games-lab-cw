@@ -27,7 +27,7 @@ namespace game::systems
 
 
 	//First-person control by the player
-	auto FirstPersonControllerSystem = [](SceneInfo info, auto entity, FirstPersonControllerComponent &f, TransformComponent &t, KinematicComponent &k)
+	auto FirstPersonControllerSystem = [](SceneInfo info, auto entity, FirstPersonControllerComponent &f, CollisionComponent &c, TransformComponent &t, KinematicComponent &k)
 	{
 		double mouse_sensitivity = 5.0;
 		double move_speed = 11.0;
@@ -60,7 +60,7 @@ namespace game::systems
 		//if (input::is_pressed(input::KEY_SPACE))
 		//	k.velocity.y += 4.0;
 	};
-	SYSTEM(FirstPersonControllerSystem, FirstPersonControllerComponent, TransformComponent, KinematicComponent);
+	SYSTEM(FirstPersonControllerSystem, FirstPersonControllerComponent, CollisionComponent, TransformComponent, KinematicComponent);
 
 
 	//EXAMPLE Moveable sphere to demo collisions
@@ -171,4 +171,15 @@ namespace game::systems
 		renderer::animate_model(t, m.model_file);
 	};
 	SYSTEM(AnimationSystem, ModelComponent);
+
+	//Key collision system
+	auto KeySystem = [](auto info, auto entity, ModelComponent &m, ColourComponent &c, CollisionComponent &collision, TransformComponent &t)
+	{
+		if (collision.colliding.size() > 0) {
+			m.model_file = "";
+			m.vertex_shader = "";
+			m.fragment_shader = "";
+		}
+	};
+	SYSTEM(KeySystem, ModelComponent, ColourComponent, CollisionComponent, TransformComponent);
 }

@@ -92,7 +92,7 @@ namespace game
 
 	struct CollisionComponent
 	{
-		double radius;
+		double radius = 3;
 		std::unordered_set<Entity> colliding;
 	};
 

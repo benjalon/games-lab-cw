@@ -63,6 +63,7 @@ game::GameEngine::GameEngine(bool fullscreen, bool vsync, bool ground) :
 	renderer::load_model("models/Water/water.obj");
 	renderer::load_model("models/Skybox/skybox.obj");
 	renderer::load_model("models/Torch/torch.obj");
+	renderer::load_model("models/Key/Key_B_02.obj");
 	renderer::load_model("models/Minotaur/Minotaur@Jump.fbx");
 
 	std::string paths[6] = {
@@ -91,6 +92,10 @@ void game::GameEngine::run()
 	ModelComponent m_room; m_room.model_file = "models/Room/room.obj";
 	TransformComponent t_room; t_room.position.y = 10; t_room.scale = { 0.5, 0.5, 0.5 };
 	scene_.instantiate("Model", m_room, t_room);
+
+	ModelComponent m_key; m_key.model_file = "models/Key/Key_B_02.obj";
+	TransformComponent t_key; t_key.scale = { 0.5, 0.5, 0.5 }; t_key.position = { 0, 0.5, 15 }; t_key.rotation = { 90, 180, 180 };
+	scene_.instantiate("Key", m_key, t_key);
 
 	ModelComponent m_minotaur; m_minotaur.model_file = "models/Minotaur/Minotaur@Jump.fbx"; m_minotaur.fragment_shader = "shaders/BlueSpirit.frag";
 	TransformComponent t_minotaur; t_minotaur.scale = { 0.15, 0.15, 0.15 }; t_minotaur.position = { 0, 9, -15 }; t_minotaur.rotation = { 90, 180, 180 };
