@@ -17,7 +17,7 @@ std::vector<game::systems::SystemInvoker> game::systems::system_invokers;
 namespace game::systems
 {
 	//General game state system
-	auto GameStateSystem = [](auto info, auto entity, GameStateComponent &g)
+	auto GameStateSystem = [](auto info, auto entity, auto &g)
 	{
 		//ESC quits the game
 		if (input::is_pressed(input::KEY_ESCAPE))
@@ -171,4 +171,12 @@ namespace game::systems
 		renderer::animate_model(t, m.model_file);
 	};
 	SYSTEM(AnimationSystem, ModelComponent);
+
+	auto AISystem = [](SceneInfo info, Entity entity, ModelComponent &m, ColourComponent &c, TransformComponent &t, KinematicComponent &k)
+	{
+	    k.velocity.x += 1;
+	};
+	SYSTEM(AISystem, ModelComponent, ColourComponent, TransformComponent, KinematicComponent);
+
+
 }

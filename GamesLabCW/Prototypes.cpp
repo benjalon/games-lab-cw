@@ -15,6 +15,7 @@ void game::prototypes::register_prototypes()
 	PROTOTYPE(FirstPersonController, FirstPersonControllerComponent, TransformComponent, KinematicComponent);
 
 	PROTOTYPE(Model, ModelComponent, ColourComponent, TransformComponent);
+	PROTOTYPE(AIModel, ModelComponent, ColourComponent, TransformComponent, KinematicComponent);
 
 	PROTOTYPE(AmbientLight, AmbientLightComponent);
 	PROTOTYPE(DirectionalLight, DirectionalLightComponent);
