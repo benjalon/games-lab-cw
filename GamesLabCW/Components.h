@@ -97,4 +97,8 @@ namespace game
 	};
 
 	struct MoveSphere {};
+
+	struct AIComponent {
+
+	};
 }

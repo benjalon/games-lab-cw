@@ -22,8 +22,12 @@ namespace game
 		//Constructs a Vector2 with the given components
 		Vector2(double x, double y);
 
+		Vector2(glm::vec2 vec) : x(vec.x), y(vec.y) {};
+
 		//Returns the magnitude of this Vector2
 		double abs() const;
+
+		glm::vec2 game::Vector2::ToGLM();
 
 		//Returns the direction of this Vector2 in radians
 		double direction_r() const;
