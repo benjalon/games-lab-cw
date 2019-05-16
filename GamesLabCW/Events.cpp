@@ -21,4 +21,6 @@ namespace game::events
 		std::cout << "Leave: " << e.a << " " << e.b << std::endl;
 	}
 	RESPONSE(SphereLeaveCollideResponse, LeaveCollision);
+
+
 }

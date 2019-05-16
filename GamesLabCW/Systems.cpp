@@ -177,8 +177,11 @@ namespace game::systems
 	{
 		if (!k.pickedUp && collision.colliding.size() > 0) {
 			k.pickedUp = true;
-			pl.intensity = 0;
 			t.position = k.destination;
+
+			pl.intensity = 0;
+
+			//k.keysHeld++;
 		}
 	};
 	SYSTEM(KeySystem, ModelComponent, ColourComponent, CollisionComponent, TransformComponent, KeyComponent, PointLightComponent);
