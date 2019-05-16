@@ -68,6 +68,7 @@ namespace game
 	{
 		Vector3 colour{ 1.0, 1.0, 1.0 };
 		double intensity = 1.0;
+		bool on = true;
 	};
 
 	struct DirectionalLightComponent
@@ -75,6 +76,7 @@ namespace game
 		Vector3 colour{ 1.0, 1.0, 1.0 };
 		double intensity = 1.0;
 		Vector3 direction{ 0.0, 0.0, 0.0 };
+		bool on = true;
 	};
 
 	struct PointLightComponent
@@ -85,6 +87,7 @@ namespace game
 		double constant = 0;
 		double linear = 0;
 		double exponent = 1;
+		bool on = true;
 	};
 
 

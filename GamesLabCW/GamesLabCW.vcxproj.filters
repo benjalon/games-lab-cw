@@ -70,9 +70,6 @@
   <ItemGroup>
     <None Include="packages.config" />
     <None Include="cpp.hint" />
-    <None Include="shaders\Skybox.vert" />
-    <None Include="shaders\Reflection.frag" />
-    <None Include="shaders\Skybox.frag" />
     <None Include="models\sphere.nff" />
   </ItemGroup>
   <ItemGroup>

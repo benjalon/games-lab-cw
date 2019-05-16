@@ -23,6 +23,7 @@ struct AmbientLight
 {
 	vec3 colour;
 	float intensity;
+	bool on;
 };
 uniform AmbientLight ambientLights[N_AMBIENT];
 
@@ -31,6 +32,7 @@ struct DirectionalLight
 	vec3 colour;
 	float intensity;
 	vec3 direction;
+	bool on;
 };
 uniform DirectionalLight directionalLights[N_DIRECTIONAL];
 
@@ -42,6 +44,7 @@ struct PointLight
 	float constant;
 	float linear;
 	float exponent;
+	bool on;
 };
 uniform PointLight pointLights[N_POINT];
 
@@ -77,11 +80,22 @@ void main()
 
 	//Apply ambient lights
 	for (int i = 0; i < N_AMBIENT; i++)
+	{
+		if (!ambientLights[i].on) 
+		{
+			continue;
+		}
 		ambient += ambientLights[i].intensity * ambientLights[i].colour;
+	}
 		
 	// Apply directional lights
 	for (int i = 0; i < N_DIRECTIONAL; i++)
 	{
+		if (!directionalLights[i].on) 
+		{
+			continue;
+		}
+
 		vec3 lightDirection;
 		#ifdef NORMAL_MAPPED
 			lightDirection = normalize(v_mTBN * directionalLights[i].direction);
@@ -102,6 +116,11 @@ void main()
 	// Apply point lights
 	for (int i = 0; i < N_POINT; i++)
 	{
+		if (!pointLights[i].on) 
+		{
+			continue;
+		}
+
 		vec3 lightPosition;
 		#ifdef NORMAL_MAPPED
 			lightPosition = v_mTBN * pointLights[i].position;

@@ -179,7 +179,7 @@ namespace game::systems
 			k.pickedUp = true;
 			t.position = k.destination;
 
-			pl.intensity = 0;
+			pl.on = false;
 
 			//k.keysHeld++;
 		}
