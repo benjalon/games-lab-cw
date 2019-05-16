@@ -21,11 +21,6 @@ namespace game
 	struct FirstPersonControllerComponent {};
 
 
-	/* CAMERAS AND RENDERING */
-	struct AIComponent {
-
-	};
-
 	struct TransformComponent
 	{
 		Vector3 position;

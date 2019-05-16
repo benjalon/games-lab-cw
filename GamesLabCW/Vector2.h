@@ -22,7 +22,7 @@ namespace game
 		//Constructs a Vector2 with the given components
 		Vector2(double x, double y);
 
-		Vector2(glm::vec2 vec) : x(vec.x), y(vec.y) {};
+		Vector2(glm::vec2 vec);
 
 		//Returns the magnitude of this Vector2
 		double abs() const;

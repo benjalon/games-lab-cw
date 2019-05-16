@@ -210,8 +210,18 @@ namespace game::systems
 
 		// Apply this rotation to the player
 		//player.Rotate(radiansToRotate);
+		float rotate = glm::degrees(radiansToRotate);
+		float radius = 180.0;
+	/*	if (rotate > radius)
+		{
+			rotate = radius;
+		}
+		if (rotate < -radius)
+		{
+			rotate = -radius;
+		}*/
 
-		t.rotation.z = radiansToRotate;
+		t.rotation.z = rotate;
 
 		cout << t.rotation.z << ":" << radiansToRotate << ":" << glm::degrees(radiansToRotate) << endl;
 		
