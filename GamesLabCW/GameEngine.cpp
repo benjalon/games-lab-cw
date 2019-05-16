@@ -60,6 +60,10 @@ game::GameEngine::GameEngine(bool fullscreen, bool vsync, bool ground) :
 	//EXAMPLE Load models
 	renderer::load_model("models/Cyborg/cyborg.obj");
     renderer::load_model("models/Room/room.obj");
+	renderer::load_model("models/Procedural/type1.obj");
+	renderer::load_model("models/Procedural/type2.obj");
+	renderer::load_model("models/Procedural/type3.obj");
+	renderer::load_model("models/Procedural/type4.obj");
 	renderer::load_model("models/Water/water.obj");
 	renderer::load_model("models/Skybox/skybox.obj");
 	renderer::load_model("models/Torch/torch.obj");
@@ -92,6 +96,19 @@ void game::GameEngine::run()
 	ModelComponent m_room; m_room.model_file = "models/Room/room.obj";
 	TransformComponent t_room; t_room.position.y = 10; t_room.scale = { 0.5, 0.5, 0.5 };
 	scene_.instantiate("Model", m_room, t_room);
+
+	// Procedural stuff
+	/*ModelComponent m_type1; m_type1.model_file = "models/Procedural/type1.obj";
+	scene_.instantiate("Model", m_type1);
+
+	ModelComponent m_type2; m_type2.model_file = "models/Procedural/type2.obj";
+	scene_.instantiate("Model", m_type2);
+
+	ModelComponent m_type3; m_type3.model_file = "models/Procedural/type3.obj";
+	scene_.instantiate("Model", m_type3);
+
+	ModelComponent m_type4; m_type4.model_file = "models/Procedural/type4.obj";
+	scene_.instantiate("Model", m_type4);*/
 
 	// Keys
 	KeyComponent k_key1; k_key1.destination = { -40, 10, 10 };
