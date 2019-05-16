@@ -22,6 +22,9 @@ namespace game
 
 
 	/* CAMERAS AND RENDERING */
+	struct AIComponent {
+
+	};
 
 	struct TransformComponent
 	{
