@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SHADER_H
+#define SHADER_H
 
 #include <glad/glad.h>
 #include <string>
@@ -32,3 +33,5 @@ namespace game
 			std::string vertexPrepend = "", std::string fragmentPrepend = "");
 	};
 }
+
+#endif

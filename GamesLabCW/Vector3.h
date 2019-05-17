@@ -3,7 +3,8 @@
  * Simple data structure representing a 3-dimensional vector.
  */
 
-#pragma once
+#ifndef VECTOR3_H
+#define VECTOR3_H
 
 #include <glm/glm.hpp>
 #include <iostream>
@@ -45,3 +46,5 @@ namespace game
 		friend std::ostream &operator<<(std::ostream &os, const Vector3 &v);
 	};
 }
+
+#endif

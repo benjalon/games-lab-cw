@@ -3,7 +3,8 @@
  * Defines the functions for loading and rendering models.
  */
 
-#pragma once
+#ifndef RENDERER_H
+#define RENDERER_H
 
 #include "../Components.h"
 #include "Texture.h"
@@ -34,3 +35,5 @@ namespace game::renderer
 
 	void animate_model(double time, std::string model_file);
 };
+
+#endif

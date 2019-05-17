@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MODEL_H
+#define MODEL_H
 
 #include "../Components.h"
 
@@ -151,3 +152,5 @@ namespace game
 		const bool Model::IsAnimated() { return bones.size() > 0; }
 	};
 }
+
+#endif

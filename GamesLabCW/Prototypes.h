@@ -4,7 +4,8 @@
  * entity prototypes.
  */
 
-#pragma once
+#ifndef PROTOTYPES_H
+#define PROTOTYPES_H
 
 #include "GameEngine.h"
 
@@ -29,3 +30,5 @@ namespace game::prototypes
 //Registers a prototype of the given name with component types
 #define PROTOTYPE(name, ...) \
 	register_prototype<__VA_ARGS__>(#name)
+
+#endif

@@ -29,12 +29,12 @@ namespace game::systems
 
 
 	//First-person control by the player
-	auto FirstPersonControllerSystem = [](SceneInfo info, auto entity, FirstPersonControllerComponent &f, CollisionComponent &c, TransformComponent &t, KinematicComponent &k)
+	auto FirstPersonControllerSystem = [](SceneInfo info, auto entity, FirstPersonControllerComponent &f, CollisionComponent &c, TransformComponent &t, KinematicComponent &k, BulletComponent &bc)
 	{
 		double mouse_sensitivity = 5.0;
 		double move_speed = 11.0;
 
-		//Rotate using cursor offset
+		//Rotate using cursor offsetW
 		t.rotation.x += mouse_sensitivity * input::cursor_pos.x * info.dt;
 		t.rotation.y += mouse_sensitivity * input::cursor_pos.y * info.dt;
 
@@ -49,6 +49,9 @@ namespace game::systems
 		k.velocity += Vector2(t.rotation.x, t.rotation.y).direction_hv_right() * move_speed *
 			(input::is_held(input::KEY_D) - input::is_held(input::KEY_A));
 
+		if (input::MOUSE_BUTTON_1)
+			events::dispatcher.enqueue<events::FireBullet>(info.scene, bc.model_file, t.position, t.rotation);
+
 
 		/* JUMPING SIMULATION IN ABSENCE OF COLLISIONS */
 		////Acceleration due to gravity
@@ -62,7 +65,7 @@ namespace game::systems
 		//if (input::is_pressed(input::KEY_SPACE))
 		//	k.velocity.y += 4.0;
 	};
-	SYSTEM(FirstPersonControllerSystem, FirstPersonControllerComponent, CollisionComponent, TransformComponent, KinematicComponent);
+	SYSTEM(FirstPersonControllerSystem, FirstPersonControllerComponent, CollisionComponent, TransformComponent, KinematicComponent, BulletComponent);
 
 
 	//EXAMPLE Moveable sphere to demo collisions
@@ -174,7 +177,7 @@ namespace game::systems
 	};
 	SYSTEM(AnimationSystem, ModelComponent);
 
-	auto AISystem = [](SceneInfo info, Entity entity, ModelComponent &m, ColourComponent &colour, TransformComponent &t, KinematicComponent &k, AIComponent &a, CameraComponent &c)
+	auto AISystem = [](SceneInfo info, Entity entity, ModelComponent &m, ColourComponent &colour, TransformComponent &t, KinematicComponent &k, AIComponent &a, CameraComponent &c, CollisionComponent &col)
 	{
 		//goal: rotate t on the z axis.
 
@@ -186,20 +189,11 @@ namespace game::systems
 		// Get the positions of both Entities
 		Vector2 cameraPos = Vector2(c.position.x, c.position.z);
 		Vector2 enemyPos = Vector2(t.position.x, t.position.z);
-
-
-		// Calculate the vector that points from playerPos directly to enemyPos
 		Vector2 fromPlayerToEnemy = cameraPos - enemyPos;
-
 		fromPlayerToEnemy = Vector2(glm::normalize(fromPlayerToEnemy.ToGLM()));
 
 
-		// and Normalize the vector
-		//fromPlayerToEnemy.Normalize();
-
 		// Get the current heading of the player (this should already be Normalized)
-		//Vector3 playerHeading = Vector3(glm::normalize(fromPlayerToEnemy.ToGLM()));
-		//Vector3 playerHeading = Vector3(glm::normalize(t.rotation.ToGLM()));
 		glm::vec2 playerHeading = glm::radians(glm::vec2(t.rotation.x, t.rotation.z));
 
 		// Now calculate the Dot product between the two (Normalized) vectors, playerHeading and fromPlayerToEnemy
@@ -212,21 +206,11 @@ namespace game::systems
 		//player.Rotate(radiansToRotate);
 		float rotate = glm::degrees(radiansToRotate);
 		float radius = 180.0;
-	/*	if (rotate > radius)
-		{
-			rotate = radius;
-		}
-		if (rotate < -radius)
-		{
-			rotate = -radius;
-		}*/
-
 		t.rotation.z = rotate;
-
 		cout << t.rotation.z << ":" << radiansToRotate << ":" << glm::degrees(radiansToRotate) << endl;
 		
 	};
-	SYSTEM(AISystem, ModelComponent, ColourComponent, TransformComponent, KinematicComponent, AIComponent, CameraComponent);
+	SYSTEM(AISystem, ModelComponent, ColourComponent, TransformComponent, KinematicComponent, AIComponent, CameraComponent,CollisionComponent);
 
 
 	//Key collision system

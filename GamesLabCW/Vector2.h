@@ -3,7 +3,8 @@
  * Simple data structure representing a 2-dimensional vector.
  */
 
-#pragma once
+#ifndef VECTOR2_H
+#define VECTOR2_H
 
 #include <glm/glm.hpp>
 #include <iostream>
@@ -67,3 +68,5 @@ namespace game
 		friend std::ostream &operator<<(std::ostream &os, const Vector2 &v);
 	};
 }
+
+#endif

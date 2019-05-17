@@ -22,5 +22,10 @@ namespace game::events
 	}
 	RESPONSE(SphereLeaveCollideResponse, LeaveCollision);
 
+	void FireBulletResponse(const FireBullet &e)
+	{
+		//e.scene.instantiate("Bullet", ModelComponent(e.bullet_file), TransformComponent(e.position, e.rotation));
+	}
+	RESPONSE(FireBulletResponse, FireBullet);
 
 }

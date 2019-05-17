@@ -3,7 +3,8 @@
  * Defines the basic component data structures.
  */
 
-#pragma once
+#ifndef COMPONENTS_H
+#define COMPONENTS_H
 
 #include <string>
 #include <unordered_set>
@@ -108,4 +109,10 @@ namespace game
 	struct AIComponent {
 
 	};
+
+	struct BulletComponent{
+		std::string model_file = "";
+	};
 }
+
+#endif

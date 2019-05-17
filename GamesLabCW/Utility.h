@@ -3,7 +3,8 @@
  * Defines engine-wide, general-purpose utilities.
  */
 
-#pragma once
+#ifndef UTILITY_H
+#define UTILITY_H
 
 #include <string>
 
@@ -19,3 +20,5 @@ namespace game::utility
 		return collection.find(elt) != collection.end();
 	}
 }
+
+#endif

@@ -4,7 +4,8 @@
  * texture.
  */
 
-#pragma once
+#ifndef TEXTURE_H
+#define TEXTURE_H
 
 #include <string>
 
@@ -42,3 +43,5 @@ namespace game
 		Texture(std::string filenames[6], bool genMipMaps = true);
 	};
 }
+
+#endif

@@ -4,7 +4,8 @@
  * a vertex buffer object in OpenGL.
  */
 
-#pragma once
+#ifndef VBO_H
+#define VBO_H
 
 #include <glad\glad.h>
 #include <vector>
@@ -54,3 +55,5 @@ namespace game
 		void upload(GLenum usage);
 	};
 }
+
+#endif
