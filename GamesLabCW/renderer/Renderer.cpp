@@ -231,6 +231,9 @@ namespace game::renderer
 			glUniform1f(glGetUniformLocation(shader,
 				("ambientLights[" + j + "].intensity").c_str()),
 				(GLfloat)ambients[i].intensity);
+			glUniform1f(glGetUniformLocation(shader,
+				("ambientLights[" + j + "].on").c_str()),
+				(GLfloat)ambients[i].on);
 		}
 
 		//Provide directional lights information
@@ -250,6 +253,9 @@ namespace game::renderer
 				(GLfloat)directionals[i].direction.x,
 				(GLfloat)directionals[i].direction.y,
 				(GLfloat)directionals[i].direction.z);
+			glUniform1f(glGetUniformLocation(shader,
+				("directionalLights[" + j + "].on").c_str()),
+				(GLfloat)directionals[i].on);
 		}
 
 		//Provide point lights information
@@ -278,6 +284,9 @@ namespace game::renderer
 			glUniform1f(glGetUniformLocation(shader,
 				("pointLights[" + j + "].exponent").c_str()),
 				(GLfloat)points[i].exponent);
+			glUniform1f(glGetUniformLocation(shader,
+				("pointLights[" + j + "].on").c_str()),
+				(GLfloat)points[i].on);
 		}
 
 		model.Render(shader);

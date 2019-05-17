@@ -41,9 +41,6 @@
     <None Include="cpp.hint" />
     <None Include="models\sphere.nff" />
     <None Include="packages.config" />
-    <None Include="shaders\Reflection.frag" />
-    <None Include="shaders\Skybox.frag" />
-    <None Include="shaders\Skybox.vert" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Components.h" />

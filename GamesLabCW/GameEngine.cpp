@@ -60,9 +60,14 @@ game::GameEngine::GameEngine(bool fullscreen, bool vsync, bool ground) :
 	//EXAMPLE Load models
 	renderer::load_model("models/Cyborg/cyborg.obj");
     renderer::load_model("models/Room/room.obj");
+	renderer::load_model("models/Procedural/type1.obj");
+	renderer::load_model("models/Procedural/type2.obj");
+	renderer::load_model("models/Procedural/type3.obj");
+	renderer::load_model("models/Procedural/type4.obj");
 	renderer::load_model("models/Water/water.obj");
 	renderer::load_model("models/Skybox/skybox.obj");
 	renderer::load_model("models/Torch/torch.obj");
+	renderer::load_model("models/Key/Key_B_02.obj");
 	renderer::load_model("models/Minotaur/Minotaur@Jump.fbx");
 
 	std::string paths[6] = {
@@ -92,6 +97,56 @@ void game::GameEngine::run()
 	ModelComponent m_room; m_room.model_file = "models/Room/room.obj";
 	TransformComponent t_room; t_room.position.y = 10; t_room.scale = { 0.5, 0.5, 0.5 };
 	scene_.instantiate("Model", m_room, t_room);
+
+	// Procedural stuff
+	/*ModelComponent m_type1; m_type1.model_file = "models/Procedural/type1.obj";
+	scene_.instantiate("Model", m_type1);
+
+	ModelComponent m_type2; m_type2.model_file = "models/Procedural/type2.obj";
+	scene_.instantiate("Model", m_type2);
+
+	ModelComponent m_type3; m_type3.model_file = "models/Procedural/type3.obj";
+	scene_.instantiate("Model", m_type3);
+
+	ModelComponent m_type4; m_type4.model_file = "models/Procedural/type4.obj";
+	scene_.instantiate("Model", m_type4);*/
+
+	// Keys
+	KeyComponent k_key1; k_key1.destination = { -40, 10, 10 };
+	ModelComponent m_key1; m_key1.model_file = "models/Key/Key_B_02.obj";
+	TransformComponent t_key1; t_key1.scale = { 0.5, 0.5, 0.5 }; t_key1.position = { 0, 0.5, 15 }; t_key1.rotation = { 90, 180, 180 };
+	PointLightComponent pl_key1{ {1, 180 / 255.0, 120.0 / 255.0}, 0.5, t_key1.position };
+	scene_.instantiate("Key", m_key1, t_key1, k_key1, pl_key1);
+
+	KeyComponent k_key2; k_key2.destination = { -40, 15, 10 };
+	ModelComponent m_key2; m_key2.model_file = "models/Key/Key_B_02.obj";
+	TransformComponent t_key2; t_key2.scale = { 0.5, 0.5, 0.5 }; t_key2.position = { 0, 0.5, -15 }; t_key2.rotation = { 90, 180, 180 };
+	PointLightComponent pl_key2{ {1, 180 / 255.0, 120.0 / 255.0}, 0.5, t_key2.position };
+	scene_.instantiate("Key", m_key2, t_key2, k_key2, pl_key2);
+
+	KeyComponent k_key3; k_key3.destination = { -40, 20, 10 };
+	ModelComponent m_key3; m_key3.model_file = "models/Key/Key_B_02.obj";
+	TransformComponent t_key3; t_key3.scale = { 0.5, 0.5, 0.5 }; t_key3.position = { 10, 0.5, 15 }; t_key3.rotation = { 90, 180, 180 };
+	PointLightComponent pl_key3{ {1, 180 / 255.0, 120.0 / 255.0}, 0.5, t_key3.position };
+	scene_.instantiate("Key", m_key3, t_key3, k_key3, pl_key3);
+
+	KeyComponent k_key4; k_key4.destination = { -40, 10, -10 };
+	ModelComponent m_key4; m_key4.model_file = "models/Key/Key_B_02.obj";
+	TransformComponent t_key4; t_key4.scale = { 0.5, 0.5, 0.5 }; t_key4.position = { -10, 0.5, 15 }; t_key4.rotation = { 90, 180, 180 };
+	PointLightComponent pl_key4{ {1, 180 / 255.0, 120.0 / 255.0}, 0.5, t_key4.position };
+	scene_.instantiate("Key", m_key4, t_key4, k_key4, pl_key4);
+
+	KeyComponent k_key5; k_key5.destination = { -40, 15, -10 };
+	ModelComponent m_key5; m_key5.model_file = "models/Key/Key_B_02.obj";
+	TransformComponent t_key5; t_key5.scale = { 0.5, 0.5, 0.5 }; t_key5.position = { 30, 0.5, 10 }; t_key5.rotation = { 90, 180, 180 };
+	PointLightComponent pl_key5{ {1, 180 / 255.0, 120.0 / 255.0}, 0.5, t_key5.position };
+	scene_.instantiate("Key", m_key5, t_key5, k_key5, pl_key5);
+
+	KeyComponent k_key6; k_key6.destination = { -40, 20, -10 };
+	ModelComponent m_key6; m_key6.model_file = "models/Key/Key_B_02.obj";
+	TransformComponent t_key6; t_key6.scale = { 0.5, 0.5, 0.5 }; t_key6.position = { -30, 0.5, 10 }; t_key6.rotation = { 90, 180, 180 };
+	PointLightComponent pl_key6{ {1, 180 / 255.0, 120.0 / 255.0}, 0.5, t_key6.position };
+	scene_.instantiate("Key", m_key6, t_key6, k_key6, pl_key6);
 
 	ModelComponent m_minotaur; m_minotaur.model_file = "models/Minotaur/Minotaur@Jump.fbx"; m_minotaur.fragment_shader = "shaders/BlueSpirit.frag";
 	TransformComponent t_minotaur; t_minotaur.scale = { 0.15, 0.15, 0.15 }; t_minotaur.position = { 0, 9, -15 }; t_minotaur.rotation = { 90, 180, 180 };
