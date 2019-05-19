@@ -5,9 +5,7 @@
 
 #include "Events.h"
 #include "Components.h"
-
-
-#include "Components.h"
+using namespace std;
 
 entt::dispatcher game::events::dispatcher{};
 std::vector<std::unique_ptr<game::events::ResponseBase>> game::events::responses;
@@ -34,15 +32,33 @@ namespace game::events
 		TransformComponent t; t.scale = { 0.5, 0.5, 0.5 }; t.position = e.position; t.rotation = e.rotation;
 		ModelComponent m; m.model_file = "models/Key/Key_B_02.obj";
 
-		Vector3 currentPos = Vector3(glm::normalize(t.position.ToGLM()));
+		double x = fmod(t.rotation.x,360);
+		double y = fmod(t.rotation.y, 360);
+		double z = 0;
+		
 
-		glm::vec3 heading = glm::radians(glm::vec3(t.rotation));
+		Vector3 orientation = { x,y,z };
+		orientation = Vector3(glm::normalize(orientation.ToGLM()));
+		//m_vecDirection += vecLook * fSpeed*fTimeDelta;e
 
-		Vector3 direction = glm::cross(heading, currentPos.ToGLM());
+		//auto cam = e.registry.view<CameraComponent>().begin();
+		
+		e.registry.view<CameraComponent>().each([&](auto, auto &cam) {
+			//glm::vec3 heading = glm::radians(glm::vec3(orientation));
 
-		KinematicComponent k; k.velocity = direction;
+		//Vector3 direction = glm::cross(orientation.ToGLM(), currentPos.ToGLM());
+		
+			Vector3 direction = { cam.orientation.x, cam.orientation.y, 0 };
+			KinematicComponent k; k.velocity = direction;
 
-		e.scene.instantiate("Bullet", m, t, k);
+			cout << " X:" << cam.orientation.x << " Y:" << cam.orientation.y << " Z:" << 0 << endl;
+
+
+
+			e.scene.instantiate("Bullet", m, t, k);
+		});
+
+		
 	}
 	RESPONSE(FireBulletResponse, FireBullet);
 

@@ -89,7 +89,7 @@ void game::GameEngine::run()
 	//EXAMPLE Instantiate a camera and models
 	auto player = scene_.instantiate("FirstPersonController", TransformComponent{ {0,6,5} , { 180,0,0 } });
 	auto camera = CameraComponent{ player };
-	scene_.instantiate("Camera", camera);
+	//scene_.instantiate("Camera", camera);
 
 	ModelComponent m_water; m_water.model_file = "models/Water/water.obj"; m_water.vertex_shader = "shaders/Water.vert"; m_water.fragment_shader = "shaders/Water.frag";
 	scene_.instantiate("Model", m_water);

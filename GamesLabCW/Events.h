@@ -35,6 +35,7 @@ namespace game::events
 	struct FireBullet
 	{
 		Scene &scene;
+		entt::registry<> &registry;
 		std::string bullet_file;
 		Vector3 position;
 		Vector3 rotation;
