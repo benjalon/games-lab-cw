@@ -17,13 +17,13 @@ namespace game::events
 		if (e.registry.has<KeyComponent>(e.a))
 			HandleKeyCollision(e);
 
-		std::cout << "Enter: " << e.a << " " << e.b << std::endl;
+		//std::cout << "Enter: " << e.a << " " << e.b << std::endl;
 	}
 	RESPONSE(SphereEnterCollideResponse, EnterCollision);
 
 	void SphereLeaveCollideResponse(const LeaveCollision &e)
 	{
-		std::cout << "Leave: " << e.a << " " << e.b << std::endl;
+		//std::cout << "Leave: " << e.a << " " << e.b << std::endl;
 	}
 	RESPONSE(SphereLeaveCollideResponse, LeaveCollision);
 
@@ -31,32 +31,10 @@ namespace game::events
 	{
 		TransformComponent t; t.scale = { 0.5, 0.5, 0.5 }; t.position = e.position; t.rotation = e.rotation;
 		ModelComponent m; m.model_file = "models/Key/Key_B_02.obj";
-
-		double x = fmod(t.rotation.x,360);
-		double y = fmod(t.rotation.y, 360);
-		double z = 0;
 		
+		KinematicComponent k; k.velocity = Vector2(t.rotation.x, t.rotation.y).direction_hv() * 30;
 
-		Vector3 orientation = { x,y,z };
-		orientation = Vector3(glm::normalize(orientation.ToGLM()));
-		//m_vecDirection += vecLook * fSpeed*fTimeDelta;e
-
-		//auto cam = e.registry.view<CameraComponent>().begin();
-		
-		e.registry.view<CameraComponent>().each([&](auto, auto &cam) {
-			//glm::vec3 heading = glm::radians(glm::vec3(orientation));
-
-		//Vector3 direction = glm::cross(orientation.ToGLM(), currentPos.ToGLM());
-		
-			Vector3 direction = { cam.orientation.x, cam.orientation.y, 0 };
-			KinematicComponent k; k.velocity = direction;
-
-			cout << " X:" << cam.orientation.x << " Y:" << cam.orientation.y << " Z:" << 0 << endl;
-
-
-
-			e.scene.instantiate("Bullet", m, t, k);
-		});
+		e.scene.instantiate("Bullet", m, t, k);
 
 		
 	}

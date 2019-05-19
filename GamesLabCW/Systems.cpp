@@ -41,7 +41,7 @@ namespace game::systems
 		t.rotation.y += mouse_sensitivity * input::cursor_pos.y * info.dt;
 
 		//Clamp y rotation to avoid flipping
-		t.rotation.y = std::clamp(t.rotation.y, -60.0, 60.0);
+		t.rotation.y = std::clamp(t.rotation.y, -85.0, 85.0);
 
 		//Move forward/backward
 		k.velocity = Vector2(t.rotation.x, t.rotation.y).direction_hv() * move_speed *
@@ -52,7 +52,7 @@ namespace game::systems
 			(input::is_held(input::KEY_D) - input::is_held(input::KEY_A));
 		//Vector3 turd = { cam.orientation.x, cam.orientation.y, 0 };
 		if (input::is_released(input::KEY_LEFT_CONTROL))
-			events::dispatcher.enqueue<events::FireBullet>(info.scene, info.registry, bc.model_file, t.position,t.rotation);
+			events::dispatcher.enqueue<events::FireBullet>(info.scene, bc.model_file, t.position,t.rotation);
 
 
 		/* JUMPING SIMULATION IN ABSENCE OF COLLISIONS */
