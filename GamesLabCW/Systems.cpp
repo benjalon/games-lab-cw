@@ -49,7 +49,7 @@ namespace game::systems
 		k.velocity += Vector2(t.rotation.x, t.rotation.y).direction_hv_right() * move_speed *
 			(input::is_held(input::KEY_D) - input::is_held(input::KEY_A));
 
-		if (input::is_held(input::KEY_LEFT_CONTROL))
+		if (input::is_released(input::KEY_LEFT_CONTROL))
 			events::dispatcher.enqueue<events::FireBullet>(info.scene, bc.model_file, t.position, t.rotation);
 
 

@@ -28,7 +28,14 @@ namespace game::events
 	{
 		TransformComponent t; t.scale = { 0.5, 0.5, 0.5 }; t.position = e.position; t.rotation = e.rotation;
 		ModelComponent m; m.model_file = "models/Key/Key_B_02.obj";
-		KinematicComponent k; k.velocity = { 0,0,0 };
+
+		Vector3 currentPos = Vector3(glm::normalize(t.position.ToGLM()));
+
+		glm::vec3 heading = glm::radians(glm::vec3(t.rotation));
+
+		Vector3 direction = glm::cross(heading, currentPos.ToGLM());
+
+		KinematicComponent k; k.velocity = direction;
 
 		e.scene.instantiate("Bullet", m, t, k);
 	}
