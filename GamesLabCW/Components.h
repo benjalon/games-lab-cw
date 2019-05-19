@@ -27,6 +27,8 @@ namespace game
 		Vector3 destination;
 	};
 
+	struct DoorComponent {};
+
 	/* CAMERAS AND RENDERING */
 
 	struct TransformComponent
