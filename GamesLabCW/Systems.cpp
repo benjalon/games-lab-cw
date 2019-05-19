@@ -137,7 +137,6 @@ namespace game::systems
 	};
 	SYSTEM(CollisionSystem, CollisionComponent, TransformComponent);
 
-
 	//Makes a camera follow its target
 	auto MoveCameraSystem = [](SceneInfo info, auto entity, CameraComponent &c)
 	{
