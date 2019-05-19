@@ -4,8 +4,7 @@
  * world of entities.
  */
 
-#ifndef SCENE_H
-#define SCENE_H
+#pragma once
 
 #include <entt/entt.hpp>
 
@@ -81,5 +80,3 @@ namespace game
 		void destroy(Entity e);
 	};
 }
-
-#endif

@@ -3,8 +3,7 @@
  * Defines the interface for obtaining user input.
  */
 
-#ifndef INPUT_H
-#define INPUT_H
+#pragma once
 
 #include <string>
 #include <unordered_set>
@@ -181,5 +180,3 @@ namespace game::input
 	constexpr Input MOUSE_BUTTON_RIGHT = MOUSE_BUTTON_2;
 	constexpr Input MOUSE_BUTTON_MIDDLE = MOUSE_BUTTON_3;
 }
-
-#endif

@@ -4,8 +4,7 @@
  * a regular grid of positions in 3D space.
  */
 
-#ifndef SPATIALGRID_H
-#define SPATIALGRID_H
+#pragma once
 
 #include <map>
 #include <unordered_set>
@@ -100,5 +99,3 @@ namespace game
 		}
 	};
 }
-
-#endif

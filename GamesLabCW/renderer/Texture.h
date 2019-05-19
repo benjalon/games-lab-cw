@@ -3,9 +3,7 @@
  * Declares the Texture structure, representing a 2D
  * texture.
  */
-
-#ifndef TEXTURE_H
-#define TEXTURE_H
+#pragma once
 
 #include <string>
 
@@ -43,5 +41,3 @@ namespace game
 		Texture(std::string filenames[6], bool genMipMaps = true);
 	};
 }
-
-#endif

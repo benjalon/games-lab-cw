@@ -3,8 +3,7 @@
  * Defines engine-wide, general-purpose utilities.
  */
 
-#ifndef UTILITY_H
-#define UTILITY_H
+#pragma once
 
 #include <string>
 
@@ -21,4 +20,3 @@ namespace game::utility
 	}
 }
 
-#endif

@@ -3,8 +3,7 @@
  * Defines the basic component data structures.
  */
 
-#ifndef COMPONENTS_H
-#define COMPONENTS_H
+#pragma once
 
 #include <string>
 #include <unordered_set>
@@ -114,5 +113,3 @@ namespace game
 		std::string model_file = "";
 	};
 }
-
-#endif

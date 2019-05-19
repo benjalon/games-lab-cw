@@ -4,8 +4,7 @@
  * game application and environment.
  */
 
-#ifndef GAMEENGINE_H
-#define GAMEENGINE_H
+#pragma once
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -85,5 +84,3 @@ namespace game
 		static void window_size_callback(GLFWwindow *window, int width, int height);
 	};
 }
-
-#endif

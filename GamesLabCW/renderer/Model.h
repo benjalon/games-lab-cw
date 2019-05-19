@@ -1,5 +1,4 @@
-#ifndef MODEL_H
-#define MODEL_H
+#pragma once
 
 #include "../Components.h"
 
@@ -153,4 +152,3 @@ namespace game
 	};
 }
 
-#endif

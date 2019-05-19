@@ -3,8 +3,7 @@
  * Simple data structure representing a 3-dimensional vector.
  */
 
-#ifndef VECTOR3_H
-#define VECTOR3_H
+#pragma once
 
 #include <glm/glm.hpp>
 #include <iostream>
@@ -47,4 +46,3 @@ namespace game
 	};
 }
 
-#endif

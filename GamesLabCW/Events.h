@@ -2,9 +2,7 @@
  * Events.h
  * Defines the interface for event signalling.
  */
-
-#ifndef EVENTS_H
-#define EVENTS_H
+#pragma once
 
 #include <entt/entt.hpp>
 
@@ -33,7 +31,7 @@ namespace game::events
 
 	struct FireBullet
 	{
-		Scene scene;
+		Scene &scene;
 		std::string bullet_file;
 		Vector3 position;
 		Vector3 rotation;
@@ -77,5 +75,3 @@ namespace game::events
 //Registers a function as a response to an event
 #define RESPONSE(name, ev) \
 	ResponseLogger<ev, &name> RES_##name
-
-#endif

@@ -4,8 +4,7 @@
  * systems as automatically-registered functions.
  */
 
-#ifndef SYSTEMS_H
-#define SYSTEMS_H
+#pragma once
 
 #include <functional>
 #include <entt/entt.hpp>
@@ -65,5 +64,3 @@ namespace game::systems
 	struct SYS_##name { static System<SYS_##name, __VA_ARGS__> s; }; \
 	System<SYS_##name, __VA_ARGS__> SYS_##name::s ( \
 	name )
-
-#endif
