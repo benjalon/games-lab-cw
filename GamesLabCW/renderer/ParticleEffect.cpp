@@ -120,11 +120,14 @@ namespace game
 
 	void ParticleEffect::respawnParticle(Particle &particle, glm::vec2 offset)
 	{
-		GLfloat random = ((rand() % 100) - 50) / 10.0f;
+		GLfloat randomX = ((rand() % 100) - 50) / 10.0f;
+		GLfloat randomY = ((rand() % 100) - 50) / 10.0f;
+		GLfloat randomVelX = ((rand() % 100) - 50) / 20.0f;
+		GLfloat randomVelY = ((rand() % 100) - 50) / 20.0f;
 		GLfloat rColor = 0.5 + ((rand() % 100) / 100.0f);
-		particle.Position = glm::vec2(0, 0) + random + offset;
+		particle.Position = glm::vec2(randomX, randomY) + offset;
 		particle.Color = glm::vec4(rColor, rColor, rColor, 1.0f);
 		particle.Life = 1.0f;
-		particle.Velocity = glm::vec2(0, 0) + random * 0.1f;
+		particle.Velocity = glm::vec2(randomVelX, randomVelY) * 0.1f;
 	}
 }

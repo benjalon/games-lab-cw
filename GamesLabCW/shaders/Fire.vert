@@ -12,7 +12,7 @@ out vec4 ParticleColor;
 
 void main()
 {
-    float scale = 0.1f;
+    float scale = 0.5f;
     TexCoords = in_Position.zw;
     ParticleColor = color;
     gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4((in_Position.xy * scale) + offset, 0.0, 1.0);
