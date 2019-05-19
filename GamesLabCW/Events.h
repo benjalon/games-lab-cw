@@ -19,6 +19,7 @@ namespace game::events
 	//Represents two entities entering a collision
 	struct EnterCollision
 	{
+		entt::registry<> &registry;
 		Entity a;
 		Entity b;
 	};
@@ -26,11 +27,10 @@ namespace game::events
 	//Represents two entities leaving a collision
 	struct LeaveCollision
 	{
+		entt::registry<> &registry;
 		Entity a;
 		Entity b;
 	};
-
-
 
 	/* EVENTS AND RESPONSES IMPLEMENTATION */
 
@@ -65,6 +65,8 @@ namespace game::events
 			responses.push_back(std::make_unique<Response<T, Function>>());
 		}
 	};
+		
+	void HandleKeyCollision(const EnterCollision &e);
 }
 
 //Registers a function as a response to an event
