@@ -34,8 +34,6 @@ namespace game::systems
 		double mouse_sensitivity = 5.0;
 		double move_speed = 11.0;
 
-
-
 		//Rotate using cursor offsetW
 		t.rotation.x += mouse_sensitivity * input::cursor_pos.x * info.dt;
 		t.rotation.y += mouse_sensitivity * input::cursor_pos.y * info.dt;
@@ -50,7 +48,7 @@ namespace game::systems
 		//Strafe
 		k.velocity += Vector2(t.rotation.x, t.rotation.y).direction_hv_right() * move_speed *
 			(input::is_held(input::KEY_D) - input::is_held(input::KEY_A));
-		//Vector3 turd = { cam.orientation.x, cam.orientation.y, 0 };
+
 		if (input::is_released(input::KEY_LEFT_CONTROL))
 			events::dispatcher.enqueue<events::FireBullet>(info.scene, bc.model_file, t.position,t.rotation);
 

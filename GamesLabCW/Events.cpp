@@ -14,8 +14,13 @@ namespace game::events
 {
 	void SphereEnterCollideResponse(const EnterCollision &e)
 	{
-		if (e.registry.has<KeyComponent>(e.a))
+		if (e.registry.has<KeyComponent>(e.a)) {
 			HandleKeyCollision(e);
+		}
+		else if (e.registry.has<AIComponent>(e.b)) {
+			HandleBulletCollision(e);
+		}
+			
 
 		//std::cout << "Enter: " << e.a << " " << e.b << std::endl;
 	}
@@ -46,5 +51,12 @@ namespace game::events
 		k.pickedUp = true;
 		pl.on = false;
 		t.position = k.destination;
+	}
+
+	void HandleBulletCollision(const EnterCollision &e) {
+
+		auto &t = e.registry.get<TransformComponent>(e.b);
+		t.rotation.x = 50;
+		
 	}
 }
