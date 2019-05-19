@@ -122,7 +122,7 @@ namespace game::systems
 				c1.colliding.insert(other);
 				c2.colliding.insert(entity);
 
-				events::dispatcher.enqueue<events::EnterCollision>(entity, other);
+				events::dispatcher.enqueue<events::EnterCollision>(info.registry, entity, other);
 			}
 
 			//Log leaving of collision
@@ -131,7 +131,7 @@ namespace game::systems
 				c1.colliding.erase(other);
 				c2.colliding.erase(entity);
 
-				events::dispatcher.enqueue<events::LeaveCollision>(entity, other);
+				events::dispatcher.enqueue<events::LeaveCollision>(info.registry, entity, other);
 			}
 		}
 	};
@@ -171,18 +171,4 @@ namespace game::systems
 		renderer::animate_model(t, m.model_file);
 	};
 	SYSTEM(AnimationSystem, ModelComponent);
-
-	//Key collision system
-	auto KeySystem = [](auto info, auto entity, ModelComponent &m, ColourComponent &c, CollisionComponent &collision, TransformComponent &t, KeyComponent &k, PointLightComponent &pl)
-	{
-		if (!k.pickedUp && collision.colliding.size() > 0) {
-			k.pickedUp = true;
-			t.position = k.destination;
-
-			pl.on = false;
-
-			//k.keysHeld++;
-		}
-	};
-	SYSTEM(KeySystem, ModelComponent, ColourComponent, CollisionComponent, TransformComponent, KeyComponent, PointLightComponent);
 }
