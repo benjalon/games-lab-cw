@@ -6,5 +6,5 @@ uniform sampler2D texSampler;
 
 void main()
 {
-    color = ParticleColor;
+    color = (texture(texSampler, TexCoords) * ParticleColor);
 }  
