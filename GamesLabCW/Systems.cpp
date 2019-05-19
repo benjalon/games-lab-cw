@@ -170,4 +170,10 @@ namespace game::systems
 		renderer::animate_model(t, m.model_file);
 	};
 	SYSTEM(AnimationSystem, ModelComponent);
+
+	auto ParticleSystem = [](auto info, auto entity, ParticleComponent &p, ColourComponent &c, TransformComponent &t)
+	{
+		renderer::update_particle(info.dt, p.texture_file, p.respawn_count);// , t.position);
+	};
+	SYSTEM(ParticleSystem, ParticleComponent, ColourComponent, TransformComponent);
 }

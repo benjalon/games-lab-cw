@@ -27,6 +27,7 @@
     <ClCompile Include="Math3D.cpp" />
     <ClCompile Include="renderer\Model.cpp" />
     <ClCompile Include="Prototypes.cpp" />
+    <ClCompile Include="renderer\ParticleEffect.cpp" />
     <ClCompile Include="renderer\Renderer.cpp" />
     <ClCompile Include="renderer\Shader.cpp" />
     <ClCompile Include="renderer\Texture.cpp" />
@@ -50,6 +51,7 @@
     <ClInclude Include="Math3D.h" />
     <ClInclude Include="renderer\Model.h" />
     <ClInclude Include="Prototypes.h" />
+    <ClInclude Include="renderer\ParticleEffect.h" />
     <ClInclude Include="renderer\Renderer.h" />
     <ClInclude Include="renderer\Shader.h" />
     <ClInclude Include="renderer\Texture.h" />

@@ -70,6 +70,8 @@ game::GameEngine::GameEngine(bool fullscreen, bool vsync, bool ground) :
 	renderer::load_model("models/Key/Key_B_02.obj");
 	renderer::load_model("models/Minotaur/Minotaur@Jump.fbx");
 
+	renderer::load_particle_effect("models/particle.png", 100);
+
 	std::string paths[6] = {
 		"models/Skybox/hw_ruins/ruins_lf.tga",
 		"models/Skybox/hw_ruins/ruins_rt.tga",
@@ -96,6 +98,9 @@ void game::GameEngine::run()
 	ModelComponent m_room; m_room.model_file = "models/Room/room.obj";
 	TransformComponent t_room; t_room.position.y = 10; t_room.scale = { 0.5, 0.5, 0.5 };
 	scene_.instantiate("Model", m_room, t_room);
+
+	ParticleComponent p_test; p_test.texture_file = "models/particle.png"; p_test.respawn_count = 2;
+	scene_.instantiate("ParticleEffect", p_test);
 
 	// Procedural stuff
 	/*ModelComponent m_type1; m_type1.model_file = "models/Procedural/type1.obj";

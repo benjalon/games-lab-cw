@@ -63,6 +63,11 @@ namespace game
 		double alpha = 1.0;
 	};
 
+	struct ParticleComponent
+	{
+		std::string texture_file;
+		int respawn_count;
+	};
 
 	/* LIGHTING */
 
