@@ -346,13 +346,13 @@ namespace game::renderer
 		model.Animate(time);
 	}
 
-	void update_particle(double time, std::string texture_file, int respawn_count)
+	void update_particle(double time, std::string texture_file, int respawn_count, Vector3 position_variation, Vector3 velocity_variation, Vector3 color_variation)
 	{
 		//Get the model, aborting if not found
 		auto it = particleEffects.find(texture_file);
 		if (it == particleEffects.end()) return;
 		ParticleEffect &particleEffect = it->second;
 
-		particleEffect.Update(time, respawn_count);
+		particleEffect.Update(time, respawn_count, position_variation, velocity_variation, color_variation);
 	}
 }

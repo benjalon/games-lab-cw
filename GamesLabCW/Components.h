@@ -67,6 +67,9 @@ namespace game
 	{
 		std::string texture_file;
 		int respawn_count;
+		Vector3 position_variation;
+		Vector3 velocity_variation;
+		Vector3 color_variation;
 	};
 
 	/* LIGHTING */

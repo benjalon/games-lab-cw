@@ -25,6 +25,8 @@ namespace game
 		//Returns the magnitude of this Vector2
 		double abs() const;
 
+		glm::vec2 ToGLM();
+
 		//Returns the direction of this Vector2 in radians
 		double direction_r() const;
 

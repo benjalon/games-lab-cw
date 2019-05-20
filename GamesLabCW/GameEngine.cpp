@@ -103,9 +103,6 @@ void game::GameEngine::run()
 	/*ParticleComponent p_test; p_test.texture_file = "models/particle.png"; p_test.respawn_count = 2;
 	scene_.instantiate("ParticleEffect", p_test);*/
 
-	ParticleComponent p_fire; p_fire.texture_file = "models/fire.png"; p_fire.respawn_count = 2;
-	scene_.instantiate("ParticleEffect", p_fire);
-
 	// Procedural stuff
 	/*ModelComponent m_type1; m_type1.model_file = "models/Procedural/type1.obj";
 	scene_.instantiate("Model", m_type1);
@@ -182,6 +179,12 @@ void game::GameEngine::run()
 
 	// Portal light
 	scene_.instantiate("PointLight", PointLightComponent{ {1, 105.0 / 255.0, 180.0 / 255.0}, 40, { 3, 3, 22} });
+
+	ParticleComponent p_fire; p_fire.texture_file = "models/fire.png"; p_fire.respawn_count = 2;
+	p_fire.position_variation = Vector3(100, 50, 10);
+	p_fire.velocity_variation = Vector3(100, 50, 20);
+	p_fire.color_variation = Vector3(100, -0.5, 100);
+	scene_.instantiate("ParticleEffect", p_fire, TransformComponent{ Vector3(3, 3, 22) });
 
 	TransformComponent t_skybox; t_skybox.scale = { 20, 20, 20 };
 	ModelComponent m_skybox; m_skybox.model_file = "models/Skybox/skybox.obj"; m_skybox.vertex_shader = "shaders/Skybox.vert"; m_skybox.fragment_shader = "shaders/Skybox.frag";

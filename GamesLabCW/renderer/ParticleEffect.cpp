@@ -8,13 +8,13 @@ namespace game
 		this->init();
 	}
 
-	void ParticleEffect::Update(GLfloat dt, GLuint newParticles, glm::vec2 offset)
+	void ParticleEffect::Update(GLfloat dt, GLuint newParticles, Vector3 positionVariation, Vector3 velocityVariation, Vector3 colorVariation, glm::vec3 offset)
 	{
 		// Add new particles 
 		for (GLuint i = 0; i < newParticles; ++i)
 		{
 			int unusedParticle = this->firstUnusedParticle();
-			this->respawnParticle(this->particles[unusedParticle], offset);
+			this->respawnParticle(this->particles[unusedParticle], positionVariation, velocityVariation, colorVariation, offset);
 		}
 		// Update all particles
 		for (GLuint i = 0; i < this->amount; ++i)
@@ -118,16 +118,11 @@ namespace game
 		return 0;
 	}
 
-	void ParticleEffect::respawnParticle(Particle &particle, glm::vec2 offset)
+	void ParticleEffect::respawnParticle(Particle &particle, Vector3 positionVariation, Vector3 velocityVariation, Vector3 colorVariation, glm::vec3 offset)
 	{
-		GLfloat randomX = ((rand() % 100) - 50) / 10.0f;
-		GLfloat randomY = ((rand() % 100) - 50) / 10.0f;
-		GLfloat randomVelX = ((rand() % 100) - 50) / 20.0f;
-		GLfloat randomVelY = ((rand() % 100) - 50) / 20.0f;
-		GLfloat rColor = 0.5 + ((rand() % 100) / 100.0f);
-		particle.Position = glm::vec2(randomX, randomY) + offset;
-		particle.Color = glm::vec4(rColor, rColor, rColor, 1.0f);
+		particle.Position = glm::vec3(positionVariation.ToGLM()) + offset;
+		particle.Color = glm::vec4(colorVariation.x, colorVariation.y, colorVariation.z, 1.0f);
 		particle.Life = 1.0f;
-		particle.Velocity = glm::vec2(randomVelX, randomVelY) * 0.1f;
+		particle.Velocity = glm::vec3(velocityVariation.ToGLM()) * 0.1f;
 	}
 }

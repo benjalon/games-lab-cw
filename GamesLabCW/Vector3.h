@@ -25,6 +25,7 @@ namespace game
 		//Returns the magnitude of this Vector3
 		double abs() const;
 
+		glm::vec3 ToGLM();
 
 		//Definitions of algebraic operations
 

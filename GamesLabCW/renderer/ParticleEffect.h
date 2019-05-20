@@ -20,10 +20,11 @@ namespace game
 		// Constructor
 		ParticleEffect(Texture texture, GLuint amount);
 		// Update all particles
-		void Update(GLfloat dt, GLuint newParticles, glm::vec2 offset = glm::vec2(0.0f, 0.0f));
+		void Update(GLfloat dt, GLuint newParticles, Vector3 positionVariation, Vector3 velocityVariation, Vector3 colorVariation, glm::vec3 offset = glm::vec3(0.0f, 0.0f, 0.0f));
 		// Render all particles
 		void Draw(GLuint shaderProgram);
 	private:
+
 		// State
 		std::vector<Particle> particles;
 		GLuint amount;
@@ -35,6 +36,6 @@ namespace game
 		// Returns the first Particle index that's currently unused e.g. Life <= 0.0f or 0 if no particle is currently inactive
 		GLuint firstUnusedParticle();
 		// Respawns particle
-		void respawnParticle(Particle &particle, glm::vec2 offset = glm::vec2(0.0f, 0.0f));
+		void respawnParticle(Particle &particle, Vector3 positionVariation, Vector3 velocityVariation, Vector3 colorVariation, glm::vec3 offset = glm::vec3(0.0f, 0.0f, 0.0f));
 	};
 }

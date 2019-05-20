@@ -37,5 +37,5 @@ namespace game::renderer
 
 	void animate_model(double time, std::string model_file);
 
-	void update_particle(double time, std::string texture_file, int respawn_count);
+	void update_particle(double time, std::string texture_file, int respawn_count, Vector3 position_variation, Vector3 velocity_variation, Vector3 color_variation);
 };
