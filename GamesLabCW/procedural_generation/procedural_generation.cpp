@@ -182,6 +182,43 @@ namespace game::procgen
 					dead_ends.emplace(coords_to_index(x, y - 1));
 			}
 		}
+
+		//Place n rooms of random sizes
+		void populate_rooms(int n, int min_size, int max_size)
+		{
+			//Each room is randomly either 2x2 or 3x3
+			std::default_random_engine rng;
+			rng.seed(std::random_device()());
+			std::uniform_int_distribution<> dist(min_size, max_size);
+			int room_size = dist(rng);
+
+			//While rooms are left to populate
+			for (int i = 0; n > 0 && i < grid_.size(); i++)
+			{
+				//Don't bother checking extremes
+				auto [x, y] = index_to_coords(i);
+				if (x > 0 && x < (size_ - room_size) && y > 0 && y < (size_ - room_size))
+				{
+					//If destination is all solid, including surroundings
+					bool all_solid = grid_[i].solid;
+					for (int dx = -1; dx <= room_size; dx++)
+						for (int dy = -1; dy <= room_size; dy++)
+							all_solid &= grid_[coords_to_index(x + dx, y + dy)].solid;
+
+					if (all_solid)
+					{
+						//Place room
+						grid_[i].solid = false;
+						for (int dx = 0; dx < room_size; dx++)
+							for (int dy = 0; dy < room_size; dy++)
+								grid_[coords_to_index(x + dx, y + dy)].solid = false;
+
+						n--;
+						room_size = dist(rng);
+					}
+				}
+			}
+		}
 	};
 
 	void generate_maze()
@@ -198,6 +235,9 @@ namespace game::procgen
 
 		//Retract dead ends to increase sparsity
 		g.sparsify(SPARSIFICATION);
+
+		//Place 3 rooms between 2x2 and 3x3
+		g.populate_rooms(3, 2, 5);
 
 		//Debug -- print result
 		g.print();
