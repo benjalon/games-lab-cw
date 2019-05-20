@@ -20,6 +20,7 @@ void game::prototypes::register_prototypes()
 	PROTOTYPE(AIModel, ModelComponent, ColourComponent, TransformComponent, KinematicComponent, AIComponent, CameraComponent, CollisionComponent, DetectionComponent,BulletComponent);
 
 	PROTOTYPE(ParticleEffect, ParticleComponent, ColourComponent, TransformComponent, KinematicComponent);
+	PROTOTYPE(Image, ImageComponent);
 
 	PROTOTYPE(Key, ModelComponent, ColourComponent, CollisionComponent, TransformComponent, KeyComponent, PointLightComponent);
 

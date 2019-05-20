@@ -73,6 +73,11 @@ namespace game
 		Vector3 color_modifier;
 	};
 
+	struct ImageComponent
+	{
+		std::string texture_file;
+	};
+
 	/* LIGHTING */
 
 	struct AmbientLightComponent

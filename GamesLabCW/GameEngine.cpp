@@ -74,7 +74,9 @@ game::GameEngine::GameEngine(bool fullscreen, bool vsync, bool ground) :
 	//renderer::load_particle_effect("models/particle.png", 100);
 	renderer::load_particle_effect("models/star.png", 300, 0.2, 0.5);
 	renderer::load_particle_effect("models/fire.png", 30, 0.08, 0.3);
-	renderer::load_particle_effect("models/fire2.png", 100, 0.2, 1);
+	renderer::load_particle_effect("models/fire2.png", 80, 0.15, 1);
+
+	renderer::load_image("models/hud.png", Vector2(0, 0));
 
 	std::string paths[6] = {
 		"models/Skybox/hw_ruins/ruins_lf.tga",
@@ -181,6 +183,10 @@ void game::GameEngine::run()
 	p_portal.color_modifier = Vector3(0.8, 0.2, 1);
 	scene_.instantiate("ParticleEffect", p_portal, TransformComponent{ Vector3(3, 5, 22) });
 	scene_.instantiate("PointLight", PointLightComponent{ {1, 105.0 / 255.0, 180.0 / 255.0}, 40, { 3, 3, 22} });
+
+	// UI
+	ImageComponent i_ui; i_ui.texture_file = "models/hud.png";
+	scene_.instantiate("Image", i_ui);
 
 	// Skybox
 	TransformComponent t_skybox; t_skybox.scale = { 20, 20, 20 };

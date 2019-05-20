@@ -27,7 +27,7 @@ namespace game::events
 			HandleBulletCollision(e);
 		}
 
-		std::cout << "Enter: " << e.a << " " << e.b << std::endl;
+		/*std::cout << "Enter: " << e.a << " " << e.b << std::endl;*/
 	}
 	RESPONSE(SphereEnterCollideResponse, EnterCollision);
 

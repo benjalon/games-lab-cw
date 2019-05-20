@@ -25,6 +25,7 @@
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Math3D.cpp" />
+    <ClCompile Include="renderer\Image.cpp" />
     <ClCompile Include="renderer\Model.cpp" />
     <ClCompile Include="Prototypes.cpp" />
     <ClCompile Include="renderer\ParticleEffect.cpp" />
@@ -49,6 +50,7 @@
     <ClInclude Include="GameEngine.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="Math3D.h" />
+    <ClInclude Include="renderer\Image.h" />
     <ClInclude Include="renderer\Model.h" />
     <ClInclude Include="Prototypes.h" />
     <ClInclude Include="renderer\ParticleEffect.h" />

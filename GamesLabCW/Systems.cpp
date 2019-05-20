@@ -220,7 +220,7 @@ namespace game::systems
 					t.rotation.z = -(glm::degrees(acos(cosinedegreesToRotate)));
 
 				//t.rotation.z = rotate *-1;
-				cout << fromPlayerToEnemy.x << " " << fromPlayerToEnemy.y << " " <<  cosinedegreesToRotate << " " << t.rotation.z << endl;// ":" << fromPlayerToEnemy << ":" << degreesToRotate << endl;
+				//cout << fromPlayerToEnemy.x << " " << fromPlayerToEnemy.y << " " <<  cosinedegreesToRotate << " " << t.rotation.z << endl;// ":" << fromPlayerToEnemy << ":" << degreesToRotate << endl;
 
 
 				

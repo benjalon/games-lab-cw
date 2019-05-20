@@ -50,6 +50,10 @@ void game::Scene::draw()
 		registry_.view<ParticleComponent, ColourComponent, TransformComponent>().each([&](auto, auto &p, auto &c, auto &t) {
 			renderer::render_particle(cam, p, c, t);
 		});
+
+		registry_.view<ImageComponent>().each([&](auto, auto &i) {
+			renderer::render_image(cam, i);
+		});
 	});
 }
 
