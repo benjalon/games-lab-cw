@@ -333,7 +333,7 @@ namespace game::renderer
 			1, GL_FALSE, glm::value_ptr(matModel)
 		);
 
-		particle.Draw(shader);
+		particle.Render(shader);
 	}
 
 	void animate_model(double time, std::string model_file) 
