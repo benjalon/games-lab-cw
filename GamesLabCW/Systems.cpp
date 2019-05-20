@@ -170,4 +170,25 @@ namespace game::systems
 		renderer::animate_model(t, m.model_file);
 	};
 	SYSTEM(AnimationSystem, ModelComponent);
+
+	auto ParticleSystem = [](auto info, auto entity, ParticleComponent &p, ColourComponent &c, TransformComponent &t)
+	{
+		Vector3 randomPosition = Vector3(
+				((fmod(rand(), p.position_variation.x)) - p.position_variation.y) / p.position_variation.z,
+				((fmod(rand(), p.position_variation.x)) - p.position_variation.y) / p.position_variation.z,
+				((fmod(rand(), p.position_variation.x)) - p.position_variation.y) / p.position_variation.z);
+
+		Vector3 randomVelocity = Vector3(
+			((fmod(rand(), p.velocity_variation.x)) - p.velocity_variation.y) / p.velocity_variation.z,
+			((fmod(rand(), p.velocity_variation.x)) - p.velocity_variation.y) / p.velocity_variation.z,
+			((fmod(rand(), p.velocity_variation.x)) - p.velocity_variation.y) / p.velocity_variation.z);
+
+		Vector3 randomColor = Vector3(
+			(((fmod(rand(), p.color_variation.x)) - p.color_variation.y) / p.color_variation.z) * p.color_modifier.x,
+			(((fmod(rand(), p.color_variation.x)) - p.color_variation.y) / p.color_variation.z) * p.color_modifier.y,
+			(((fmod(rand(), p.color_variation.x)) - p.color_variation.y) / p.color_variation.z) * p.color_modifier.z);
+
+		renderer::update_particle(info.dt, p.texture_file, p.respawn_count, randomPosition, randomVelocity, randomColor);// , t.position);
+	};
+	SYSTEM(ParticleSystem, ParticleComponent, ColourComponent, TransformComponent);
 }

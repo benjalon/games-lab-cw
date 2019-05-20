@@ -63,6 +63,16 @@ namespace game
 		double alpha = 1.0;
 	};
 
+	struct ParticleComponent
+	{
+		std::string texture_file;
+		int respawn_count;
+		Vector3 position_variation;
+		Vector3 velocity_variation;
+		Vector3 color_variation;
+		Vector3 color_modifier;
+		Vector3 scale_variation;
+	};
 
 	/* LIGHTING */
 
