@@ -54,3 +54,4 @@ namespace game
 		void upload(GLenum usage);
 	};
 }
+

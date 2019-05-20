@@ -2,7 +2,6 @@
  * Events.h
  * Defines the interface for event signalling.
  */
-
 #pragma once
 
 #include <entt/entt.hpp>
@@ -31,6 +30,16 @@ namespace game::events
 		Entity a;
 		Entity b;
 	};
+
+
+	struct FireBullet
+	{
+		Scene &scene;
+		std::string bullet_file;
+		Vector3 position;
+		Vector3 rotation;
+	};
+
 
 	/* EVENTS AND RESPONSES IMPLEMENTATION */
 
@@ -67,6 +76,7 @@ namespace game::events
 	};
 		
 	void HandleKeyCollision(const EnterCollision &e);
+	void HandleBulletCollision(const EnterCollision &e);
 	void HandleDoorCollision(const EnterCollision &e);
 }
 

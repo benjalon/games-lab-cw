@@ -16,6 +16,8 @@ game::Vector2::Vector2() : x(0), y(0) {};
 
 game::Vector2::Vector2(double x, double y) : x(x), y(y) {};
 
+game::Vector2::Vector2(glm::vec2 vec) : x(vec.x), y(vec.y) {};
+
 double game::Vector2::abs() const { return sqrt(x*x + y * y); }
 
 glm::vec2 game::Vector2::ToGLM() { return glm::vec2(x, y); }

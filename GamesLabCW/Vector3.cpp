@@ -11,6 +11,8 @@ game::Vector3::Vector3() : x(0), y(0), z(0) {};
 
 game::Vector3::Vector3(double x, double y, double z) : x(x), y(y), z(z) {};
 
+game::Vector3::Vector3(glm::vec3 vec) : x(vec.x), y(vec.y), z(vec.z) {};
+
 double game::Vector3::abs() const { return sqrt(x*x + y*y + z*z); }
 
 glm::vec3 game::Vector3::ToGLM() { return glm::vec3(x, y, z); }
