@@ -21,6 +21,7 @@ namespace game::renderer
 
 	//Loads the given model
 	void load_model(std::string file);
+	void load_particle_effect(std::string texture, int count, float scale, float speed);
 
 	// external textures for a given model
 	void load_external_map(std::string path, std::string model_path, TextureType type);
@@ -32,5 +33,9 @@ namespace game::renderer
 		size_t n_directional, DirectionalLightComponent *directionals,
 		size_t n_point, PointLightComponent *points);
 
+	void render_particle(CameraComponent camera, ParticleComponent &model, ColourComponent c, TransformComponent t);
+
 	void animate_model(double time, std::string model_file);
+
+	void update_particle(double time, std::string texture_file, int respawn_count, Vector3 position_variation, Vector3 velocity_variation, Vector3 color_variation);
 };

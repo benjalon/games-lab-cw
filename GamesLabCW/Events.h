@@ -76,8 +76,8 @@ namespace game::events
 	};
 		
 	void HandleKeyCollision(const EnterCollision &e);
-
 	void HandleBulletCollision(const EnterCollision &e);
+	void HandleDoorCollision(const EnterCollision &e);
 }
 
 //Registers a function as a response to an event
