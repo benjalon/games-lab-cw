@@ -39,6 +39,7 @@ namespace game
 
 	void ParticleEffect::Update(float dt, int newParticles, Vector3 positionVariation, Vector3 velocityVariation, Vector3 colorVariation, glm::vec3 offset)
 	{
+		// Respawn particles at given speed, assuming there are some dead
 		for (size_t i = 0; i < newParticles && i < deadParticles; ++i)
 		{
 			int unusedParticle = this->firstUnusedParticle();
@@ -66,14 +67,13 @@ namespace game
 		}
 	}
 
-	// Render all particles
 	void ParticleEffect::Render(GLuint shaderProgram)
 	{
+		// Bind array object and blend
 		glBindVertexArray(vao);
-
-		// Use additive blending to give it a 'glow' effect
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
+		// Set uniforms for shader
 		for (Particle particle : this->particles)
 		{
 			if (particle.Life > 0.0f)
@@ -102,9 +102,9 @@ namespace game
 				glBindVertexArray(0);
 			}
 		}
-		// Don't forget to reset to default blending mode
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+		// Reset array object and blend setting
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glBindVertexArray(0);
 	}
 
