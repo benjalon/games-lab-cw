@@ -5,14 +5,17 @@
 
 #include "Systems.h"
 
-#include <glm/gtc/type_ptr.hpp>
+#define GLM_ENABLE_EXPERIMENTAL
+
 
 #include "Input.h"
 #include "Utility.h"
 #include "renderer/Renderer.h"
 #include <iostream>
 using namespace std;
-
+#include <glm/glm.hpp>
+#include <glm/gtx/transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 std::vector<game::systems::SystemInvoker> game::systems::system_invokers;
 
@@ -197,24 +200,28 @@ namespace game::systems
 				Vector2 fromPlayerToEnemy = cameraPos - enemyPos;
 				fromPlayerToEnemy = Vector2(glm::normalize(fromPlayerToEnemy.ToGLM()));
 
+				glm::mat4 matModel = glm::rotate(glm::radians((float)(t.rotation.z)), glm::vec3(0, 0, 1));
 
 				// Get the current heading of the player (this should already be Normalized)
-				glm::vec2 playerHeading = glm::radians(glm::vec2(t.rotation.x, t.rotation.z));
+				//glm::vec2 playerHeading = glm::vec2(t.rotation.x, t.rotation.z);
+				glm::vec2 playerHeading = glm::vec2(matModel[2][0], matModel[2][2]);
 
 
 				// Now calculate the Dot product between the two (Normalized) vectors, playerHeading and fromPlayerToEnemy
 				// Note: this process is different between 2-dimensional and 3-dimensional vectors, 
 				//  so I'll just represent this process by a function
-				float radiansToRotate = glm::dot(playerHeading, fromPlayerToEnemy.ToGLM());
+				float cosinedegreesToRotate = glm::dot(playerHeading, fromPlayerToEnemy.ToGLM());
 
 
 				// Apply this rotation to the player
 				//player.Rotate(radiansToRotate);
-				float rotate = glm::degrees(radiansToRotate);
-				float radius = 180.0;
-				t.rotation.z = rotate;
+				if(fromPlayerToEnemy.x < 0)
+					t.rotation.z = -(360 - glm::degrees(acos(cosinedegreesToRotate)));
+				else
+					t.rotation.z = -(glm::degrees(acos(cosinedegreesToRotate)));
+
 				//t.rotation.z = rotate *-1;
-				cout << t.rotation.z << ":" << radiansToRotate << ":" << glm::degrees(radiansToRotate) << endl;
+				cout << fromPlayerToEnemy.x << " " << fromPlayerToEnemy.y << " " <<  cosinedegreesToRotate << " " << t.rotation.z << endl;// ":" << fromPlayerToEnemy << ":" << degreesToRotate << endl;
 
 
 				
@@ -247,7 +254,7 @@ namespace game::systems
 				//rotate.x = glm::degrees(rotate.x);
 				//rotate.y = glm::degrees(rotate.y);
 				//rotate.z = glm::degrees(rotate.z);
-				float radius = 180.0;
+				//float radius = 180.0;
 				//t.rotation.z = rotate;
 			}
 			
