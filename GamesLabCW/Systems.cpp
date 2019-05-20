@@ -191,13 +191,12 @@ namespace game::systems
 		}
 		else if (!a.looking)
 		{
-			if (true)
-			{
+			
 				// Get the positions of both Entities
 				Vector2 cameraPos = Vector2(c.position.x, c.position.z);
 				Vector2 enemyPos = Vector2(t.position.x, t.position.z);
-				Vector2 fromPlayerToEnemy = cameraPos - enemyPos;
-				fromPlayerToEnemy = Vector2(glm::normalize(fromPlayerToEnemy.ToGLM()));
+				Vector2 nonNormal = cameraPos - enemyPos;
+				Vector2 fromPlayerToEnemy = Vector2(glm::normalize(nonNormal.ToGLM()));
 
 				glm::mat4 matModel = glm::rotate(glm::radians((float)(t.rotation.z)), glm::vec3(0, 0, 1));
 
@@ -207,62 +206,20 @@ namespace game::systems
 
 
 				// Now calculate the Dot product between the two (Normalized) vectors, playerHeading and fromPlayerToEnemy
-				// Note: this process is different between 2-dimensional and 3-dimensional vectors, 
-				//  so I'll just represent this process by a function
 				float cosinedegreesToRotate = glm::dot(playerHeading, fromPlayerToEnemy.ToGLM());
 
 
-				// Apply this rotation to the player
-				//player.Rotate(radiansToRotate);
+				// Apply acos to that value and set z-axis 360 rule. Then rotation to the AIModel
 				if(fromPlayerToEnemy.x < 0)
 					t.rotation.z = -(360 - glm::degrees(acos(cosinedegreesToRotate)));
 				else
 					t.rotation.z = -(glm::degrees(acos(cosinedegreesToRotate)));
 
-				//t.rotation.z = rotate *-1;
-				cout << fromPlayerToEnemy.x << " " << fromPlayerToEnemy.y << " " <<  cosinedegreesToRotate << " " << t.rotation.z << endl;// ":" << fromPlayerToEnemy << ":" << degreesToRotate << endl;
-
-
-				
-			}
-			else {
-				// Get the positions of both Entities
-				Vector3 cameraPos = c.position;
-				Vector3 enemyPos = t.position;
-				Vector3 direction = enemyPos - cameraPos;
-
-
-				// Get the current heading of the player (this should already be Normalized)
-				//glm::vec3 playerHeading = glm::radians(glm::vec3(t.rotation.x, t.rotation.z));
-				//Vector3 playerHeading = Vector2(t.rotation.x, t.rotation.y).direction_hv();
-
-				// Now calculate the Dot product between the two (Normalized) vectors, playerHeading and fromPlayerToEnemy
-				// Note: this process is different between 2-dimensional and 3-dimensional vectors, 
-				//  so I'll just represent this process by a function
-				//float rotate = glm::dot(playerHeading.ToGLM(), fromPlayerToEnemy.ToGLM());
-
-				
-				//auto g = glm::lookAt(t.position.ToGLM(), glm::normalize(direction.ToGLM()) + enemyPos.ToGLM(), { 0.0f, 1.0f, 0.0f });
-
-				//t.follow = true;
-				//t.lookAt = glm::inverse(g);
-				
-				//auto b = glm::look
-				// Apply this rotation to the player
-				//player.Rotate(radiansToRotate);
-				//rotate.x = glm::degrees(rotate.x);
-				//rotate.y = glm::degrees(rotate.y);
-				//rotate.z = glm::degrees(rotate.z);
-				//float radius = 180.0;
-				//t.rotation.z = rotate;
-			}
-			
-			
-
 			
 			if (input::is_pressed(input::KEY_LEFT_CONTROL))
 			{
-				Vector3 tmp = { t.rotation.x,t.rotation.z,t.rotation.y }; //really shitty doesn't work
+				//Vector3 tmp = { matModel[2][0],matModel[2][1],matModel[2][2] };
+				Vector3 tmp = { -fmod(t.rotation.z,360), 0, 0 };
 				events::dispatcher.enqueue<events::FireBullet>(info.scene, bc.model_file, t.position, tmp);
 			}
 			
