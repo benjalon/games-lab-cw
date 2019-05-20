@@ -46,6 +46,13 @@ namespace game::events
 
 		e.scene.instantiate("Bullet", m, t, k);
 
+		ParticleComponent p_fireball; p_fireball.texture_file = "models/fire2.png"; p_fireball.respawn_count = 1;
+		p_fireball.position_variation = Vector3(100, 50, 100);
+		p_fireball.velocity_variation = Vector3(100, 50, 10);
+		p_fireball.color_variation = Vector3(100, -0.5, 100);
+		p_fireball.color_modifier = Vector3(1, 0.15, 0);
+		TransformComponent t_torch; t_torch.position = e.position;
+		e.scene.instantiate("ParticleEffect", p_fireball, t_torch, k);
 		
 	}
 	RESPONSE(FireBulletResponse, FireBullet);

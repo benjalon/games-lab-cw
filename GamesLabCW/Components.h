@@ -71,7 +71,6 @@ namespace game
 		Vector3 velocity_variation;
 		Vector3 color_variation;
 		Vector3 color_modifier;
-		Vector3 scale_variation;
 	};
 
 	/* LIGHTING */
@@ -124,7 +123,7 @@ namespace game
 	};
 
 	struct BulletComponent{
-		std::string model_file = "models/Key/Key_B_02.obj";
+		std::string model_file = "models/Fireball/fireball.obj";
 	};
 
 	struct DetectionComponent {

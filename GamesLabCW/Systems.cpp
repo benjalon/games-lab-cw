@@ -275,7 +275,7 @@ namespace game::systems
 	};
 	SYSTEM(AISystem, ModelComponent, ColourComponent, TransformComponent, KinematicComponent, AIComponent, CameraComponent,CollisionComponent,DetectionComponent,BulletComponent);
 	
-	auto ParticleSystem = [](auto info, auto entity, ParticleComponent &p, ColourComponent &c, TransformComponent &t)
+	auto ParticleSystem = [](auto info, auto entity, ParticleComponent &p, ColourComponent &c, TransformComponent &t, KinematicComponent &k)
 	{
 		Vector3 randomPosition = Vector3(
 				((fmod(rand(), p.position_variation.x)) - p.position_variation.y) / p.position_variation.z,
@@ -294,5 +294,5 @@ namespace game::systems
 
 		renderer::update_particle(info.dt, p.texture_file, p.respawn_count, randomPosition, randomVelocity, randomColor);// , t.position);
 	};
-	SYSTEM(ParticleSystem, ParticleComponent, ColourComponent, TransformComponent);
+	SYSTEM(ParticleSystem, ParticleComponent, ColourComponent, TransformComponent, KinematicComponent);
 }

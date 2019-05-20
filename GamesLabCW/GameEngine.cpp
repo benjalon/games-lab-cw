@@ -58,7 +58,7 @@ game::GameEngine::GameEngine(bool fullscreen, bool vsync, bool ground) :
 	prototypes::register_prototypes();
 
 	//EXAMPLE Load models
-	renderer::load_model("models/Cyborg/cyborg.obj");
+	//renderer::load_model("models/Cyborg/cyborg.obj");
 	renderer::load_model("models/Room/room.obj");
 	renderer::load_model("models/Procedural/type1.obj");
 	renderer::load_model("models/Procedural/type2.obj");
@@ -69,10 +69,12 @@ game::GameEngine::GameEngine(bool fullscreen, bool vsync, bool ground) :
 	renderer::load_model("models/Torch/torch.obj");
 	renderer::load_model("models/Key/Key_B_02.obj");
 	renderer::load_model("models/Minotaur/Minotaur@Jump.fbx");
+	renderer::load_model("models/Fireball/fireball.obj");
 
 	//renderer::load_particle_effect("models/particle.png", 100);
 	renderer::load_particle_effect("models/star.png", 300, 0.2, 0.5);
 	renderer::load_particle_effect("models/fire.png", 30, 0.08, 0.3);
+	renderer::load_particle_effect("models/fire2.png", 100, 0.2, 1);
 
 	std::string paths[6] = {
 		"models/Skybox/hw_ruins/ruins_lf.tga",
@@ -150,7 +152,6 @@ void game::GameEngine::run()
 	p_torch.velocity_variation = Vector3(100, 50, 50);
 	p_torch.color_variation = Vector3(100, -0.5, 100);
 	p_torch.color_modifier = Vector3(1, 0.15, 0);
-	p_torch.scale_variation = Vector3(100, 50, 10);
 
 	TransformComponent t_torch1; t_torch1.position = { 26, 0, -23 }; t_torch1.scale = { 5, 5, 5 };
 	scene_.instantiate("Model", m_torch, t_torch1);
