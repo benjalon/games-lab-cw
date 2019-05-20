@@ -15,11 +15,15 @@ namespace game::events
 	void SphereEnterCollideResponse(const EnterCollision &e)
 	{
 		if (e.registry.has<KeyComponent, PointLightComponent, TransformComponent>(e.a))
+		{
 			HandleKeyCollision(e);
+		}
 		else if (e.registry.has<DoorComponent>(e.a))
+		{
 			HandleDoorCollision(e);
 		}
-		else if (e.registry.has<AIComponent>(e.b)) {
+		else if (e.registry.has<AIComponent>(e.b)) 
+		{
 			HandleBulletCollision(e);
 		}
 

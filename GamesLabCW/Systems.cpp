@@ -274,23 +274,7 @@ namespace game::systems
 		
 	};
 	SYSTEM(AISystem, ModelComponent, ColourComponent, TransformComponent, KinematicComponent, AIComponent, CameraComponent,CollisionComponent,DetectionComponent,BulletComponent);
-
-
-	//Key collision system
-	auto KeySystem = [](auto info, auto entity, ModelComponent &m, ColourComponent &c, CollisionComponent &collision, TransformComponent &t, KeyComponent &k, PointLightComponent &pl)
-	{
-		if (!k.pickedUp && collision.colliding.size() > 0) {
-			k.pickedUp = true;
-			t.position = k.destination;
-
-			pl.on = false;
-
-			//k.keysHeld++;
-		}
-	};
-	SYSTEM(KeySystem, ModelComponent, ColourComponent, CollisionComponent, TransformComponent, KeyComponent, PointLightComponent);
-
-
+	
 	auto ParticleSystem = [](auto info, auto entity, ParticleComponent &p, ColourComponent &c, TransformComponent &t)
 	{
 		Vector3 randomPosition = Vector3(
