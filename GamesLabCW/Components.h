@@ -106,10 +106,14 @@ namespace game
 	struct MoveSphere {};
 
 	struct AIComponent {
-
+		bool looking = true;
 	};
 
 	struct BulletComponent{
-		std::string model_file = "";
+		std::string model_file = "models/Key/Key_B_02.obj";
+	};
+
+	struct DetectionComponent {
+		CollisionComponent c;
 	};
 }
