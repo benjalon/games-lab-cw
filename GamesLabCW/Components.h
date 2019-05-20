@@ -70,6 +70,8 @@ namespace game
 		Vector3 position_variation;
 		Vector3 velocity_variation;
 		Vector3 color_variation;
+		Vector3 color_modifier;
+		Vector3 scale_variation;
 	};
 
 	/* LIGHTING */

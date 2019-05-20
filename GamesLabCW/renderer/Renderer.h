@@ -21,7 +21,7 @@ namespace game::renderer
 
 	//Loads the given model
 	void load_model(std::string file);
-	void load_particle_effect(std::string texture, int count);
+	void load_particle_effect(std::string texture, int count, float scale, float speed);
 
 	// external textures for a given model
 	void load_external_map(std::string path, std::string model_path, TextureType type);

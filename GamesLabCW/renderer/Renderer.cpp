@@ -102,8 +102,8 @@ namespace game::renderer
 		models.emplace(file, Model(file)).first->second;
 	}
 
-	void load_particle_effect(std::string texture, int count) {
-		particleEffects.emplace(texture, ParticleEffect(texture, count)).first->second;
+	void load_particle_effect(std::string texture, int count, float scale, float speed) {
+		particleEffects.emplace(texture, ParticleEffect(texture, count, scale, speed)).first->second;
 	}
 
 	void load_external_map(std::string path, std::string model_path, TextureType type)

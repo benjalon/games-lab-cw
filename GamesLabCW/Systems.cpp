@@ -184,9 +184,9 @@ namespace game::systems
 			((fmod(rand(), p.velocity_variation.x)) - p.velocity_variation.y) / p.velocity_variation.z);
 
 		Vector3 randomColor = Vector3(
-			((fmod(rand(), p.color_variation.x)) - p.color_variation.y) / p.color_variation.z,
-			((fmod(rand(), p.color_variation.x)) - p.color_variation.y) / p.color_variation.z,
-			((fmod(rand(), p.color_variation.x)) - p.color_variation.y) / p.color_variation.z);
+			(((fmod(rand(), p.color_variation.x)) - p.color_variation.y) / p.color_variation.z) * p.color_modifier.x,
+			(((fmod(rand(), p.color_variation.x)) - p.color_variation.y) / p.color_variation.z) * p.color_modifier.y,
+			(((fmod(rand(), p.color_variation.x)) - p.color_variation.y) / p.color_variation.z) * p.color_modifier.z);
 
 		renderer::update_particle(info.dt, p.texture_file, p.respawn_count, randomPosition, randomVelocity, randomColor);// , t.position);
 	};

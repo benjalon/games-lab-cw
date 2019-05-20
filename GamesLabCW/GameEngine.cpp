@@ -70,8 +70,9 @@ game::GameEngine::GameEngine(bool fullscreen, bool vsync, bool ground) :
 	renderer::load_model("models/Key/Key_B_02.obj");
 	renderer::load_model("models/Minotaur/Minotaur@Jump.fbx");
 
-	renderer::load_particle_effect("models/particle.png", 100);
-	renderer::load_particle_effect("models/fire.png", 500);
+	//renderer::load_particle_effect("models/particle.png", 100);
+	renderer::load_particle_effect("models/star.png", 500, 0.2, 0.5);
+	renderer::load_particle_effect("models/fire.png", 100, 0.1, 0.4);
 
 	std::string paths[6] = {
 		"models/Skybox/hw_ruins/ruins_lf.tga",
@@ -161,30 +162,59 @@ void game::GameEngine::run()
 	TransformComponent t_torch1; t_torch1.position = { 26, 0, -23 }; t_torch1.scale = { 5, 5, 5 };
 	scene_.instantiate("Model", m_torch1, t_torch1);
 	scene_.instantiate("PointLight", PointLightComponent{ {1, 147.0 / 255.0, 41.0 / 255.0}, 40, {26, 7, -23} });
+	ParticleComponent p_torch1; p_torch1.texture_file = "models/fire.png"; p_torch1.respawn_count = 1;
+	p_torch1.position_variation = Vector3(100, 50, 20);
+	p_torch1.velocity_variation = Vector3(100, 50, 50);
+	p_torch1.color_variation = Vector3(100, -0.5, 100);
+	p_torch1.color_modifier = Vector3(0.8, 0.1, 0);
+	p_torch1.scale_variation = Vector3(100, 50, 10);
+	scene_.instantiate("ParticleEffect", p_torch1, TransformComponent{ { 26, 8, -23 } });
 
 	ModelComponent m_torch2; m_torch2.model_file = "models/Torch/torch.obj";
 	TransformComponent t_torch2; t_torch2.position = { 26, 0, 23 }; t_torch2.scale = { 5, 5, 5 };
 	scene_.instantiate("Model", m_torch2, t_torch2);
 	scene_.instantiate("PointLight", PointLightComponent{ {1, 147.0 / 255.0, 41.0 / 255.0}, 40, {26, 7, 23} });
+	ParticleComponent p_torch2; p_torch2.texture_file = "models/fire.png"; p_torch2.respawn_count = 1;
+	p_torch2.position_variation = Vector3(100, 50, 20);
+	p_torch2.velocity_variation = Vector3(100, 50, 50);
+	p_torch2.color_variation = Vector3(100, -0.5, 100);
+	p_torch2.color_modifier = Vector3(0.8, 0.1, 0);
+	p_torch2.scale_variation = Vector3(100, 50, 10);
+	scene_.instantiate("ParticleEffect", p_torch2, TransformComponent{ { 26, 8, 23 } });
 
 	ModelComponent m_torch3; m_torch3.model_file = "models/Torch/torch.obj";
 	TransformComponent t_torch3; t_torch3.position = { -26, 6, -10 }; t_torch3.scale = { 5, 5, 5 };
 	scene_.instantiate("Model", m_torch3, t_torch3);
 	scene_.instantiate("PointLight", PointLightComponent{ {1, 147.0 / 255.0, 41.0 / 255.0}, 40, { -26, 13, -10 } });
+	ParticleComponent p_torch3; p_torch3.texture_file = "models/fire.png"; p_torch3.respawn_count = 1;
+	p_torch3.position_variation = Vector3(100, 50, 20);
+	p_torch3.velocity_variation = Vector3(100, 50, 50);
+	p_torch3.color_variation = Vector3(100, -0.5, 100);
+	p_torch3.color_modifier = Vector3(0.8, 0.1, 0);
+	p_torch3.scale_variation = Vector3(100, 50, 10);
+	scene_.instantiate("ParticleEffect", p_torch3, TransformComponent{ { -26, 13, -10 } });
 
 	ModelComponent m_torch4; m_torch4.model_file = "models/Torch/torch.obj";
 	TransformComponent t_torch4; t_torch4.position = { -26, 6, 10 }; t_torch4.scale = { 5, 5, 5 };
 	scene_.instantiate("Model", m_torch4, t_torch4);
 	scene_.instantiate("PointLight", PointLightComponent{ {1, 147.0 / 255.0, 41.0 / 255.0}, 40, { -26, 13, 10 } });
+	ParticleComponent p_torch4; p_torch4.texture_file = "models/fire.png"; p_torch4.respawn_count = 1;
+	p_torch4.position_variation = Vector3(100, 50, 20);
+	p_torch4.velocity_variation = Vector3(100, 50, 50);
+	p_torch4.color_variation = Vector3(100, -0.5, 100);
+	p_torch4.color_modifier = Vector3(0.8, 0.1, 0);
+	p_torch4.scale_variation = Vector3(100, 50, 10);
+	scene_.instantiate("ParticleEffect", p_torch4, TransformComponent{ { -26, 13, 10 } });
 
 	// Portal light
 	scene_.instantiate("PointLight", PointLightComponent{ {1, 105.0 / 255.0, 180.0 / 255.0}, 40, { 3, 3, 22} });
 
-	ParticleComponent p_fire; p_fire.texture_file = "models/fire.png"; p_fire.respawn_count = 2;
-	p_fire.position_variation = Vector3(100, 50, 10);
-	p_fire.velocity_variation = Vector3(100, 50, 20);
-	p_fire.color_variation = Vector3(100, -0.5, 100);
-	scene_.instantiate("ParticleEffect", p_fire, TransformComponent{ Vector3(3, 3, 22) });
+	ParticleComponent p_portal; p_portal.texture_file = "models/star.png"; p_portal.respawn_count = 1;
+	p_portal.position_variation = Vector3(100, 50, 10);
+	p_portal.velocity_variation = Vector3(100, 50, 40);
+	p_portal.color_variation = Vector3(100, -0.5, 100);
+	p_portal.color_modifier = Vector3(0.8, 0.2, 1);
+	scene_.instantiate("ParticleEffect", p_portal, TransformComponent{ Vector3(3, 5, 22) });
 
 	TransformComponent t_skybox; t_skybox.scale = { 20, 20, 20 };
 	ModelComponent m_skybox; m_skybox.model_file = "models/Skybox/skybox.obj"; m_skybox.vertex_shader = "shaders/Skybox.vert"; m_skybox.fragment_shader = "shaders/Skybox.frag";

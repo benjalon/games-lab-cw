@@ -6,19 +6,20 @@
 namespace game
 {
 	struct Particle {
-		glm::vec2 Position, Velocity;
+		glm::vec3 Position, Velocity;
 		glm::vec4 Color;
+		GLfloat Scale;
 		GLfloat Life;
 
 		Particle()
-			: Position(0.0f), Velocity(0.0f), Color(1.0f), Life(0.0f) { }
+			: Position(0.0f), Velocity(0.0f), Color(1.0f), Scale(1.0f), Life(0.0f) { }
 	};
 
 	class ParticleEffect
 	{
 	public:
 		// Constructor
-		ParticleEffect(Texture texture, GLuint amount);
+		ParticleEffect(Texture texture, GLuint amount, float scale, float speed);
 		// Update all particles
 		void Update(GLfloat dt, GLuint newParticles, Vector3 positionVariation, Vector3 velocityVariation, Vector3 colorVariation, glm::vec3 offset = glm::vec3(0.0f, 0.0f, 0.0f));
 		// Render all particles
@@ -28,6 +29,8 @@ namespace game
 		// State
 		std::vector<Particle> particles;
 		GLuint amount;
+		float scale;
+		float speed;
 		// Render state
 		Texture texture;
 		GLuint VAO;

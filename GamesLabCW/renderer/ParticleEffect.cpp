@@ -2,8 +2,8 @@
 
 namespace game
 {
-	ParticleEffect::ParticleEffect(Texture texture, GLuint amount)
-		: texture(texture), amount(amount)
+	ParticleEffect::ParticleEffect(Texture texture, GLuint amount, float scale, float speed)
+		: texture(texture), amount(amount), scale(scale), speed(speed)
 	{
 		this->init();
 	}
@@ -16,15 +16,18 @@ namespace game
 			int unusedParticle = this->firstUnusedParticle();
 			this->respawnParticle(this->particles[unusedParticle], positionVariation, velocityVariation, colorVariation, offset);
 		}
+
+		float scaledDT = dt * speed;
+
 		// Update all particles
 		for (GLuint i = 0; i < this->amount; ++i)
 		{
 			Particle &p = this->particles[i];
-			p.Life -= dt; // reduce life
+			p.Life -= scaledDT; // reduce life
 			if (p.Life > 0.0f)
 			{	// particle is alive, thus update
-				p.Position -= p.Velocity * dt;
-				p.Color.a -= dt * 2.5;
+				p.Position -= p.Velocity * scaledDT;
+				p.Color.a -= scaledDT * 2.5;
 			}
 		}
 	}
@@ -41,9 +44,14 @@ namespace game
 		{
 			if (particle.Life > 0.0f)
 			{
-				glUniform2f(
+				glUniform1f(
+					glGetUniformLocation(shaderProgram, "scale"),
+					(GLfloat)particle.Scale
+				);
+
+				glUniform3f(
 					glGetUniformLocation(shaderProgram, "offset"),
-					(GLfloat)particle.Position.x, (GLfloat)particle.Position.y
+					(GLfloat)particle.Position.x, (GLfloat)particle.Position.y, (GLfloat)particle.Position.z
 				);
 
 				glUniform4f(
@@ -108,7 +116,12 @@ namespace game
 		}
 		// Otherwise, do a linear search
 		for (GLuint i = 0; i < lastUsedParticle; ++i) {
+			if (i >= particles.size()) {
+				i = particles.size() - 1;
+				return i;
+			}
 			if (this->particles[i].Life <= 0.0f) {
+
 				lastUsedParticle = i;
 				return i;
 			}
@@ -124,5 +137,6 @@ namespace game
 		particle.Color = glm::vec4(colorVariation.x, colorVariation.y, colorVariation.z, 1.0f);
 		particle.Life = 1.0f;
 		particle.Velocity = glm::vec3(velocityVariation.ToGLM()) * 0.1f;
+		particle.Scale = scale;
 	}
 }
