@@ -376,6 +376,7 @@ namespace game::procgen
 			ModelComponent m_type_2; m_type_2.model_file = "models/Procedural/type2.obj";
 			ModelComponent m_type_3; m_type_3.model_file = "models/Procedural/type3.obj";
 			ModelComponent m_type_4; m_type_4.model_file = "models/Procedural/type4.obj";
+			ModelComponent m_type_5; m_type_5.model_file = "models/Procedural/type5.obj";
 
 			//Parameters of model
 			double model_size = 20.0;
@@ -408,6 +409,11 @@ namespace game::procgen
 						//Determine which type to use and rotate as necessary
 						switch (num_neighbours)
 						{
+						case 0:
+							//Room piece
+							scene.instantiate("Model", m_type_5, t);
+							break;
+
 						case 1:
 							//Edge piece
 							if (south) t.rotation = { 0, 90.0, 0 };
@@ -421,10 +427,12 @@ namespace game::procgen
 							//Corridor piece
 							if (east && west)
 							{
+								t.position.y += 0.1 * scale; //Account for slight gap
 								scene.instantiate("Model", m_type_1, t);
 							}
 							else if (north && south)
 							{
+								t.position.y += 0.1 * scale; //Account for slight gap
 								t.rotation = { 0, 90.0, 0 };
 								scene.instantiate("Model", m_type_1, t);
 							}
@@ -446,9 +454,6 @@ namespace game::procgen
 							else if (!south) t.rotation = { 0, 270.0, 0 };
 
 							scene.instantiate("Model", m_type_4, t);
-							break;
-
-						default:
 							break;
 						}
 					}

@@ -59,13 +59,14 @@ game::GameEngine::GameEngine(bool fullscreen, bool vsync, bool ground) :
 	//Load entity prototypes
 	prototypes::register_prototypes();
 
-	//EXAMPLE Load models
+	//Load models
 	//renderer::load_model("models/Cyborg/cyborg.obj");
 	renderer::load_model("models/Room/room.obj");
 	renderer::load_model("models/Procedural/type1.obj");
 	renderer::load_model("models/Procedural/type2.obj");
 	renderer::load_model("models/Procedural/type3.obj");
 	renderer::load_model("models/Procedural/type4.obj");
+	renderer::load_model("models/Procedural/type5.obj");
 	renderer::load_model("models/Water/water.obj");
 	renderer::load_model("models/Skybox/skybox.obj");
 	renderer::load_model("models/Torch/torch.obj");
