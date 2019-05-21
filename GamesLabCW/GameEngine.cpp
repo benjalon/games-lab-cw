@@ -141,8 +141,10 @@ void game::GameEngine::run()
 	ModelComponent m_minotaur; m_minotaur.model_file = "models/Minotaur/Minotaur@Jump.fbx";
 	ColourComponent c_minotaur; c_minotaur.colour = { 0, 0, 255 };
 	TransformComponent t_minotaur; t_minotaur.scale = { 0.15, 0.15, 0.15 }; t_minotaur.position = { 0, 9, -15 }; t_minotaur.rotation = { 90, 180, 0 };
-	DetectionComponent d_minotaur; d_minotaur.c.radius = 30;
-	scene_.instantiate("AIModel", m_minotaur, t_minotaur, camera, d_minotaur, c_minotaur);
+	scene_.instantiate("AIModel", m_minotaur, t_minotaur, camera, c_minotaur);// d_minotaur, c_minotaur);
+	DetectionComponent d_minotaur;
+	CollisionComponent c_detectionRadius; c_detectionRadius.radius = 10000;
+	scene_.instantiate("DetectionRadius", d_minotaur, t_minotaur, c_detectionRadius);
 
 	// Torches
 	ModelComponent m_torch; m_torch.model_file = "models/Torch/torch.obj";

@@ -22,7 +22,7 @@ namespace game::events
 		{
 			HandleDoorCollision(e);
 		}
-		else if (e.registry.has<DetectionComponent>(e.b) & e.registry.has<FirstPersonControllerComponent>(e.a))
+		else if (e.registry.has<DetectionComponent>(e.a) & e.registry.has<FirstPersonControllerComponent>(e.b))
 		{
 			HandleDetectionCollision(e);
 		}
@@ -38,7 +38,7 @@ namespace game::events
 
 	void SphereLeaveCollideResponse(const LeaveCollision &e)
 	{
-		if (e.registry.has<DetectionComponent>(e.b))
+		if (e.registry.has<DetectionComponent>(e.a))
 		{
 			HandleDetectionCollisionLeaving(e);
 		}
@@ -109,17 +109,17 @@ namespace game::events
 
 	void HandleDetectionCollision(const EnterCollision &e)
 	{
-		auto &dc = e.registry.get<AIComponent>(e.a);
+		/*auto &dc = e.registry.get<AIComponent>(e.a);
 		
-		dc.looking = false;
+		dc.looking = false;*/
 
 	}
 
 	void HandleDetectionCollisionLeaving(const LeaveCollision &e)
 	{
-		auto &dc = e.registry.get<AIComponent>(e.a);
+		/*auto &dc = e.registry.get<AIComponent>(e.a);
 
-		dc.looking = true;
+		dc.looking = true;*/
 
 	}
 }
