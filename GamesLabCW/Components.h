@@ -133,5 +133,6 @@ namespace game
 
 	struct DetectionComponent {
 		CollisionComponent c;
+		Entity camera;
 	};
 }

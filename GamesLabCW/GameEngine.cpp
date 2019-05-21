@@ -101,7 +101,7 @@ void game::GameEngine::run()
 {
 	// Player/camera
 	auto player = scene_.instantiate("FirstPersonController", TransformComponent{ {0,6,5} , { 180,0,0 } });
-	auto camera = CameraComponent{ player };
+	auto camera = scene_.instantiate("Camera", CameraComponent{ player });
 
 	// Room stuff
 	ModelComponent m_water; m_water.model_file = "models/Water/water.obj"; m_water.vertex_shader = "shaders/Water.vert"; m_water.fragment_shader = "shaders/Water.frag";
@@ -148,8 +148,8 @@ void game::GameEngine::run()
 	ModelComponent m_minotaur; m_minotaur.model_file = "models/Minotaur/Minotaur@Jump.fbx";
 	ColourComponent c_minotaur; c_minotaur.colour = { 0, 0, 255 };
 	TransformComponent t_minotaur; t_minotaur.scale = { 0.15, 0.15, 0.15 }; t_minotaur.position = { 0, 9, -15 }; t_minotaur.rotation = { 90, 180, 0 };//90, 180
-	DetectionComponent d_minotaur; d_minotaur.c.radius = 10;
-	scene_.instantiate("AIModel", m_minotaur, t_minotaur, camera, d_minotaur, c_minotaur);
+	DetectionComponent d_minotaur; d_minotaur.c.radius = 10; d_minotaur.camera = camera;
+	scene_.instantiate("AIModel", m_minotaur, t_minotaur, d_minotaur, c_minotaur);
 
 	// Torches
 	ModelComponent m_torch; m_torch.model_file = "models/Torch/torch.obj";
