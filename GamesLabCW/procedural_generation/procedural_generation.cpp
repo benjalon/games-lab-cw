@@ -388,14 +388,69 @@ namespace game::procgen
 			double give = 0.001;
 
 			//Instantiate correct type for each cell in grid
-			for (int x = 0; x < size_; x++)
-				for (int y = 0; y < size_; y++)
-					if (grid_[coords_to_index(x, y)].solid)
+			for (int x = 1; x < size_ - 1; x++)
+				for (int y = 1; y < size_ - 1; y++)
+					if (!grid_[coords_to_index(x, y)].solid)
 					{
+						//Universally applicable transformation
 						TransformComponent t;
-						t.position = Vector3(x * (cell_size + give), 0, y * (cell_size + give));
+						t.position = { x * (cell_size + give), 0, y * (cell_size + give) };
 						t.scale = { scale, scale, scale };
-						scene.instantiate("Model", m_type_1, t);
+
+						//Determine number of solid neighbours
+						int num_neighbours = 0;
+						bool east, west, south, north;
+						if (east = grid_[coords_to_index(x + 1, y)].solid) num_neighbours++;
+						if (west = grid_[coords_to_index(x - 1, y)].solid) num_neighbours++;
+						if (south = grid_[coords_to_index(x, y + 1)].solid) num_neighbours++;
+						if (north = grid_[coords_to_index(x, y - 1)].solid) num_neighbours++;
+
+						//Determine which type to use and rotate as necessary
+						switch (num_neighbours)
+						{
+						case 1:
+							//Edge piece
+							if (south) t.rotation = { 0, 90.0, 0 };
+							else if (east) t.rotation = { 0, 180.0, 0 };
+							else if (north) t.rotation = { 0, 270.0, 0 };
+
+							scene.instantiate("Model", m_type_3, t);
+							break;
+
+						case 2:
+							//Corridor piece
+							if (east && west)
+							{
+								scene.instantiate("Model", m_type_1, t);
+							}
+							else if (north && south)
+							{
+								t.rotation = { 0, 90.0, 0 };
+								scene.instantiate("Model", m_type_1, t);
+							}
+							//Corner piece
+							else
+							{
+								if (south && east) t.rotation = { 0, 90.0, 0 };
+								else if (east && north) t.rotation = { 0, 180.0, 0 };
+								else if (north && west) t.rotation = { 0, 270.0, 0 };
+
+								scene.instantiate("Model", m_type_2, t);
+							}
+							break;
+
+						case 3:
+							//Dead end piece
+							if (!north) t.rotation = { 0, 90.0, 0 };
+							else if (!west) t.rotation = { 0, 180.0, 0 };
+							else if (!south) t.rotation = { 0, 270.0, 0 };
+
+							scene.instantiate("Model", m_type_4, t);
+							break;
+
+						default:
+							break;
+						}
 					}
 		}
 	};
