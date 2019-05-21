@@ -81,6 +81,16 @@ namespace game::procgen
 			}
 		}
 
+		//Gets the number of solid cells in the grid
+		int number_solid() const
+		{
+			int n = 0;
+			for (auto &c : grid_)
+				if (c.solid) n++;
+
+			return n;
+		}
+
 		//Returns true if the given cell is a dead end
 		bool is_dead_end(size_t i) const
 		{
@@ -182,7 +192,7 @@ namespace game::procgen
 					dead_ends.emplace(i);
 
 			//Erase n dead ends
-			for (int i = 0; i < n; i++)
+			for (int i = 0; i < n && dead_ends.size() > 0; i++)
 			{
 				//Select random dead end
 				std::uniform_int_distribution<> dead_ends_dist(0, dead_ends.size() - 1);
@@ -370,7 +380,8 @@ namespace game::procgen
 		g.sparsify(sparsification);
 
 		//Place rooms
-		g.populate_rooms(number_rooms, min_room_size, max_room_size);
+		if (g.number_solid() < grid_size * grid_size)
+			g.populate_rooms(number_rooms, min_room_size, max_room_size);
 
 		//Debug -- print result
 		g.print();
