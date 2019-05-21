@@ -20,8 +20,17 @@ namespace game::procgen
 	//Method of seeding RNG, overridable for debug purposes
 	unsigned seeder()
 	{
-		return std::random_device()();
-		//return 1;
+		static bool set_seed = false;
+		static unsigned seed = 0;
+
+		if (!set_seed)
+		{
+			seed = std::random_device()();
+			std::cout << "Procgen seed: " << seed << std::endl;
+			set_seed = true;
+		}
+
+		return seed;
 	}
 
 	//Represents a single cell in maze space
