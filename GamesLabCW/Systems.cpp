@@ -121,7 +121,9 @@ namespace game::systems
 				std::pow(t2.position.y - t1.position.y, 2) +
 				std::pow(t2.position.z - t1.position.z, 2);
 
-			bool currently_colliding = d2 < std::pow(c1.radius + c2.radius, 2);
+			double sumRad = std::pow(c1.radius + c2.radius, 2);
+			bool currently_colliding = d2 < sumRad;
+
 			bool was_colliding = utility::contains(c1.colliding, other);
 
 			//Log entering of collision

@@ -93,7 +93,7 @@ game::GameEngine::GameEngine(bool fullscreen, bool vsync, bool ground) :
 void game::GameEngine::run()
 {
 	// Player/camera
-	auto player = scene_.instantiate("FirstPersonController", TransformComponent{ {0,6,5} , { 180,0,0 } });
+	auto player = scene_.instantiate("FirstPersonController", TransformComponent{ {0,55,5} , { 180,0,0 } });
 	auto camera = CameraComponent{ player };
 
 	// Room stuff
@@ -140,10 +140,10 @@ void game::GameEngine::run()
 	// Minotaur test model
 	ModelComponent m_minotaur; m_minotaur.model_file = "models/Minotaur/Minotaur@Jump.fbx";
 	ColourComponent c_minotaur; c_minotaur.colour = { 0, 0, 255 };
-	TransformComponent t_minotaur; t_minotaur.scale = { 0.15, 0.15, 0.15 }; t_minotaur.position = { 0, 9, -15 }; t_minotaur.rotation = { 90, 180, 0 };
+	TransformComponent t_minotaur; t_minotaur.scale = { 0.15, 0.15, 0.15 }; t_minotaur.position = { 0, 55, -15 }; t_minotaur.rotation = { 90, 180, 0 };
 	scene_.instantiate("AIModel", m_minotaur, t_minotaur, camera, c_minotaur);// d_minotaur, c_minotaur);
 	DetectionComponent d_minotaur;
-	CollisionComponent c_detectionRadius; c_detectionRadius.radius = 10000;
+	CollisionComponent c_detectionRadius; c_detectionRadius.radius = 20;
 	scene_.instantiate("DetectionRadius", d_minotaur, t_minotaur, c_detectionRadius);
 
 	// Torches

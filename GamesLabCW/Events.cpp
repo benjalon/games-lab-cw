@@ -22,11 +22,11 @@ namespace game::events
 		{
 			HandleDoorCollision(e);
 		}
-		else if (e.registry.has<DetectionComponent>(e.a) & e.registry.has<FirstPersonControllerComponent>(e.b))
+		else if (e.registry.has<DetectionComponent>(e.a) && e.registry.has< FirstPersonControllerComponent>(e.b))
 		{
 			HandleDetectionCollision(e);
 		}
-		else if (e.registry.has<AIComponent>(e.b)) 
+		else if (e.registry.has<AIComponent>(e.b) && e.registry.has<BulletComponent>(e.a)) 
 		{
 			HandleBulletCollision(e);
 		}
