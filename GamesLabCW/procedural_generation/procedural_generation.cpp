@@ -14,6 +14,7 @@
 #include <iostream>
 
 #include "../Utility.h"
+#include "../Components.h"
 
 namespace game::procgen
 {
@@ -366,9 +367,40 @@ namespace game::procgen
 			if (n > 0 && max_size > min_size)
 				populate_rooms(n, min_size, max_size - 1, id_from);
 		}
+
+		//Builds the maze into the given scene
+		void build_scene(Scene &scene)
+		{
+			//Instantiate models for each cell type
+			ModelComponent m_type_1; m_type_1.model_file = "models/Procedural/type1.obj";
+			ModelComponent m_type_2; m_type_2.model_file = "models/Procedural/type2.obj";
+			ModelComponent m_type_3; m_type_3.model_file = "models/Procedural/type3.obj";
+			ModelComponent m_type_4; m_type_4.model_file = "models/Procedural/type4.obj";
+
+			//Parameters of model
+			double model_size = 20.0;
+			double scale = 0.5;
+
+			//Effective size
+			double cell_size = model_size * scale;
+
+			//Separation between cells to prevent z-fighting
+			double give = 0.001;
+
+			//Instantiate correct type for each cell in grid
+			for (int x = 0; x < size_; x++)
+				for (int y = 0; y < size_; y++)
+					if (grid_[coords_to_index(x, y)].solid)
+					{
+						TransformComponent t;
+						t.position = Vector3(x * (cell_size + give), 0, y * (cell_size + give));
+						t.scale = { scale, scale, scale };
+						scene.instantiate("Model", m_type_1, t);
+					}
+		}
 	};
 
-	void generate_maze(size_t grid_size, int sparsification, int number_rooms, int min_room_size, int max_room_size)
+	void generate_maze(Scene &scene, size_t grid_size, int sparsification, int number_rooms, int min_room_size, int max_room_size)
 	{
 		//Prepare fully-solid grid
 		Grid g(grid_size);
@@ -383,7 +415,10 @@ namespace game::procgen
 		if (g.number_solid() < grid_size * grid_size)
 			g.populate_rooms(number_rooms, min_room_size, max_room_size);
 
-		//Debug -- print result
+		//Print minimap to console
 		g.print();
+
+		//Build the map into the scene
+		g.build_scene(scene);
 	}
 }
