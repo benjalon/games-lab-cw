@@ -99,7 +99,7 @@ void game::GameEngine::run()
 	auto camera = CameraComponent{ player };
 
 	// Room stuff
-	ModelComponent m_water; m_water.model_file = "models/Water/water.obj"; m_water.vertex_shader = "shaders/Water.vert"; m_water.fragment_shader = "shaders/Water.frag";
+	ModelComponent m_water; m_water.model_file = "models/Water/water.obj"; m_water.vertex_shader = "shaders/Water.vert";
 	scene_.instantiate("Water", m_water);
 
 	ModelComponent m_room; m_room.model_file = "models/Room/room.obj";

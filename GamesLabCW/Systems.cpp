@@ -299,7 +299,7 @@ namespace game::systems
 	float elapsed = 0.0f;
 	auto Water = [](auto info, auto entity, WaterComponent &w, ModelComponent &m, ColourComponent &c, TransformComponent &t)
 	{
-		elapsed += info.dt * 1000;
+		elapsed += info.dt;
 		renderer::update_wave(elapsed);
 	};
 	SYSTEM(Water, WaterComponent, ModelComponent, ColourComponent, TransformComponent);

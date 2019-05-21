@@ -1,8 +1,8 @@
 uniform mat4 projectionMatrix;
 uniform mat4 viewMatrix;
 uniform mat4 modelMatrix;
-uniform float delta;
 uniform vec3 cameraPosition;
+uniform float delta;
 
 layout (location = 0) in vec3 in_Position;
 layout (location = 1) in vec2 in_TextureCoord;
@@ -33,15 +33,7 @@ void main()
 	v_vPosition = (modelMatrix * vec4(in_Position, 1.0)).xyz;
 	v_vTexcoord = in_TextureCoord;
 
-	//mat3 normalMatrix = transpose(inverse(mat3(modelMatrix)));
-    //v_vNormal = normalize(normalMatrix * in_Normal);
-
-	//vec3 tangent = normalize(normalMatrix * in_Tangent);
-    //tangent = normalize(tangent - dot(tangent, v_vNormal) * v_vNormal);
-
-   // vec3 bitangent = cross(v_vNormal, tangent);
 	
-    //v_mTBN = transpose(mat3(tangent, bitangent, v_vNormal));  
 
 	// Make waves
 	Wave wave;
@@ -67,6 +59,15 @@ void main()
 	vec3 normal = vec3(-diff.x , 1.0, -diff.z);
 	normal.y = 1.0;
 
+	mat3 normalMatrix = transpose(inverse(mat3(modelMatrix)));
+    v_vNormal = normalize(normalMatrix * normal);
+
+	vec3 tangent = normalize(normalMatrix * in_Tangent);
+    tangent = normalize(tangent - dot(tangent, v_vNormal) * v_vNormal);
+
+    vec3 bitangent = cross(v_vNormal, tangent);
+	
+    v_mTBN = transpose(mat3(tangent, bitangent, v_vNormal));  
 
 
 
