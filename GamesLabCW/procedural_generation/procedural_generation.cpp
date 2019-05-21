@@ -17,8 +17,8 @@
 
 namespace game::procgen
 {
-	//Method of seeding RNG, overridable for debug purposes
-	unsigned seeder()
+	//Provides a random engine seeded once at the start of the game
+	std::default_random_engine &rng()
 	{
 		static bool set_seed = false;
 		static unsigned seed = 0;
@@ -30,7 +30,8 @@ namespace game::procgen
 			set_seed = true;
 		}
 
-		return seed;
+		static std::default_random_engine rng(seed);
+		return rng;
 	}
 
 	//Represents a single cell in maze space
@@ -100,9 +101,6 @@ namespace game::procgen
 			instead	of walls. Cells with both even x and y are always wall,
 			and not	considered by the visiting algorithm, but are knocked
 			down as connections. */
-
-			std::default_random_engine rng;
-			rng.seed(seeder());
 			
 			//Current path stack for backtracking procedure
 			std::stack<Coords> path;
@@ -115,8 +113,8 @@ namespace game::procgen
 
 			//Randomly select starting point
 			std::uniform_int_distribution<> grid_dist(0, size_ / 2 - 1);
-			int x = grid_dist(rng) * 2 + 1;
-			int y = grid_dist(rng) * 2 + 1;
+			int x = grid_dist(rng()) * 2 + 1;
+			int y = grid_dist(rng()) * 2 + 1;
 
 			//Mark as visited, with section ID 1
 			grid_[coords_to_index(x, y)] = { false, 1 };
@@ -143,7 +141,7 @@ namespace game::procgen
 				{
 					//Randomly pick a neighbour
 					std::uniform_int_distribution<size_t> neighbour_dist(0, unvisited_neighbours.size() - 1);
-					size_t ind = neighbour_dist(rng);
+					size_t ind = neighbour_dist(rng());
 					Coords neighbour = unvisited_neighbours[ind];
 
 					//Knock down the connecting wall
@@ -183,16 +181,13 @@ namespace game::procgen
 				if (is_dead_end(i))
 					dead_ends.emplace(i);
 
-			std::default_random_engine rng;
-			rng.seed(seeder());
-
 			//Erase n dead ends
 			for (int i = 0; i < n; i++)
 			{
 				//Select random dead end
 				std::uniform_int_distribution<> dead_ends_dist(0, dead_ends.size() - 1);
 				auto it = dead_ends.begin();
-				std::advance(it, dead_ends_dist(rng));
+				std::advance(it, dead_ends_dist(rng()));
 
 				//Make solid
 				auto [x, y] = index_to_coords(*it);
@@ -215,10 +210,8 @@ namespace game::procgen
 		void populate_rooms(int n, int min_size, int max_size, int id_from = 2)
 		{
 			//Each room is randomly between min and max size
-			std::default_random_engine rng;
-			rng.seed(seeder());
 			std::uniform_int_distribution<> size_dist(min_size, max_size);
-			int room_size = size_dist(rng);
+			int room_size = size_dist(rng());
 
 			//While rooms are left to populate
 			for (int i = 0; n > 0 && i < grid_.size(); i++)
@@ -264,7 +257,7 @@ namespace game::procgen
 
 							std::uniform_int_distribution<size_t> border_dist(0, border_cells.size() - 1);
 							auto it = border_cells.begin();
-							std::advance(it, border_dist(rng));
+							std::advance(it, border_dist(rng()));
 
 							//Carve out path from border cell to corridors
 							size_t current_cell = *it;
@@ -282,10 +275,10 @@ namespace game::procgen
 								//Would the given offset open up to the connected maze?
 								auto open_to_maze = [&](int x, int y)
 								{
-									return utility::contains(connected_, grid_[coords_to_index(x + 1, y)].section) ||
-										utility::contains(connected_, grid_[coords_to_index(x - 1, y)].section) ||
-										utility::contains(connected_, grid_[coords_to_index(x, y + 1)].section) ||
-										utility::contains(connected_, grid_[coords_to_index(x, y - 1)].section);
+									return (x + 1 < size_ && utility::contains(connected_, grid_[coords_to_index(x + 1, y)].section)) ||
+										(x > 0 && utility::contains(connected_, grid_[coords_to_index(x - 1, y)].section)) ||
+										(y + 1 < size_ && utility::contains(connected_, grid_[coords_to_index(x, y + 1)].section)) ||
+										(y > 0 && utility::contains(connected_, grid_[coords_to_index(x, y - 1)].section));
 								};
 
 								//If a connection opens to the maze, we're done
@@ -342,7 +335,7 @@ namespace game::procgen
 									//Otherwise, carve out neighbour and continue path
 									else
 									{
-										auto [x2, y2] = neighbours[neighbours_dist(rng)];
+										auto [x2, y2] = neighbours[neighbours_dist(rng())];
 										current_cell = coords_to_index(x2, y2);
 										grid_[current_cell] = { false, id_from };
 										current_path.emplace(current_cell);
@@ -353,7 +346,7 @@ namespace game::procgen
 
 						//Update room(s) still to place
 						n--;
-						room_size = size_dist(rng);
+						room_size = size_dist(rng());
 						connected_.emplace(id_from++);
 					}
 				}
