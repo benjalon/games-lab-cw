@@ -60,7 +60,7 @@ game::GameEngine::GameEngine(bool fullscreen, bool vsync, bool ground) :
 	prototypes::register_prototypes();
 
 	//EXAMPLE Procedurally generate maze
-	procgen::generate_maze(21, 120, 3, 2, 5);
+	procgen::generate_maze(21, 120, 3, 4, 6);
 
 	//EXAMPLE Load models
 	renderer::load_model("models/Cyborg/cyborg.obj");

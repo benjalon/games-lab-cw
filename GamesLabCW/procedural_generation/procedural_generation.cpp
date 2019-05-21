@@ -20,8 +20,8 @@ namespace game::procgen
 	//Method of seeding RNG, overridable for debug purposes
 	unsigned seeder()
 	{
-		//return std::random_device()();
-		return 1;
+		return std::random_device()();
+		//return 1;
 	}
 
 	//Represents a single cell in maze space
@@ -232,81 +232,112 @@ namespace game::procgen
 							for (int dy = 0; dy < room_size; dy++)
 								grid_[coords_to_index(x + dx, y + dy)] = { false, id_from };
 
-						//Pick random edge border cell (not on grid border)
-						std::unordered_set<size_t> border_cells;
-						for (int dx = -1; dx <= room_size; dx++)
-							for (int dy = -1; dy <= room_size; dy++)
-								if ((dx == -1 || dx == room_size) ^
-									(dy == -1 || dy == room_size) &&
-									x + dx > 0 && y + dy > 0 &&
-									x + dx < size_ - 1 && y + dy < size_ - 1)
-									border_cells.emplace(coords_to_index(x + dx, y + dy));
+						/* Attempts to connect to corridor can get stuck in on itself, so a
+						Las Vegas approach just keeps randomly trying until success, as a valid
+						solution should always exist. */
 
-						std::uniform_int_distribution<size_t> border_dist(0, border_cells.size() - 1);
-						auto it = border_cells.begin();
-						std::advance(it, border_dist(rng));
-
-						//Carve out path from border cell to corridors
-						size_t current_cell = *it;
-						grid_[current_cell] = { false, id_from };
-						bool closed = true;
-						while (closed)
+						bool unfinished = true;
+						while (unfinished)
 						{
-							//Current cell coords
-							auto [xc, yc] = index_to_coords(current_cell);
+							//Set of walls knocked down for this path, to be undone if necessary
+							std::unordered_set<size_t> current_path;
 
-							//Would the given offset open up to the connected maze?
-							auto open_to_maze = [&](int x, int y)
-							{
-								return utility::contains(connected_, grid_[coords_to_index(x + 1, y)].section) ||
-									utility::contains(connected_, grid_[coords_to_index(x - 1, y)].section) ||
-									utility::contains(connected_, grid_[coords_to_index(x, y + 1)].section) ||
-									utility::contains(connected_, grid_[coords_to_index(x, y - 1)].section);
-							};
+							//Pick random edge border cell (not on grid border)
+							std::unordered_set<size_t> border_cells;
+							for (int dx = -1; dx <= room_size; dx++)
+								for (int dy = -1; dy <= room_size; dy++)
+									if ((dx == -1 || dx == room_size) ^
+										(dy == -1 || dy == room_size) &&
+										x + dx > 0 && y + dy > 0 &&
+										x + dx < size_ - 1 && y + dy < size_ - 1)
+										border_cells.emplace(coords_to_index(x + dx, y + dy));
 
-							if (open_to_maze(xc + 1, yc))
-							{
-								grid_[coords_to_index(xc + 1, yc)] = { false, id_from };
-								closed = false;
-							}
-							else if (xc - 1 > 0 && open_to_maze(xc - 1, yc))
-							{
-								grid_[coords_to_index(xc - 1, yc)] = { false, id_from };
-								closed = false;
-							}
-							else if (open_to_maze(xc, yc + 1))
-							{
-								grid_[coords_to_index(xc, yc + 1)] = { false, id_from };
-								closed = false;
-							}
-							else if (yc - 1 > 0 && open_to_maze(xc, yc - 1))
-							{
-								grid_[coords_to_index(xc, yc - 1)] = { false, id_from };
-								closed = false;
-							}
-							//Failing that, pick a neighbour that leads to another dead end
-							else
-							{
-								std::vector<Coords> neighbours;
+							std::uniform_int_distribution<size_t> border_dist(0, border_cells.size() - 1);
+							auto it = border_cells.begin();
+							std::advance(it, border_dist(rng));
 
-								auto open_to_dead_end = [&](int x, int y)
+							//Carve out path from border cell to corridors
+							size_t current_cell = *it;
+							grid_[current_cell] = { false, id_from };
+							current_path.emplace(current_cell);
+
+							bool closed = true;
+							while (closed)
+							{
+								unfinished = false;
+
+								//Current cell coords
+								auto [xc, yc] = index_to_coords(current_cell);
+
+								//Would the given offset open up to the connected maze?
+								auto open_to_maze = [&](int x, int y)
 								{
-									bool state = grid_[coords_to_index(x, y)].solid;
-									grid_[coords_to_index(x, y)].solid = false;
-									bool result = is_dead_end(coords_to_index(x, y));
-									grid_[coords_to_index(x, y)].solid = state;
-									return result;
+									return utility::contains(connected_, grid_[coords_to_index(x + 1, y)].section) ||
+										utility::contains(connected_, grid_[coords_to_index(x - 1, y)].section) ||
+										utility::contains(connected_, grid_[coords_to_index(x, y + 1)].section) ||
+										utility::contains(connected_, grid_[coords_to_index(x, y - 1)].section);
 								};
 
-								if (open_to_dead_end(xc + 1, yc)) neighbours.emplace_back(xc + 1, yc);
-								if (open_to_dead_end(xc - 1, yc)) neighbours.emplace_back(xc - 1, yc);
-								if (open_to_dead_end(xc, yc + 1)) neighbours.emplace_back(xc, yc + 1);
-								if (open_to_dead_end(xc, yc - 1)) neighbours.emplace_back(xc, yc - 1);
+								//If a connection opens to the maze, we're done
+								if (open_to_maze(xc + 1, yc))
+								{
+									grid_[coords_to_index(xc + 1, yc)] = { false, id_from };
+									closed = false;
+								}
+								else if (xc - 1 > 0 && open_to_maze(xc - 1, yc))
+								{
+									grid_[coords_to_index(xc - 1, yc)] = { false, id_from };
+									closed = false;
+								}
+								else if (open_to_maze(xc, yc + 1))
+								{
+									grid_[coords_to_index(xc, yc + 1)] = { false, id_from };
+									closed = false;
+								}
+								else if (yc - 1 > 0 && open_to_maze(xc, yc - 1))
+								{
+									grid_[coords_to_index(xc, yc - 1)] = { false, id_from };
+									closed = false;
+								}
+								//Failing that, pick a neighbour that leads to another dead end
+								else
+								{
+									std::vector<Coords> neighbours;
 
-								std::uniform_int_distribution<size_t> neighbours_dist(0, neighbours.size() - 1);
-								auto [x2, y2] = neighbours[neighbours_dist(rng)];
-								current_cell = coords_to_index(x2, y2);
-								grid_[current_cell] = { false, id_from };
+									auto open_to_dead_end = [&](int x, int y)
+									{
+										bool state = grid_[coords_to_index(x, y)].solid;
+										grid_[coords_to_index(x, y)].solid = false;
+										bool result = is_dead_end(coords_to_index(x, y));
+										grid_[coords_to_index(x, y)].solid = state;
+										return result;
+									};
+
+									if (open_to_dead_end(xc + 1, yc)) neighbours.emplace_back(xc + 1, yc);
+									if (open_to_dead_end(xc - 1, yc)) neighbours.emplace_back(xc - 1, yc);
+									if (open_to_dead_end(xc, yc + 1)) neighbours.emplace_back(xc, yc + 1);
+									if (open_to_dead_end(xc, yc - 1)) neighbours.emplace_back(xc, yc - 1);
+
+									std::uniform_int_distribution<size_t> neighbours_dist(0, neighbours.size() - 1);
+
+									//If solution is invalid, stop and try again
+									if (neighbours.size() == 0)
+									{
+										for (size_t ind : current_path)
+											grid_[ind] = { true, 0 };
+
+										closed = false;
+										unfinished = true;
+									}
+									//Otherwise, carve out neighbour and continue path
+									else
+									{
+										auto [x2, y2] = neighbours[neighbours_dist(rng)];
+										current_cell = coords_to_index(x2, y2);
+										grid_[current_cell] = { false, id_from };
+										current_path.emplace(current_cell);
+									}
+								}
 							}
 						}
 
