@@ -26,8 +26,10 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Math3D.cpp" />
     <ClCompile Include="procedural_generation\procedural_generation.cpp" />
+    <ClCompile Include="renderer\Image.cpp" />
     <ClCompile Include="renderer\Model.cpp" />
     <ClCompile Include="Prototypes.cpp" />
+    <ClCompile Include="renderer\ParticleEffect.cpp" />
     <ClCompile Include="renderer\Renderer.cpp" />
     <ClCompile Include="renderer\Shader.cpp" />
     <ClCompile Include="renderer\Texture.cpp" />
@@ -42,9 +44,6 @@
     <None Include="cpp.hint" />
     <None Include="models\sphere.nff" />
     <None Include="packages.config" />
-    <None Include="shaders\Reflection.frag" />
-    <None Include="shaders\Skybox.frag" />
-    <None Include="shaders\Skybox.vert" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Components.h" />
@@ -53,8 +52,10 @@
     <ClInclude Include="Input.h" />
     <ClInclude Include="Math3D.h" />
     <ClInclude Include="procedural_generation\procedural_generation.h" />
+    <ClInclude Include="renderer\Image.h" />
     <ClInclude Include="renderer\Model.h" />
     <ClInclude Include="Prototypes.h" />
+    <ClInclude Include="renderer\ParticleEffect.h" />
     <ClInclude Include="renderer\Renderer.h" />
     <ClInclude Include="renderer\Shader.h" />
     <ClInclude Include="renderer\Texture.h" />

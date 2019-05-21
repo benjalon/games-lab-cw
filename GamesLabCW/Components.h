@@ -20,6 +20,14 @@ namespace game
 	struct GameStateComponent {};
 	struct FirstPersonControllerComponent {};
 
+	// Tracks how many keys are picked up, and where in the game they should be rendered
+	struct KeyComponent
+	{
+		bool pickedUp = false;
+		Vector3 destination;
+	};
+
+	struct DoorComponent {};
 
 	/* CAMERAS AND RENDERING */
 
@@ -55,6 +63,20 @@ namespace game
 		double alpha = 1.0;
 	};
 
+	struct ParticleComponent
+	{
+		std::string texture_file;
+		int respawn_count;
+		Vector3 position_variation;
+		Vector3 velocity_variation;
+		Vector3 color_variation;
+		Vector3 color_modifier;
+	};
+
+	struct ImageComponent
+	{
+		std::string texture_file;
+	};
 
 	/* LIGHTING */
 
@@ -62,6 +84,7 @@ namespace game
 	{
 		Vector3 colour{ 1.0, 1.0, 1.0 };
 		double intensity = 1.0;
+		bool on = true;
 	};
 
 	struct DirectionalLightComponent
@@ -69,6 +92,7 @@ namespace game
 		Vector3 colour{ 1.0, 1.0, 1.0 };
 		double intensity = 1.0;
 		Vector3 direction{ 0.0, 0.0, 0.0 };
+		bool on = true;
 	};
 
 	struct PointLightComponent
@@ -79,6 +103,7 @@ namespace game
 		double constant = 0;
 		double linear = 0;
 		double exponent = 1;
+		bool on = true;
 	};
 
 
@@ -92,9 +117,21 @@ namespace game
 
 	struct CollisionComponent
 	{
-		double radius;
+		double radius = 3;
 		std::unordered_set<Entity> colliding;
 	};
 
 	struct MoveSphere {};
+
+	struct AIComponent {
+		bool looking = true;
+	};
+
+	struct BulletComponent{
+		std::string model_file = "models/Fireball/fireball.obj";
+	};
+
+	struct DetectionComponent {
+		CollisionComponent c;
+	};
 }

@@ -46,6 +46,14 @@ void game::Scene::draw()
 			renderer::render_model(cam, m, c, t,
 				n_a, a, n_d, d, n_p, p);
 		});
+
+		registry_.view<ParticleComponent, ColourComponent, TransformComponent>().each([&](auto, auto &p, auto &c, auto &t) {
+			renderer::render_particle(cam, p, c, t);
+		});
+
+		registry_.view<ImageComponent>().each([&](auto, auto &i) {
+			renderer::render_image(cam, i);
+		});
 	});
 }
 

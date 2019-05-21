@@ -22,9 +22,12 @@ namespace game
 		//Constructs a Vector2 with the given components
 		Vector3(double x, double y, double z);
 
+		Vector3(glm::vec3 vec);
+
 		//Returns the magnitude of this Vector3
 		double abs() const;
 
+		glm::vec3 ToGLM();
 
 		//Definitions of algebraic operations
 
@@ -42,3 +45,4 @@ namespace game
 		friend std::ostream &operator<<(std::ostream &os, const Vector3 &v);
 	};
 }
+

@@ -19,6 +19,8 @@
 #include "Shader.h"
 #include "VBO.h"
 #include "Model.h"
+#include "ParticleEffect.h"
+#include "Image.h"
 
 //Quick conversion to radians
 #define R(x) glm::radians((float)x)
@@ -26,6 +28,8 @@
 namespace game::renderer
 {
 	std::unordered_map<std::string, Model> models;
+	std::unordered_map<std::string, ParticleEffect> particleEffects;
+	std::unordered_map<std::string, Image> images;
 	std::map<std::string, Texture> externalTextures;
 
 	void init()
@@ -98,6 +102,14 @@ namespace game::renderer
 
 	void load_model(std::string file) {
 		models.emplace(file, Model(file)).first->second;
+	}
+
+	void load_particle_effect(std::string texture, int count, float scale, float speed) {
+		particleEffects.emplace(texture, ParticleEffect(texture, count, scale, speed)).first->second;
+	}
+
+	void load_image(std::string file, Vector2 position) {
+		images.emplace(file, Image(file, position)).first->second;
 	}
 
 	void load_external_map(std::string path, std::string model_path, TextureType type)
@@ -231,6 +243,9 @@ namespace game::renderer
 			glUniform1f(glGetUniformLocation(shader,
 				("ambientLights[" + j + "].intensity").c_str()),
 				(GLfloat)ambients[i].intensity);
+			glUniform1f(glGetUniformLocation(shader,
+				("ambientLights[" + j + "].on").c_str()),
+				(GLfloat)ambients[i].on);
 		}
 
 		//Provide directional lights information
@@ -250,6 +265,9 @@ namespace game::renderer
 				(GLfloat)directionals[i].direction.x,
 				(GLfloat)directionals[i].direction.y,
 				(GLfloat)directionals[i].direction.z);
+			glUniform1f(glGetUniformLocation(shader,
+				("directionalLights[" + j + "].on").c_str()),
+				(GLfloat)directionals[i].on);
 		}
 
 		//Provide point lights information
@@ -278,9 +296,90 @@ namespace game::renderer
 			glUniform1f(glGetUniformLocation(shader,
 				("pointLights[" + j + "].exponent").c_str()),
 				(GLfloat)points[i].exponent);
+			glUniform1f(glGetUniformLocation(shader,
+				("pointLights[" + j + "].on").c_str()),
+				(GLfloat)points[i].on);
 		}
 
 		model.Render(shader);
+	}
+
+	void render_particle(CameraComponent camera, ParticleComponent &p, ColourComponent c, TransformComponent t)
+	{
+		//Get the particle, aborting if not found
+		auto it = particleEffects.find(p.texture_file);
+		if (it == particleEffects.end()) return;
+		ParticleEffect &particle = it->second;
+
+		GLuint shader = get_shader(false, false, 0, 0, 0, "shaders/Particle.vert", "shaders/Particle.frag");
+		glUseProgram(shader);
+
+		//Calculate MVP matrices
+		glm::mat4 matProj = proj_matrix(camera);
+
+		glm::mat4 matView = view_matrix(camera);
+
+		glm::mat4 matModel = glm::translate(glm::vec3(t.position)) *
+			glm::rotate(R(t.rotation.x), glm::vec3(1, 0, 0)) *
+			glm::rotate(R(t.rotation.z), glm::vec3(0, 0, 1)) *
+			glm::rotate(R(t.rotation.y), glm::vec3(0, 1, 0)) *
+			glm::scale(glm::vec3(t.scale));
+
+		//Provide MVP matrices
+		glUniformMatrix4fv(
+			glGetUniformLocation(shader, "projectionMatrix"),
+			1, GL_FALSE, glm::value_ptr(matProj)
+		);
+		glUniformMatrix4fv(
+			glGetUniformLocation(shader, "viewMatrix"),
+			1, GL_FALSE, glm::value_ptr(matView)
+		);
+		glUniformMatrix4fv(
+			glGetUniformLocation(shader, "modelMatrix"),
+			1, GL_FALSE, glm::value_ptr(matModel)
+		);
+
+		particle.Render(shader);
+	}
+
+	void render_image(CameraComponent camera, ImageComponent &i)
+	{
+		//Get the image, aborting if not found
+		auto it = images.find(i.texture_file);
+		if (it == images.end()) return;
+		Image &image = it->second;
+
+		GLuint shader = get_shader(false, false, 0, 0, 0, "shaders/Image.vert", "shaders/Image.frag");
+		glUseProgram(shader);
+
+		//Calculate MVP matrices
+		glm::mat4 matProj = proj_matrix(camera);
+
+		glm::mat4 matView = view_matrix(camera);
+
+		glm::mat4 matModel = glm::mat4(1);
+			
+			/*glm::translate(glm::vec3(t.position)) *
+			glm::rotate(R(t.rotation.x), glm::vec3(1, 0, 0)) *
+			glm::rotate(R(t.rotation.z), glm::vec3(0, 0, 1)) *
+			glm::rotate(R(t.rotation.y), glm::vec3(0, 1, 0)) *
+			glm::scale(glm::vec3(t.scale));
+*/
+		//Provide MVP matrices
+		glUniformMatrix4fv(
+			glGetUniformLocation(shader, "projectionMatrix"),
+			1, GL_FALSE, glm::value_ptr(matProj)
+		);
+		glUniformMatrix4fv(
+			glGetUniformLocation(shader, "viewMatrix"),
+			1, GL_FALSE, glm::value_ptr(matView)
+		);
+		glUniformMatrix4fv(
+			glGetUniformLocation(shader, "modelMatrix"),
+			1, GL_FALSE, glm::value_ptr(matModel)
+		);
+
+		image.Render(shader);
 	}
 
 	void animate_model(double time, std::string model_file) 
@@ -291,5 +390,15 @@ namespace game::renderer
 		Model &model = it->second;
 
 		model.Animate(time);
+	}
+
+	void update_particle(double time, std::string texture_file, int respawn_count, Vector3 position_variation, Vector3 velocity_variation, Vector3 color_variation)
+	{
+		//Get the model, aborting if not found
+		auto it = particleEffects.find(texture_file);
+		if (it == particleEffects.end()) return;
+		ParticleEffect &particleEffect = it->second;
+
+		particleEffect.Update(time, respawn_count, position_variation, velocity_variation, color_variation);
 	}
 }

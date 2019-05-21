@@ -3,7 +3,6 @@
  * Declares the Texture structure, representing a 2D
  * texture.
  */
-
 #pragma once
 
 #include <string>

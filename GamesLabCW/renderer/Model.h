@@ -151,3 +151,4 @@ namespace game
 		const bool Model::IsAnimated() { return bones.size() > 0; }
 	};
 }
+

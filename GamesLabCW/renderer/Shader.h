@@ -32,3 +32,4 @@ namespace game
 			std::string vertexPrepend = "", std::string fragmentPrepend = "");
 	};
 }
+

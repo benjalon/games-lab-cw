@@ -19,3 +19,4 @@ namespace game::utility
 		return collection.find(elt) != collection.end();
 	}
 }
+
