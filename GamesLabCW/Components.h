@@ -120,6 +120,7 @@ namespace game
 
 	struct AIComponent {
 		bool looking = true;
+		//CollisionComponent c;
 	};
 
 	struct BulletComponent{

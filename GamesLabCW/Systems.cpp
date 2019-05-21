@@ -186,7 +186,7 @@ namespace game::systems
 		
 		if (a.looking)
 		{
-			a.looking = false;
+			
 			//move side to side. 
 		}
 		else if (!a.looking)
@@ -216,7 +216,8 @@ namespace game::systems
 					t.rotation.z = -(glm::degrees(acos(cosinedegreesToRotate)));
 
 			
-			if (input::is_pressed(input::KEY_LEFT_CONTROL))
+			//if (input::is_pressed(input::KEY_LEFT_CONTROL))
+			if(false)
 			{
 				//Vector3 tmp = { matModel[2][0],matModel[2][1],matModel[2][2] };
 				Vector3 tmp = { -fmod(t.rotation.z,360), 0, 0 };
