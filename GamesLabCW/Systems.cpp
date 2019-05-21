@@ -295,4 +295,12 @@ namespace game::systems
 		renderer::update_particle(info.dt, p.texture_file, p.respawn_count, randomPosition, randomVelocity, randomColor);// , t.position);
 	};
 	SYSTEM(ParticleSystem, ParticleComponent, ColourComponent, TransformComponent, KinematicComponent);
+
+	float elapsed = 0.0f;
+	auto Water = [](auto info, auto entity, WaterComponent &w, ModelComponent &m, ColourComponent &c, TransformComponent &t)
+	{
+		elapsed += info.dt * 1000;
+		renderer::update_wave(elapsed);
+	};
+	SYSTEM(Water, WaterComponent, ModelComponent, ColourComponent, TransformComponent);
 }

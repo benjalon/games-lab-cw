@@ -134,4 +134,6 @@ namespace game
 	struct DetectionComponent {
 		CollisionComponent c;
 	};
+
+	struct WaterComponent {};
 }

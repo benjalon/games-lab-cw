@@ -22,7 +22,7 @@
 #include "ParticleEffect.h"
 #include "Image.h"
 
-//Quick conversion to radians
+ //Quick conversion to radians
 #define R(x) glm::radians((float)x)
 
 namespace game::renderer
@@ -39,6 +39,8 @@ namespace game::renderer
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glEnable(GL_DEPTH_TEST);
+		glCullFace(GL_BACK);
+		glEnable(GL_CULL_FACE);
 	}
 
 	//Returns the (potentially cached) shader using the given paramaters
@@ -84,7 +86,7 @@ namespace game::renderer
 	//Calculates the projection matrix for a camera
 	glm::mat4 proj_matrix(CameraComponent camera)
 	{
-		return glm::infinitePerspective(R(camera.fov), (float)ASPECT_RATIO_VAL, 0.1f);
+		return glm::perspective(R(camera.fov), (float)ASPECT_RATIO_VAL, 0.1f, 100.0f);
 	}
 
 	//Calculates the view matrix for a camera
@@ -138,7 +140,7 @@ namespace game::renderer
 		Model &model = it->second;
 
 		m.isAnimated = model.IsAnimated();
-		
+
 		//Determine and use appropriate shader
 		GLuint shader = get_shader(model.IsTextured(), model.IsNormalMapped(), n_ambient, n_directional, n_point, m.vertex_shader, m.fragment_shader);
 		glUseProgram(shader);
@@ -306,6 +308,8 @@ namespace game::renderer
 
 	void render_particle(CameraComponent camera, ParticleComponent &p, ColourComponent c, TransformComponent t)
 	{
+		glDisable(GL_CULL_FACE);
+
 		//Get the particle, aborting if not found
 		auto it = particleEffects.find(p.texture_file);
 		if (it == particleEffects.end()) return;
@@ -342,6 +346,17 @@ namespace game::renderer
 		particle.Render(shader);
 	}
 
+	void update_wave(float delta)
+	{
+		GLuint shader = get_shader(false, false, 0, 0, 0, "shaders/Water.vert", "shaders/Water.frag");
+		glUseProgram(shader);
+
+		glUniform1f(
+			glGetUniformLocation(shader, "delta"),
+			(GLfloat)delta
+		);
+	}
+
 	void render_image(CameraComponent camera, ImageComponent &i)
 	{
 		//Get the image, aborting if not found
@@ -358,14 +373,14 @@ namespace game::renderer
 		glm::mat4 matView = view_matrix(camera);
 
 		glm::mat4 matModel = glm::mat4(1);
-			
-			/*glm::translate(glm::vec3(t.position)) *
-			glm::rotate(R(t.rotation.x), glm::vec3(1, 0, 0)) *
-			glm::rotate(R(t.rotation.z), glm::vec3(0, 0, 1)) *
-			glm::rotate(R(t.rotation.y), glm::vec3(0, 1, 0)) *
-			glm::scale(glm::vec3(t.scale));
+
+		/*glm::translate(glm::vec3(t.position)) *
+		glm::rotate(R(t.rotation.x), glm::vec3(1, 0, 0)) *
+		glm::rotate(R(t.rotation.z), glm::vec3(0, 0, 1)) *
+		glm::rotate(R(t.rotation.y), glm::vec3(0, 1, 0)) *
+		glm::scale(glm::vec3(t.scale));
 */
-		//Provide MVP matrices
+//Provide MVP matrices
 		glUniformMatrix4fv(
 			glGetUniformLocation(shader, "projectionMatrix"),
 			1, GL_FALSE, glm::value_ptr(matProj)
@@ -382,7 +397,7 @@ namespace game::renderer
 		image.Render(shader);
 	}
 
-	void animate_model(double time, std::string model_file) 
+	void animate_model(double time, std::string model_file)
 	{
 		//Get the model, aborting if not found
 		auto it = models.find(model_file);

@@ -100,7 +100,7 @@ void game::GameEngine::run()
 
 	// Room stuff
 	ModelComponent m_water; m_water.model_file = "models/Water/water.obj"; m_water.vertex_shader = "shaders/Water.vert"; m_water.fragment_shader = "shaders/Water.frag";
-	scene_.instantiate("Model", m_water);
+	scene_.instantiate("Water", m_water);
 
 	ModelComponent m_room; m_room.model_file = "models/Room/room.obj";
 	TransformComponent t_room; t_room.position.y = 10; t_room.scale = { 0.5, 0.5, 0.5 };
