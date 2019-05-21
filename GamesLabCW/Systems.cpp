@@ -89,12 +89,12 @@ namespace game::systems
 
 
 	//Updates the spatial partitioning grid
-	auto SpatialGridSystem = [](SceneInfo info, auto entity, TransformComponent &t)
+	auto SpatialGridSystem = [](SceneInfo info, auto entity, TransformComponent &t, CollisionComponent &)
 	{
 		auto i = info.scene.spatial_grid.update(t.position, entity, t.last_index);
 		t.last_index = i;
 	};
-	SYSTEM(SpatialGridSystem, TransformComponent);
+	SYSTEM(SpatialGridSystem, TransformComponent, CollisionComponent);
 
 
 	//Detects collisions, updating pools and logging events
