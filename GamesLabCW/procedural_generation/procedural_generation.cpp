@@ -218,11 +218,12 @@ namespace game::procgen
 				auto [x, y] = index_to_coords(i);
 				if (x > 0 && x < (size_ - room_size) && y > 0 && y < (size_ - room_size))
 				{
-					//If destination is all solid, including surroundings
+					//If destination is all solid, including surroundings (but not border corners)
 					bool all_solid = grid_[i].solid;
 					for (int dx = -1; dx <= room_size; dx++)
 						for (int dy = -1; dy <= room_size; dy++)
-							all_solid &= grid_[coords_to_index(x + dx, y + dy)].solid;
+							if (dx != -1 && dx != room_size || dy != -1 && dy != room_size)
+								all_solid &= grid_[coords_to_index(x + dx, y + dy)].solid;
 
 					if (all_solid)
 					{
