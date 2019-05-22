@@ -1,5 +1,7 @@
 #include "Model.h"
 
+#include <iostream>
+
 namespace game
 {
 	Model::Model(std::string modelPath)
@@ -7,10 +9,12 @@ namespace game
 		// Have Assimp load and read the model file
 		static Assimp::Importer imp;
 		scene = imp.ReadFile(modelPath,
+			aiProcess_JoinIdenticalVertices |
+			aiProcess_SortByPType |
 			aiProcess_CalcTangentSpace |
 			aiProcess_Triangulate |
 			aiProcess_JoinIdenticalVertices |
-			aiProcess_SortByPType |
+			aiProcess_GenSmoothNormals |
 			aiProcess_LimitBoneWeights
 		);
 
@@ -330,6 +334,26 @@ namespace game
 			unsigned int BoneIndex = boneMapper[nodeName];
 			boneInfos[BoneIndex].finalTransformation = globalInverseTransform * GlobalTransformation *
 				boneInfos[BoneIndex].boneOffset;
+
+			std::cout << boneInfos[BoneIndex].finalTransformation.m[0][0] << ", "
+				<< boneInfos[BoneIndex].finalTransformation.m[0][1] << ", "
+				<< boneInfos[BoneIndex].finalTransformation.m[0][2] << ", "
+				<< boneInfos[BoneIndex].finalTransformation.m[0][3] << "\n";
+
+			std::cout << boneInfos[BoneIndex].finalTransformation.m[1][0] << ", "
+				<< boneInfos[BoneIndex].finalTransformation.m[1][1] << ", "
+				<< boneInfos[BoneIndex].finalTransformation.m[1][2] << ", "
+				<< boneInfos[BoneIndex].finalTransformation.m[1][3] << "\n";
+
+			std::cout << boneInfos[BoneIndex].finalTransformation.m[2][0] << ", "
+				<< boneInfos[BoneIndex].finalTransformation.m[2][1] << ", "
+				<< boneInfos[BoneIndex].finalTransformation.m[2][2] << ", "
+				<< boneInfos[BoneIndex].finalTransformation.m[2][3] << "\n";
+
+			std::cout << boneInfos[BoneIndex].finalTransformation.m[3][0] << ", "
+				<< boneInfos[BoneIndex].finalTransformation.m[3][1] << ", "
+				<< boneInfos[BoneIndex].finalTransformation.m[3][2] << ", "
+				<< boneInfos[BoneIndex].finalTransformation.m[3][3] << "\n";
 		}
 
 		// Do the same for all the node's children. 
