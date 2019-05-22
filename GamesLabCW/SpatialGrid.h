@@ -23,7 +23,7 @@ namespace game
 
 	private:
 		std::map<index_type, std::unordered_set<value_type>> grid_;
-		Vector3 cell_size_ = { 5,5,5 };
+		Vector3 cell_size_ = { 40,40,40};
 
 	public:
 		//Inserts an element as per the given position vector

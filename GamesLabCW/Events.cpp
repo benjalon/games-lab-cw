@@ -38,11 +38,11 @@ namespace game::events
 
 	void SphereLeaveCollideResponse(const LeaveCollision &e)
 	{
-		if (e.registry.has<DetectionComponent>(e.a))
+		if (e.registry.has<DetectionComponent>(e.b) && e.registry.has< FirstPersonControllerComponent>(e.a))
 		{
 			HandleDetectionCollisionLeaving(e);
 		}
-		//std::cout << "Leave: " << e.a << " " << e.b << std::endl;
+		std::cout << "Leave: " << e.a << " " << e.b << std::endl;
 	}
 	RESPONSE(SphereLeaveCollideResponse, LeaveCollision);
 
@@ -109,17 +109,16 @@ namespace game::events
 
 	void HandleDetectionCollision(const EnterCollision &e)
 	{
-		/*auto &dc = e.registry.get<AIComponent>(e.a);
-		
-		dc.looking = false;*/
+		auto &ai = e.registry.get<AIComponent>(e.a);
+		ai.looking = false;
+		auto d = 1;
 
 	}
 
 	void HandleDetectionCollisionLeaving(const LeaveCollision &e)
 	{
-		/*auto &dc = e.registry.get<AIComponent>(e.a);
-
-		dc.looking = true;*/
+		auto &ai = e.registry.get<AIComponent>(e.b);
+		ai.looking = true;
 
 	}
 }

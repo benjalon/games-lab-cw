@@ -110,38 +110,40 @@ namespace game::systems
 
 			//Ignore self
 			if (other == entity) continue;
-
+			
 			//Ignore if not collidable
 			if (!info.registry.has<CollisionComponent>(other)) continue;
-
+			
 			auto &[c2, t2] = info.registry.get<CollisionComponent, TransformComponent>(other);
 
-			//Test if currently colliding (distance between centres less than sum of radii)
-			/*var distance = Math.sqrt((point.x - sphere.x) * (point.x - sphere.x) +
-				(point.y - sphere.y) * (point.y - sphere.y) +
-				(point.z - sphere.z) * (point.z - sphere.z));
-			return distance < sphere.radius; */
+			if (info.registry.has<DetectionComponent>(other) && info.registry.has<FirstPersonControllerComponent>(entity)) 
+			{
+				DetectionComponent &d = info.registry.get<DetectionComponent>(other);
+				c2 = d.c;
+				t2 = info.registry.get<TransformComponent>(other);
+			}
+			
+			
+			
 
+			//Test if currently colliding (distance between centres less than sum of radii)
 			double d2 = sqrt(std::pow(t2.position.x - t1.position.x, 2) +
 				std::pow(t2.position.y - t1.position.y, 2) +
 				std::pow(t2.position.z - t1.position.z, 2));
 
- 			double sumRad = (c1.radius + c2.radius);
+			double sumRad = c1.radius + c2.radius;
 			bool currently_colliding = d2 < sumRad;
 
-			bool was_colliding = utility::contains(c1.colliding, other);
+			
 
-			if (c1.radius == 6 && c2.radius == 20)
-			{
-				cout << "Fuck this" << endl;
-			}
+			bool was_colliding = utility::contains(c1.colliding, other);
 
 			//Log entering of collision
 			if (currently_colliding && !was_colliding)
 			{
 				c1.colliding.insert(other);
 				c2.colliding.insert(entity);
-
+				cout << "d2:" << d2 << " sumRad:" << sumRad << endl;
 				events::dispatcher.enqueue<events::EnterCollision>(info.registry, entity, other);
 			}
 
@@ -150,7 +152,7 @@ namespace game::systems
 			{
 				c1.colliding.erase(other);
 				c2.colliding.erase(entity);
-
+				cout << "d2:" << d2 << " sumRad:" << sumRad << endl;
 				events::dispatcher.enqueue<events::LeaveCollision>(info.registry, entity, other);
 			}
 		}
@@ -192,7 +194,7 @@ namespace game::systems
 	};
 	SYSTEM(AnimationSystem, ModelComponent);
 
-	auto AISystem = [](SceneInfo info, Entity entity, ModelComponent &m, ColourComponent &colour, TransformComponent &t, KinematicComponent &k, AIComponent &a, CameraComponent &c, BulletComponent &bc)
+	auto AISystem = [](SceneInfo info, Entity entity, ModelComponent &m, ColourComponent &colour, TransformComponent &t, KinematicComponent &k, AIComponent &a, CameraComponent &c, CollisionComponent &col, BulletComponent &bc, DetectionComponent &d)
 	{
 		//goal: rotate t on the z axis.
 		
@@ -243,7 +245,7 @@ namespace game::systems
 
 		
 	};
-	SYSTEM(AISystem, ModelComponent, ColourComponent, TransformComponent, KinematicComponent, AIComponent, CameraComponent,BulletComponent);
+	SYSTEM(AISystem, ModelComponent, ColourComponent, TransformComponent, KinematicComponent, AIComponent, CameraComponent,CollisionComponent,BulletComponent, DetectionComponent);
 	
 	auto ParticleSystem = [](auto info, auto entity, ParticleComponent &p, ColourComponent &c, TransformComponent &t, KinematicComponent &k)
 	{

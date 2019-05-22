@@ -93,7 +93,7 @@ game::GameEngine::GameEngine(bool fullscreen, bool vsync, bool ground) :
 void game::GameEngine::run()
 {
 	// Player/camera
-	CollisionComponent c_player; c_player.radius = 6;
+	CollisionComponent c_player; c_player.radius = 3;
 	auto player = scene_.instantiate("FirstPersonController", TransformComponent{ {0,55,5} , { 180,0,0 } }, c_player);
 	auto camera = CameraComponent{ player };
 
@@ -141,13 +141,13 @@ void game::GameEngine::run()
 	// Minotaur test model
 	ModelComponent m_minotaur; m_minotaur.model_file = "models/Minotaur/Minotaur@Jump.fbx";
 	ColourComponent c_minotaur; c_minotaur.colour = { 0, 0, 255 };
-	TransformComponent t_minotaur; t_minotaur.scale = { 0.15, 0.15, 0.15 }; t_minotaur.position = { 0, 55, -15 }; t_minotaur.rotation = { 90, 180, 0 };
-	//CollisionComponent coll_minotaur; coll_minotaur.radius = 2.9;
-	scene_.instantiate("AIModel", m_minotaur, t_minotaur, camera, c_minotaur);// d_minotaur, c_minotaur);
+	DetectionComponent d_minotaur; d_minotaur.c.radius = 30;
+	TransformComponent t_minotaur; t_minotaur.scale = { 0.15, 0.15, 0.15 }; t_minotaur.position = { 0, 55, -30 }; t_minotaur.rotation = { 90, 180, 0 };
+	CollisionComponent coll_minotaur; coll_minotaur.radius = 2.9;
+	scene_.instantiate("AIModel", m_minotaur, t_minotaur, camera, c_minotaur, d_minotaur, coll_minotaur);// d_minotaur, c_minotaur);
 	//DetectionComponent d_minotaur;
-	CollisionComponent c_detectionRadius; c_detectionRadius.radius = 20;
-	ModelComponent m_detectionRadius;
-	scene_.instantiate("DetectionRadius", t_minotaur, c_detectionRadius, m_minotaur, c_minotaur);
+	//CollisionComponent c_detectionRadius; c_detectionRadius.radius = 40;
+	//scene_.instantiate("DetectionRadius", d_minotaur, t_minotaur, c_detectionRadius);
 
 	// Torches
 	ModelComponent m_torch; m_torch.model_file = "models/Torch/torch.obj";

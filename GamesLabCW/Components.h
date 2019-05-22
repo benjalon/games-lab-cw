@@ -127,5 +127,7 @@ namespace game
 		std::string model_file = "models/Fireball/fireball.obj";
 	};
 
-	struct DetectionComponent { };
+	struct DetectionComponent {
+		CollisionComponent c;
+	};
 }
