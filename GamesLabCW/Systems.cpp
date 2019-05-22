@@ -39,7 +39,7 @@ namespace game::systems
 	auto FirstPersonControllerSystem = [](SceneInfo info, auto entity, FirstPersonControllerComponent &f, CollisionComponent &c, TransformComponent &t, KinematicComponent &k, BulletComponent &bc)
 	{
 		double mouse_sensitivity = 5.0;
-		double move_speed = 11.0;
+		double move_speed = 30.0;
 
 		//Rotate using cursor offsetW
 		t.rotation.x += mouse_sensitivity * input::cursor_pos.x * info.dt;

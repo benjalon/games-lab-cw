@@ -14,19 +14,27 @@ std::vector<std::unique_ptr<game::events::ResponseBase>> game::events::responses
 
 namespace game::events
 {
+	void HandleKeyCollision(const EnterCollision &, Entity);
+	void HandleDoorCollision(const EnterCollision &, Entity);
+	void HandleBulletCollision(const EnterCollision &, Entity);
+
 	void SphereEnterCollideResponse(const EnterCollision &e)
 	{
-		if (e.registry.has<KeyComponent, PointLightComponent, TransformComponent>(e.a))
+		bool b = false;
+		if (e.registry.has<KeyComponent, PointLightComponent, TransformComponent>(e.a) ||
+			(b = e.registry.has<KeyComponent, PointLightComponent, TransformComponent>(e.b)))
 		{
-			HandleKeyCollision(e);
+			HandleKeyCollision(e, b ? e.b : e.a);
 		}
-		else if (e.registry.has<DoorComponent>(e.a))
+		else if (e.registry.has<DoorComponent>(e.a) ||
+			(b = e.registry.has<DoorComponent>(e.b)))
 		{
-			HandleDoorCollision(e);
+			HandleDoorCollision(e, b ? e.b : e.a);
 		}
-		else if (e.registry.has<AIComponent>(e.b)) 
+		else if (e.registry.has<AIComponent>(e.a) ||
+			(b = e.registry.has<AIComponent>(e.b)))
 		{
-			HandleBulletCollision(e);
+			HandleBulletCollision(e, b ? e.b : e.a);
 		}
 
 		/*std::cout << "Enter: " << e.a << " " << e.b << std::endl;*/
@@ -60,9 +68,9 @@ namespace game::events
 	RESPONSE(FireBulletResponse, FireBullet);
 
 	int keyCount = 0;
-	void HandleKeyCollision(const EnterCollision &e)
+	void HandleKeyCollision(const EnterCollision &e, Entity key)
 	{
-		auto &[k, pl, t] = e.registry.get<KeyComponent, PointLightComponent, TransformComponent>(e.a);
+		auto &[k, pl, t] = e.registry.get<KeyComponent, PointLightComponent, TransformComponent>(key);
 
 		if (k.pickedUp)
 		{
@@ -78,7 +86,7 @@ namespace game::events
 		keyCount++;
 	}
 
-	void HandleDoorCollision(const EnterCollision &e)
+	void HandleDoorCollision(const EnterCollision &e, Entity door)
 	{
 		if (keyCount < 6) 
 		{
@@ -88,10 +96,10 @@ namespace game::events
 		// Game over happy days
 	}
 
-	void HandleBulletCollision(const EnterCollision &e) {
+	void HandleBulletCollision(const EnterCollision &e, Entity bullet) {
 
-		auto &t = e.registry.get<TransformComponent>(e.b);
-		auto &c = e.registry.get<ColourComponent>(e.b);
+		auto &t = e.registry.get<TransformComponent>(bullet);
+		auto &c = e.registry.get<ColourComponent>(bullet);
 
 		c.colour = {255,0,0};
 		
@@ -106,7 +114,7 @@ namespace game::events
 		auto camera = e.scene.instantiate("Camera", CameraComponent{ player });
 
 		// Generic scene lighting
-		e.scene.instantiate("AmbientLight", AmbientLightComponent{ {1, 147.0 / 255.0, 41.0 / 255.0}, 1.0 });
+		e.scene.instantiate("AmbientLight", AmbientLightComponent{ {1, 147.0 / 255.0, 41.0 / 255.0}, 0.2 });
 		e.scene.instantiate("DirectionalLight", DirectionalLightComponent{ {0, 0, 0}, 0, {0,0,0} });
 		e.scene.instantiate("PointLight", PointLightComponent{ {1, 147.0 / 255.0, 41.0 / 255.0}, 1, {0,5,0} });
 	}

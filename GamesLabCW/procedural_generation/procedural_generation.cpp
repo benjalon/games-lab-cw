@@ -371,6 +371,17 @@ namespace game::procgen
 		//Builds the maze into the given scene
 		void build_scene(Scene &scene)
 		{
+			//Utility to place key
+			auto place_key = [&](Vector3 position)
+			{
+				ModelComponent m_key; m_key.model_file = "models/Key/Key_B_02.obj";
+				KeyComponent k_key; k_key.destination = { -40, 10, 10 };
+				TransformComponent t_key; t_key.scale = { 0.5, 0.5, 0.5 }; t_key.rotation = { 0, 180, 180 };
+				t_key.position = position;
+				PointLightComponent pl_key{ {1, 180 / 255.0, 120.0 / 255.0}, 1.0, t_key.position };
+				scene.instantiate("Key", m_key, t_key, k_key, pl_key);
+			};
+
 			//Instantiate models for each cell type
 			ModelComponent m_type_1; m_type_1.model_file = "models/Procedural/type1.obj";
 			ModelComponent m_type_2; m_type_2.model_file = "models/Procedural/type2.obj";
@@ -387,6 +398,10 @@ namespace game::procgen
 
 			//Separation between cells to prevent z-fighting
 			double give = 0.001;
+
+			//Has the key been instantiated yet?
+			bool key = false;
+			Coords key_pos;
 
 			//Instantiate correct type for each cell in grid
 			for (int x = 1; x < size_ - 1; x++)
@@ -454,9 +469,32 @@ namespace game::procgen
 							else if (!south) t.rotation = { 0, 270.0, 0 };
 
 							scene.instantiate("Model", m_type_4, t);
+
+							//Instantiate key
+							if (!key)
+							{
+								place_key({ x * cell_size, 0.5, y * cell_size });
+								key_pos = { x, y };
+								key = true;
+							}
+
 							break;
 						}
 					}
+
+			//If there were no dead ends, place key in random cell
+			if (!key)
+			{
+				std::uniform_int_distribution<size_t> index_dist(0, size_ - 1);
+				size_t i = index_dist(rng());
+				while (!grid_[i].solid)
+					i = index_dist(rng());
+
+				auto [x, y] = index_to_coords(i);
+				place_key({ x * cell_size, 0.5, y * cell_size });
+				key_pos = { x, y };
+				key = true;
+			}
 		}
 	};
 
