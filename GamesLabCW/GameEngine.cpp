@@ -102,12 +102,94 @@ void game::GameEngine::run()
 	auto camera = scene_.instantiate("Camera", CameraComponent{ player });
 
 	// Room stuff
-	//ModelComponent m_water; m_water.model_file = "models/Water/water.obj"; m_water.vertex_shader = "shaders/Water.vert"; m_water.fragment_shader = "shaders/Water.frag";
-	//scene_.instantiate("Model", m_water);
+	ModelComponent m_water; m_water.model_file = "models/Water/water.obj"; m_water.vertex_shader = "shaders/Water.vert"; m_water.fragment_shader = "shaders/Water.frag";
+	scene_.instantiate("Model", m_water);
 
-	//ModelComponent m_room; m_room.model_file = "models/Procedural/type4.obj";
-	//TransformComponent t_room; t_room.position.y = 10; t_room.scale = { 0.5, 0.5, 0.5 };
-	//scene_.instantiate("Model", m_room, t_room);
+	ModelComponent m_room; m_room.model_file = "models/Room/room.obj";
+	TransformComponent t_room; t_room.position.y = 10; t_room.scale = { 0.5, 0.5, 0.5 };
+	scene_.instantiate("Model", m_room, t_room);
+
+	// Keys
+	ModelComponent m_key; m_key.model_file = "models/Key/Key_B_02.obj";
+
+	KeyComponent k_key1; k_key1.destination = { -40, 10, 10 };
+	TransformComponent t_key1; t_key1.scale = { 0.5, 0.5, 0.5 }; t_key1.position = { 0, 0.5, 15 }; t_key1.rotation = { 90, 180, 180 };
+	PointLightComponent pl_key1{ {1, 180 / 255.0, 120.0 / 255.0}, 0.5, t_key1.position };
+	scene_.instantiate("Key", m_key, t_key1, k_key1, pl_key1);
+
+	KeyComponent k_key2; k_key2.destination = { -40, 15, 10 };
+	TransformComponent t_key2; t_key2.scale = { 0.5, 0.5, 0.5 }; t_key2.position = { 0, 0.5, -15 }; t_key2.rotation = { 90, 180, 180 };
+	PointLightComponent pl_key2{ {1, 180 / 255.0, 120.0 / 255.0}, 0.5, t_key2.position };
+	scene_.instantiate("Key", m_key, t_key2, k_key2, pl_key2);
+
+	KeyComponent k_key3; k_key3.destination = { -40, 20, 10 };
+	TransformComponent t_key3; t_key3.scale = { 0.5, 0.5, 0.5 }; t_key3.position = { 10, 0.5, 15 }; t_key3.rotation = { 90, 180, 180 };
+	PointLightComponent pl_key3{ {1, 180 / 255.0, 120.0 / 255.0}, 0.5, t_key3.position };
+	scene_.instantiate("Key", m_key, t_key3, k_key3, pl_key3);
+
+	KeyComponent k_key4; k_key4.destination = { -40, 10, -10 };
+	TransformComponent t_key4; t_key4.scale = { 0.5, 0.5, 0.5 }; t_key4.position = { -10, 0.5, 15 }; t_key4.rotation = { 90, 180, 180 };
+	PointLightComponent pl_key4{ {1, 180 / 255.0, 120.0 / 255.0}, 0.5, t_key4.position };
+	scene_.instantiate("Key", m_key, t_key4, k_key4, pl_key4);
+
+	KeyComponent k_key5; k_key5.destination = { -40, 15, -10 };
+	TransformComponent t_key5; t_key5.scale = { 0.5, 0.5, 0.5 }; t_key5.position = { 30, 0.5, 10 }; t_key5.rotation = { 90, 180, 180 };
+	PointLightComponent pl_key5{ {1, 180 / 255.0, 120.0 / 255.0}, 0.5, t_key5.position };
+	scene_.instantiate("Key", m_key, t_key5, k_key5, pl_key5);
+
+	KeyComponent k_key6; k_key6.destination = { -40, 20, -10 };
+	TransformComponent t_key6; t_key6.scale = { 0.5, 0.5, 0.5 }; t_key6.position = { -30, 0.5, 10 }; t_key6.rotation = { 90, 180, 180 };
+	PointLightComponent pl_key6{ {1, 180 / 255.0, 120.0 / 255.0}, 0.5, t_key6.position };
+	scene_.instantiate("Key", m_key, t_key6, k_key6, pl_key6);
+
+	// Minotaur test model
+	ModelComponent m_minotaur; m_minotaur.model_file = "models/Minotaur/Minotaur@Jump.fbx";
+	ColourComponent c_minotaur; c_minotaur.colour = { 0, 0, 255 };
+	TransformComponent t_minotaur; t_minotaur.scale = { 0.15, 0.15, 0.15 }; t_minotaur.position = { 0, 9, -15 }; t_minotaur.rotation = { 90, 180, 0 };//90, 180
+	DetectionComponent d_minotaur; d_minotaur.c.radius = 10; d_minotaur.camera = camera;
+	scene_.instantiate("AIModel", m_minotaur, t_minotaur, d_minotaur, c_minotaur);
+
+	// Torches
+	ModelComponent m_torch; m_torch.model_file = "models/Torch/torch.obj";
+
+	ParticleComponent p_torch; p_torch.texture_file = "models/fire.png"; p_torch.respawn_count = 1;
+	p_torch.position_variation = Vector3(100, 50, 40);
+	p_torch.velocity_variation = Vector3(100, 50, 50);
+	p_torch.color_variation = Vector3(100, -0.5, 100);
+	p_torch.color_modifier = Vector3(1, 0.15, 0);
+
+	TransformComponent t_torch1; t_torch1.position = { 26, 0, -23 }; t_torch1.scale = { 5, 5, 5 };
+	scene_.instantiate("Model", m_torch, t_torch1);
+	scene_.instantiate("PointLight", PointLightComponent{ {1, 147.0 / 255.0, 41.0 / 255.0}, 40, {26, 7, -23} });
+	scene_.instantiate("ParticleEffect", p_torch, TransformComponent{ { 26, 8, -23 } });
+
+	TransformComponent t_torch2; t_torch2.position = { 26, 0, 23 }; t_torch2.scale = { 5, 5, 5 };
+	scene_.instantiate("Model", m_torch, t_torch2);
+	scene_.instantiate("PointLight", PointLightComponent{ {1, 147.0 / 255.0, 41.0 / 255.0}, 40, {26, 7, 23} });
+	scene_.instantiate("ParticleEffect", p_torch, TransformComponent{ { 26, 8, 23 } });
+
+	TransformComponent t_torch3; t_torch3.position = { -26, 6, -10 }; t_torch3.scale = { 5, 5, 5 };
+	scene_.instantiate("Model", m_torch, t_torch3);
+	scene_.instantiate("PointLight", PointLightComponent{ {1, 147.0 / 255.0, 41.0 / 255.0}, 40, { -26, 13, -10 } });
+	scene_.instantiate("ParticleEffect", p_torch, TransformComponent{ { -26, 14, -10 } });
+
+	TransformComponent t_torch4; t_torch4.position = { -26, 6, 10 }; t_torch4.scale = { 5, 5, 5 };
+	scene_.instantiate("Model", m_torch, t_torch4);
+	scene_.instantiate("PointLight", PointLightComponent{ {1, 147.0 / 255.0, 41.0 / 255.0}, 40, { -26, 13, 10 } });
+	scene_.instantiate("ParticleEffect", p_torch, TransformComponent{ { -26, 14, 10 } });
+
+	// Portal
+	ParticleComponent p_portal; p_portal.texture_file = "models/star.png"; p_portal.respawn_count = 1;
+	p_portal.position_variation = Vector3(100, 50, 10);
+	p_portal.velocity_variation = Vector3(100, 50, 40);
+	p_portal.color_variation = Vector3(100, -0.5, 100);
+	p_portal.color_modifier = Vector3(0.8, 0.2, 1);
+	scene_.instantiate("ParticleEffect", p_portal, TransformComponent{ Vector3(3, 5, 22) });
+	scene_.instantiate("PointLight", PointLightComponent{ {1, 105.0 / 255.0, 180.0 / 255.0}, 40, { 3, 3, 22} });
+
+	// UI
+	ImageComponent i_ui; i_ui.texture_file = "models/hud.png";
+	scene_.instantiate("Image", i_ui);
 
 	// Skybox
 	TransformComponent t_skybox; t_skybox.scale = { 20, 20, 20 };
@@ -115,11 +197,9 @@ void game::GameEngine::run()
 	scene_.instantiate("Model", m_skybox, t_skybox);
 
 	// Generic scene lighting
-	scene_.instantiate("AmbientLight", AmbientLightComponent{ {1, 147.0 / 255.0, 41.0 / 255.0}, 1.0 });
+	scene_.instantiate("AmbientLight", AmbientLightComponent{ {1, 147.0 / 255.0, 41.0 / 255.0}, 0.01 });
 	scene_.instantiate("DirectionalLight", DirectionalLightComponent{ {0, 0, 0}, 0, {0,0,0} });
-	scene_.instantiate("PointLight", PointLightComponent{ {1, 147.0 / 255.0, 41.0 / 255.0}, 1, {0,5,0} });
-
-	procgen::generate_maze(scene_, 21, 120, 3, 4, 6);
+	/*scene_.instantiate("PointLight", PointLightComponent{ {1, 147.0 / 255.0, 41.0 / 255.0}, 1, {0,5,0} });*/
 
 	//Time of next update
 	double t_next = glfwGetTime();
