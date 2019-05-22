@@ -48,6 +48,11 @@ game::Vector3 game::Vector3::operator*(const double &other)
 	return Vector3(this->x * other, this->y * other, this->z * other);
 }
 
+game::Vector3 game::Vector3::operator/(const double &other)
+{
+	return Vector3(this->x / other, this->y / other, this->z / other);
+}
+
 game::Vector3::operator glm::vec3() const
 {
 	return glm::vec3(x, y, z);

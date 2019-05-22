@@ -86,8 +86,12 @@ namespace game::systems
 	//Basic kinematic system of calculus of motion
 	auto KinematicSystem = [](auto info, auto entity, auto &t, auto &k)
 	{
+		Vector3 old_v = k.velocity;
+
 		k.velocity += k.acceleration * info.dt;
-		t.position += k.velocity * info.dt;
+		t.position += (k.velocity + old_v) / 2.0 * info.dt;
+
+		t.rotation += k.angular_velocity * info.dt;
 	};
 	SYSTEM(KinematicSystem, TransformComponent, KinematicComponent);
 

@@ -22,7 +22,7 @@ void game::prototypes::register_prototypes()
 	PROTOTYPE(ParticleEffect, ParticleComponent, ColourComponent, TransformComponent, KinematicComponent);
 	PROTOTYPE(Image, ImageComponent);
 
-	PROTOTYPE(Key, ModelComponent, ColourComponent, CollisionComponent, TransformComponent, KeyComponent, PointLightComponent);
+	PROTOTYPE(Key, ModelComponent, ColourComponent, CollisionComponent, TransformComponent, KeyComponent, PointLightComponent, KinematicComponent);
 
 	PROTOTYPE(AmbientLight, AmbientLightComponent);
 	PROTOTYPE(DirectionalLight, DirectionalLightComponent);

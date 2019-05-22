@@ -379,7 +379,8 @@ namespace game::procgen
 				TransformComponent t_key; t_key.scale = { 0.5, 0.5, 0.5 }; t_key.rotation = { 0, 180, 180 };
 				t_key.position = position;
 				PointLightComponent pl_key{ {1, 180 / 255.0, 120.0 / 255.0}, 1.0, t_key.position };
-				scene.instantiate("Key", m_key, t_key, k_key, pl_key);
+				KinematicComponent kn_key; kn_key.angular_velocity = { 0, 90, 0 };
+				scene.instantiate("Key", m_key, t_key, k_key, pl_key, kn_key);
 			};
 
 			//Instantiate models for each cell type

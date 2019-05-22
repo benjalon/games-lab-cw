@@ -113,6 +113,8 @@ namespace game
 	{
 		Vector3 velocity;
 		Vector3 acceleration;
+
+		Vector3 angular_velocity;
 	};
 
 	struct CollisionComponent
