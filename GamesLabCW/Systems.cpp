@@ -117,14 +117,24 @@ namespace game::systems
 			auto &[c2, t2] = info.registry.get<CollisionComponent, TransformComponent>(other);
 
 			//Test if currently colliding (distance between centres less than sum of radii)
-			double d2 = std::pow(t2.position.x - t1.position.x, 2) +
-				std::pow(t2.position.y - t1.position.y, 2) +
-				std::pow(t2.position.z - t1.position.z, 2);
+			/*var distance = Math.sqrt((point.x - sphere.x) * (point.x - sphere.x) +
+				(point.y - sphere.y) * (point.y - sphere.y) +
+				(point.z - sphere.z) * (point.z - sphere.z));
+			return distance < sphere.radius; */
 
-			double sumRad = std::pow(c1.radius + c2.radius, 2);
+			double d2 = sqrt(std::pow(t2.position.x - t1.position.x, 2) +
+				std::pow(t2.position.y - t1.position.y, 2) +
+				std::pow(t2.position.z - t1.position.z, 2));
+
+ 			double sumRad = (c1.radius + c2.radius);
 			bool currently_colliding = d2 < sumRad;
 
 			bool was_colliding = utility::contains(c1.colliding, other);
+
+			if (c1.radius == 6 && c2.radius == 20)
+			{
+				cout << "Fuck this" << endl;
+			}
 
 			//Log entering of collision
 			if (currently_colliding && !was_colliding)
@@ -182,7 +192,7 @@ namespace game::systems
 	};
 	SYSTEM(AnimationSystem, ModelComponent);
 
-	auto AISystem = [](SceneInfo info, Entity entity, ModelComponent &m, ColourComponent &colour, TransformComponent &t, KinematicComponent &k, AIComponent &a, CameraComponent &c, CollisionComponent &col, BulletComponent &bc)
+	auto AISystem = [](SceneInfo info, Entity entity, ModelComponent &m, ColourComponent &colour, TransformComponent &t, KinematicComponent &k, AIComponent &a, CameraComponent &c, BulletComponent &bc)
 	{
 		//goal: rotate t on the z axis.
 		
@@ -233,7 +243,7 @@ namespace game::systems
 
 		
 	};
-	SYSTEM(AISystem, ModelComponent, ColourComponent, TransformComponent, KinematicComponent, AIComponent, CameraComponent,CollisionComponent,BulletComponent);
+	SYSTEM(AISystem, ModelComponent, ColourComponent, TransformComponent, KinematicComponent, AIComponent, CameraComponent,BulletComponent);
 	
 	auto ParticleSystem = [](auto info, auto entity, ParticleComponent &p, ColourComponent &c, TransformComponent &t, KinematicComponent &k)
 	{
