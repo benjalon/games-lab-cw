@@ -39,6 +39,9 @@ namespace game::renderer
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glEnable(GL_DEPTH_TEST);
+		//TODO Enable back face culling once maze models are fixed
+		//glCullFace(GL_BACK);
+		//glEnable(GL_CULL_FACE);
 	}
 
 	//Returns the (potentially cached) shader using the given paramaters
@@ -84,7 +87,7 @@ namespace game::renderer
 	//Calculates the projection matrix for a camera
 	glm::mat4 proj_matrix(CameraComponent camera)
 	{
-		return glm::infinitePerspective(R(camera.fov), (float)ASPECT_RATIO_VAL, 0.1f);
+		return glm::perspective(R(camera.fov), (float)ASPECT_RATIO_VAL, 0.1f, (float)RENDER_DISTANCE);
 	}
 
 	//Calculates the view matrix for a camera
@@ -306,6 +309,8 @@ namespace game::renderer
 
 	void render_particle(CameraComponent camera, ParticleComponent &p, ColourComponent c, TransformComponent t)
 	{
+		glDisable(GL_CULL_FACE);
+
 		//Get the particle, aborting if not found
 		auto it = particleEffects.find(p.texture_file);
 		if (it == particleEffects.end()) return;

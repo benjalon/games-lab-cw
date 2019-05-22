@@ -34,6 +34,9 @@ namespace game
 	//Minimum game rate (Hz)
 	constexpr int GAME_RATE_MIN = 10;
 
+	//Maximium render distance
+	constexpr double RENDER_DISTANCE = 250.0;
+
 	//Application window title
 	const std::string WINDOW_TITLE = "Dungeon Crawler";
 

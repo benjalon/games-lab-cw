@@ -383,6 +383,27 @@ namespace game::procgen
 				scene.instantiate("Key", m_key, t_key, k_key, pl_key, kn_key);
 			};
 
+			//Utility to place torch
+			auto place_torch = [&](Vector3 position)
+			{
+				ParticleComponent p_torch; p_torch.texture_file = "models/fire.png"; p_torch.respawn_count = 10;
+				p_torch.position_variation = Vector3(100, 50, 40);
+				p_torch.velocity_variation = Vector3(100, 50, 50);
+				p_torch.color_variation = Vector3(100, -0.5, 100);
+				p_torch.color_modifier = Vector3(1, 0.15, 0);
+
+				TransformComponent t_torch; t_torch.scale = { 5, 5, 5 };
+				t_torch.position = position;
+
+				scene.instantiate("Model", t_torch, ModelComponent{ "models/Torch/torch.obj" });
+				scene.instantiate("PointLight", PointLightComponent{ {1, 147.0 / 255.0, 41.0 / 255.0}, 40,
+					t_torch.position + Vector3(0, 8, 0)
+					});
+				scene.instantiate("ParticleEffect", p_torch, TransformComponent{
+					t_torch.position + Vector3(0, 8, 0)
+					});
+			};
+
 			//Instantiate models for each cell type
 			ModelComponent m_type_1; m_type_1.model_file = "models/Procedural/type1.obj";
 			ModelComponent m_type_2; m_type_2.model_file = "models/Procedural/type2.obj";
@@ -392,7 +413,7 @@ namespace game::procgen
 
 			//Parameters of model
 			double model_size = 20.0;
-			double scale = 0.5;
+			double scale = 1.0;
 
 			//Effective size
 			double cell_size = model_size * scale;
@@ -460,6 +481,9 @@ namespace game::procgen
 								else if (north && west) t.rotation = { 0, 270.0, 0 };
 
 								scene.instantiate("Model", m_type_2, t);
+
+								//Instantiate torch
+								place_torch({ x * cell_size, -9, y * cell_size });
 							}
 							break;
 
