@@ -40,6 +40,9 @@ namespace game::events
 		Vector3 rotation;
 	};
 
+	//Represents a maze generation
+	struct GenerateMaze { Scene &scene; };
+
 
 	/* EVENTS AND RESPONSES IMPLEMENTATION */
 

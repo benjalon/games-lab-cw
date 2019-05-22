@@ -5,6 +5,8 @@
 
 #include "Events.h"
 #include "Components.h"
+#include "procedural_generation/procedural_generation.h"
+
 using namespace std;
 
 entt::dispatcher game::events::dispatcher{};
@@ -94,4 +96,19 @@ namespace game::events
 		c.colour = {255,0,0};
 		
 	}
+
+	void GenerateMazeResponse(const GenerateMaze &e)
+	{
+		e.scene.clear();
+		procgen::generate_maze(e.scene, 21, 120, 3, 4, 6);
+
+		auto player = e.scene.instantiate("FirstPersonController", TransformComponent{ {0,6,5} , { 180,0,0 } });
+		auto camera = e.scene.instantiate("Camera", CameraComponent{ player });
+
+		// Generic scene lighting
+		e.scene.instantiate("AmbientLight", AmbientLightComponent{ {1, 147.0 / 255.0, 41.0 / 255.0}, 1.0 });
+		e.scene.instantiate("DirectionalLight", DirectionalLightComponent{ {0, 0, 0}, 0, {0,0,0} });
+		e.scene.instantiate("PointLight", PointLightComponent{ {1, 147.0 / 255.0, 41.0 / 255.0}, 1, {0,5,0} });
+	}
+	RESPONSE(GenerateMazeResponse, GenerateMaze);
 }

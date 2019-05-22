@@ -27,6 +27,10 @@ namespace game::systems
 		//ESC quits the game
 		if (input::is_pressed(input::KEY_ESCAPE))
 			events::dispatcher.trigger<events::QuitGame>();
+
+		//EXAMPLE Simulate collision with portal
+		if (input::is_pressed(input::KEY_ENTER))
+			events::dispatcher.enqueue<events::GenerateMaze>(info.scene);
 	};
 	SYSTEM(GameStateSystem, GameStateComponent);
 

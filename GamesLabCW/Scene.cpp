@@ -74,4 +74,6 @@ void game::Scene::destroy(Entity e)
 void game::Scene::clear()
 {
 	registry_.reset();
+	spatial_grid.clear();
+	create(GameStateComponent());
 }
