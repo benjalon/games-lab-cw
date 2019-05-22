@@ -2,6 +2,7 @@
  * Events.h
  * Defines the interface for event signalling.
  */
+
 #pragma once
 
 #include <entt/entt.hpp>
@@ -18,7 +19,7 @@ namespace game::events
 	//Represents two entities entering a collision
 	struct EnterCollision
 	{
-		entt::registry<> &registry;
+		SceneInfo info;
 		Entity a;
 		Entity b;
 	};
@@ -26,7 +27,7 @@ namespace game::events
 	//Represents two entities leaving a collision
 	struct LeaveCollision
 	{
-		entt::registry<> &registry;
+		SceneInfo info;
 		Entity a;
 		Entity b;
 	};

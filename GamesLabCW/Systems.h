@@ -13,19 +13,6 @@
 
 namespace game::systems
 {
-	//Struct of general-purpose information passed to every system
-	struct SceneInfo
-	{
-		//Reference to the current scene
-		Scene &scene;
-
-		//Delta time (seconds since last update)
-		double dt;
-
-		//The registry in use
-		entt::registry<> &registry;
-	};
-
 	//Function representing a system, receiving dt, entity and arbitrary components
 	template <typename... Ts>
 	using SystemFunction = std::function<void(SceneInfo, entt::registry<>::entity_type, Ts&...)>;

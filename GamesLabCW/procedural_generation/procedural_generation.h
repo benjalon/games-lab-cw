@@ -14,5 +14,8 @@ namespace game
 	{
 		//Generate a game maze
 		void generate_maze(Scene &scene, size_t grid_size, int sparsification, int number_rooms, int min_room_size, int max_room_size);
+
+		//Load the main hub level
+		void load_hub(Scene &scene, int keys_collected = 0);
 	}
 }

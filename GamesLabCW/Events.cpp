@@ -14,25 +14,25 @@ std::vector<std::unique_ptr<game::events::ResponseBase>> game::events::responses
 
 namespace game::events
 {
-	void HandleKeyCollision(const EnterCollision &, Entity);
+	void HandleKeyCollision(const EnterCollision &);
 	void HandleDoorCollision(const EnterCollision &, Entity);
 	void HandleBulletCollision(const EnterCollision &, Entity);
 
 	void SphereEnterCollideResponse(const EnterCollision &e)
 	{
 		bool b = false;
-		if (e.registry.has<KeyComponent, PointLightComponent, TransformComponent>(e.a) ||
-			(b = e.registry.has<KeyComponent, PointLightComponent, TransformComponent>(e.b)))
+		if (e.info.registry.has<KeyComponent, PointLightComponent, TransformComponent>(e.a) ||
+			e.info.registry.has<KeyComponent, PointLightComponent, TransformComponent>(e.b))
 		{
-			HandleKeyCollision(e, b ? e.b : e.a);
+			HandleKeyCollision(e);
 		}
-		else if (e.registry.has<DoorComponent>(e.a) ||
-			(b = e.registry.has<DoorComponent>(e.b)))
+		else if (e.info.registry.has<DoorComponent>(e.a) ||
+			(b = e.info.registry.has<DoorComponent>(e.b)))
 		{
 			HandleDoorCollision(e, b ? e.b : e.a);
 		}
-		else if (e.registry.has<AIComponent>(e.a) ||
-			(b = e.registry.has<AIComponent>(e.b)))
+		else if (e.info.registry.has<AIComponent>(e.a) ||
+			(b = e.info.registry.has<AIComponent>(e.b)))
 		{
 			HandleBulletCollision(e, b ? e.b : e.a);
 		}
@@ -68,22 +68,12 @@ namespace game::events
 	RESPONSE(FireBulletResponse, FireBullet);
 
 	int keyCount = 0;
-	void HandleKeyCollision(const EnterCollision &e, Entity key)
+	void HandleKeyCollision(const EnterCollision &e)
 	{
-		auto &[k, pl, t] = e.registry.get<KeyComponent, PointLightComponent, TransformComponent>(key);
-
-		if (k.pickedUp)
-		{
-			return; // Already handled, ignore
-		}
-
-		// Register the key, move it to the door and remove the point light from it
-		k.pickedUp = true;
-		pl.on = false;
-		t.position = k.destination;
-
-		// Track win condition
+		//Return to the hub, incrementing keyCount
 		keyCount++;
+		e.info.scene.clear();
+		procgen::load_hub(e.info.scene, keyCount);
 	}
 
 	void HandleDoorCollision(const EnterCollision &e, Entity door)
@@ -98,8 +88,8 @@ namespace game::events
 
 	void HandleBulletCollision(const EnterCollision &e, Entity bullet) {
 
-		auto &t = e.registry.get<TransformComponent>(bullet);
-		auto &c = e.registry.get<ColourComponent>(bullet);
+		auto &t = e.info.registry.get<TransformComponent>(bullet);
+		auto &c = e.info.registry.get<ColourComponent>(bullet);
 
 		c.colour = {255,0,0};
 		

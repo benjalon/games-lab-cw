@@ -57,7 +57,7 @@ namespace game::systems
 			(input::is_held(input::KEY_D) - input::is_held(input::KEY_A));
 
 		if (input::is_released(input::MOUSE_BUTTON_1))
-			events::dispatcher.enqueue<events::FireBullet>(info.scene, bc.model_file, t.position,t.rotation);
+			events::dispatcher.enqueue<events::FireBullet>(info.scene, bc.model_file, t.position, t.rotation);
 
 
 		/* JUMPING SIMULATION IN ABSENCE OF COLLISIONS */
@@ -138,7 +138,7 @@ namespace game::systems
 				c1.colliding.insert(other);
 				c2.colliding.insert(entity);
 
-				events::dispatcher.enqueue<events::EnterCollision>(info.registry, entity, other);
+				events::dispatcher.enqueue<events::EnterCollision>(info, entity, other);
 			}
 
 			//Log leaving of collision
@@ -147,7 +147,7 @@ namespace game::systems
 				c1.colliding.erase(other);
 				c2.colliding.erase(entity);
 
-				events::dispatcher.enqueue<events::LeaveCollision>(info.registry, entity, other);
+				events::dispatcher.enqueue<events::LeaveCollision>(info, entity, other);
 			}
 		}
 	};
