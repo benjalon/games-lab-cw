@@ -37,6 +37,9 @@ namespace game
 	//Maximium render distance
 	constexpr double RENDER_DISTANCE = 250.0;
 
+	//Cull more distant point lights
+	constexpr bool CULL_POINT_LIGHTS = false;
+
 	//Application window title
 	const std::string WINDOW_TITLE = "Dungeon Crawler";
 

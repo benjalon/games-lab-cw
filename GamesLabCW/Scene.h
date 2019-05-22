@@ -21,6 +21,9 @@ namespace game
 		//Registry of entities
 		entt::registry<> registry_;
 
+		//Has this scene been drawn yet after the last clear?
+		bool drawn_yet = false;
+
 	public:
 		//Spatial partitioning grid of entities
 		SpatialGrid<Entity> spatial_grid;

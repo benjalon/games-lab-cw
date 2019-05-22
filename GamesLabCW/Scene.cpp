@@ -40,6 +40,39 @@ void game::Scene::draw()
 	size_t n_p = registry_.raw_view<PointLightComponent>().size();
 	PointLightComponent *p = registry_.raw_view<PointLightComponent>().raw();
 
+	//Filter point lights to nearby only
+	if (CULL_POINT_LIGHTS)
+	{
+		auto player = registry_.view<FirstPersonControllerComponent>();
+		if (drawn_yet && player.size() > 0)
+		{
+			auto t_player = registry_.get<TransformComponent>(*player.begin());
+
+			std::vector<PointLightComponent> nearby;
+			nearby.reserve(n_p);
+			for (int i = 0; i < n_p; i++)
+			{
+				Vector3 to_player = p[i].position - t_player.position;
+				double dist = std::sqrt(to_player.x * to_player.x +
+					to_player.y * to_player.y +
+					to_player.z * to_player.z
+				);
+
+				if (dist < RENDER_DISTANCE - 100.0)
+					nearby.emplace_back(p[i]);
+			}
+
+			//Update data, ensuring at least one point light is passed in
+			if (nearby.size() > 0)
+			{
+				n_p = nearby.size();
+				p = nearby.data();
+			}
+			else if (n_p > 0)
+				n_p = 1;
+		}
+	}
+
 	//Render all models in the scene for each camera
 	registry_.view<CameraComponent>().each([&](auto, auto &cam) {
 		registry_.view<ModelComponent, ColourComponent, TransformComponent>().each([&](auto, auto &m, auto &c, auto &t) {
@@ -55,6 +88,8 @@ void game::Scene::draw()
 			renderer::render_image(cam, i);
 		});
 	});
+
+	drawn_yet = true;
 }
 
 game::Entity game::Scene::instantiate(std::initializer_list<std::string> p)
@@ -75,5 +110,7 @@ void game::Scene::clear()
 {
 	registry_.reset();
 	spatial_grid.clear();
+	drawn_yet = false;
+
 	create(GameStateComponent());
 }
