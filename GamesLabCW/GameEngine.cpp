@@ -145,7 +145,7 @@ void game::GameEngine::run()
 	// Minotaur test model
 	ModelComponent m_minotaur; m_minotaur.model_file = "models/Minotaur/Minotaur@Jump.fbx";
 	ColourComponent c_minotaur; c_minotaur.colour = { 0, 0, 255 };
-	TransformComponent t_minotaur;// t_minotaur.scale = { 0.15, 0.15, 0.15 }; t_minotaur.position = { 0, 9, -15 }; t_minotaur.rotation = { 90, 180, 0 };//90, 180
+	TransformComponent t_minotaur; t_minotaur.scale = { 0.15, 0.15, 0.15 }; t_minotaur.position = { 0, 9, -15 }; t_minotaur.rotation = { 90, 180, 0 };//90, 180
 	scene_.instantiate("Model", m_minotaur, t_minotaur, c_minotaur);
 
 	//// Torches
