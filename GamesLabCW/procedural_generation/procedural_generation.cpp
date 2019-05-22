@@ -523,11 +523,11 @@ namespace game::procgen
 
 	void load_hub(Scene &scene, int keys_collected)
 	{
-		// Player/camera
+		//Player/camera
 		auto player = scene.instantiate("FirstPersonController", TransformComponent{ {0,6,5} , { 180,0,0 } });
 		auto camera = scene.instantiate("Camera", CameraComponent{ player });
 
-		// Room stuff
+		//Room stuff
 		ModelComponent m_water; m_water.model_file = "models/Water/water.obj"; m_water.vertex_shader = "shaders/Water.vert"; m_water.fragment_shader = "shaders/Water.frag";
 		scene.instantiate("Model", m_water);
 
@@ -535,47 +535,14 @@ namespace game::procgen
 		TransformComponent t_room; t_room.position.y = 10; t_room.scale = { 0.5, 0.5, 0.5 };
 		scene.instantiate("Model", m_room, t_room);
 
-		// Keys
-		ModelComponent m_key; m_key.model_file = "models/Key/Key_B_02.obj";
-
-		KeyComponent k_key1; k_key1.destination = { -40, 10, 10 };
-		TransformComponent t_key1; t_key1.scale = { 0.5, 0.5, 0.5 }; t_key1.position = { 0, 0.5, 15 }; t_key1.rotation = { 90, 180, 180 };
-		PointLightComponent pl_key1{ {1, 180 / 255.0, 120.0 / 255.0}, 0.5, t_key1.position };
-		scene.instantiate("Key", m_key, t_key1, k_key1, pl_key1);
-
-		KeyComponent k_key2; k_key2.destination = { -40, 15, 10 };
-		TransformComponent t_key2; t_key2.scale = { 0.5, 0.5, 0.5 }; t_key2.position = { 0, 0.5, -15 }; t_key2.rotation = { 90, 180, 180 };
-		PointLightComponent pl_key2{ {1, 180 / 255.0, 120.0 / 255.0}, 0.5, t_key2.position };
-		scene.instantiate("Key", m_key, t_key2, k_key2, pl_key2);
-
-		KeyComponent k_key3; k_key3.destination = { -40, 20, 10 };
-		TransformComponent t_key3; t_key3.scale = { 0.5, 0.5, 0.5 }; t_key3.position = { 10, 0.5, 15 }; t_key3.rotation = { 90, 180, 180 };
-		PointLightComponent pl_key3{ {1, 180 / 255.0, 120.0 / 255.0}, 0.5, t_key3.position };
-		scene.instantiate("Key", m_key, t_key3, k_key3, pl_key3);
-
-		KeyComponent k_key4; k_key4.destination = { -40, 10, -10 };
-		TransformComponent t_key4; t_key4.scale = { 0.5, 0.5, 0.5 }; t_key4.position = { -10, 0.5, 15 }; t_key4.rotation = { 90, 180, 180 };
-		PointLightComponent pl_key4{ {1, 180 / 255.0, 120.0 / 255.0}, 0.5, t_key4.position };
-		scene.instantiate("Key", m_key, t_key4, k_key4, pl_key4);
-
-		KeyComponent k_key5; k_key5.destination = { -40, 15, -10 };
-		TransformComponent t_key5; t_key5.scale = { 0.5, 0.5, 0.5 }; t_key5.position = { 30, 0.5, 10 }; t_key5.rotation = { 90, 180, 180 };
-		PointLightComponent pl_key5{ {1, 180 / 255.0, 120.0 / 255.0}, 0.5, t_key5.position };
-		scene.instantiate("Key", m_key, t_key5, k_key5, pl_key5);
-
-		KeyComponent k_key6; k_key6.destination = { -40, 20, -10 };
-		TransformComponent t_key6; t_key6.scale = { 0.5, 0.5, 0.5 }; t_key6.position = { -30, 0.5, 10 }; t_key6.rotation = { 90, 180, 180 };
-		PointLightComponent pl_key6{ {1, 180 / 255.0, 120.0 / 255.0}, 0.5, t_key6.position };
-		scene.instantiate("Key", m_key, t_key6, k_key6, pl_key6);
-
-		// Minotaur test model
+		//Minotaur test model
 		ModelComponent m_minotaur; m_minotaur.model_file = "models/Minotaur/Minotaur@Jump.fbx";
 		ColourComponent c_minotaur; c_minotaur.colour = { 0, 0, 255 };
 		TransformComponent t_minotaur; t_minotaur.scale = { 0.15, 0.15, 0.15 }; t_minotaur.position = { 0, 9, -15 }; t_minotaur.rotation = { 90, 180, 0 };//90, 180
 		DetectionComponent d_minotaur; d_minotaur.c.radius = 10; d_minotaur.camera = camera;
 		scene.instantiate("AIModel", m_minotaur, t_minotaur, d_minotaur, c_minotaur);
 
-		// Torches
+		//Torches
 		ModelComponent m_torch; m_torch.model_file = "models/Torch/torch.obj";
 
 		ParticleComponent p_torch; p_torch.texture_file = "models/fire.png"; p_torch.respawn_count = 1;
@@ -604,7 +571,7 @@ namespace game::procgen
 		scene.instantiate("PointLight", PointLightComponent{ {1, 147.0 / 255.0, 41.0 / 255.0}, 40, { -26, 13, 10 } });
 		scene.instantiate("ParticleEffect", p_torch, TransformComponent{ { -26, 14, 10 } });
 
-		// Portal
+		//Portal
 		ParticleComponent p_portal; p_portal.texture_file = "models/star.png"; p_portal.respawn_count = 1;
 		p_portal.position_variation = Vector3(100, 50, 10);
 		p_portal.velocity_variation = Vector3(100, 50, 40);
@@ -613,17 +580,32 @@ namespace game::procgen
 		scene.instantiate("ParticleEffect", p_portal, TransformComponent{ Vector3(3, 5, 22) });
 		scene.instantiate("PointLight", PointLightComponent{ {1, 105.0 / 255.0, 180.0 / 255.0}, 40, { 3, 3, 22} });
 
-		// UI
+		//UI
 		ImageComponent i_ui; i_ui.texture_file = "models/hud.png";
 		scene.instantiate("Image", i_ui);
 
-		// Skybox
+		//Skybox
 		TransformComponent t_skybox; t_skybox.scale = { 20, 20, 20 };
 		ModelComponent m_skybox; m_skybox.model_file = "models/Skybox/skybox.obj"; m_skybox.vertex_shader = "shaders/Skybox.vert"; m_skybox.fragment_shader = "shaders/Skybox.frag";
 		scene.instantiate("Model", m_skybox, t_skybox);
 
-		// Generic scene lighting
+		//Generic scene lighting
 		scene.instantiate("AmbientLight", AmbientLightComponent{ {1, 147.0 / 255.0, 41.0 / 255.0}, 0.01 });
 		scene.instantiate("DirectionalLight", DirectionalLightComponent{ {0, 0, 0}, 0, {0,0,0} });
+
+		//Add keys to door, depending on number of keys collected
+		ModelComponent m_key; m_key.model_file = "models/Key/Key_B_02.obj";
+
+		for (int i = 0; i < keys_collected; i++)
+		{
+			TransformComponent t; t.scale = { 0.5, 0.5, 0.5 }; t.rotation = { 90, 180, 180 };
+
+			if (i < 3)
+				t.position = { -40, 10 + i * 5.0, 10 };
+			else
+				t.position = { -40, 10 + (i - 3) * 5.0, -10 };
+
+			scene.instantiate("Model", t, ModelComponent{ "models/Key/Key_B_02.obj" });
+		}
 	}
 }
