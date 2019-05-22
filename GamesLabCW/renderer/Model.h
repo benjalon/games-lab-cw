@@ -81,6 +81,7 @@ namespace game
 
 		// Buffer data: all of the vertices (including positions, uv, normal data etc.) and indices in the model
 		std::vector<VertexData> vertices;
+		std::vector<VertexData> vertices_backup;
 		std::vector<unsigned int> indices;
 
 		// Drawing related stuff: since one model can have multiple meshes, we need to track where to start drawing from and for how long

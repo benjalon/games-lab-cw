@@ -117,6 +117,7 @@ namespace game
 			}
 			currentIndices += mesh->mNumFaces * 3;
 		}
+		vertices_backup = vertices;
 	}
 
 	void Model::loadMaterials(const aiScene *scene, std::string modelPath)
@@ -252,6 +253,8 @@ namespace game
 
 	void Model::Animate(double time)
 	{
+		vertices = vertices_backup;
+
 		Matrix4f identity;
 		identity.InitIdentity();
 
@@ -277,6 +280,12 @@ namespace game
 			boneTransform += Matrix4fToGLM(transforms[currentBone.ids[2]]) * currentBone.weights[2];
 			boneTransform += Matrix4fToGLM(transforms[currentBone.ids[3]]) * currentBone.weights[3];
 			boneTransform = glm::transpose(boneTransform);
+
+			if (boneTransform[0][0] != 0 && boneTransform[0][1] != 0 && boneTransform[0][2] != 0)
+			{
+				int ff = 0;
+			}
+
 			vertices[i].pos = glm::vec3(boneTransform * glm::vec4(vertices[i].pos, 1));
 		}
 
@@ -458,6 +467,11 @@ namespace game
 */
 	void Model::updateVertices()
 	{
+		for (int i = 0; i < vertices.size(); i++)
+		{
+			std::cout << i << ": " << vertices[i].pos.x << ", " << vertices[i].pos.y << ", " << vertices[i].pos.z << "\n";
+		}
+
 		vbo.bind();
 		vbo.add_data(&vertices[0], sizeof(VertexData) * vertices.size());
 		vbo.upload(GL_STATIC_DRAW);
