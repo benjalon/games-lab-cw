@@ -89,12 +89,12 @@ namespace game::systems
 
 
 	//Updates the spatial partitioning grid
-	auto SpatialGridSystem = [](SceneInfo info, auto entity, TransformComponent &t)
+	auto SpatialGridSystem = [](SceneInfo info, auto entity, TransformComponent &t, CollisionComponent &)
 	{
 		auto i = info.scene.spatial_grid.update(t.position, entity, t.last_index);
 		t.last_index = i;
 	};
-	SYSTEM(SpatialGridSystem, TransformComponent);
+	SYSTEM(SpatialGridSystem, TransformComponent, CollisionComponent);
 
 
 	//Detects collisions, updating pools and logging events
@@ -180,8 +180,11 @@ namespace game::systems
 	};
 	SYSTEM(AnimationSystem, ModelComponent);
 
-	auto AISystem = [](SceneInfo info, Entity entity, ModelComponent &m, ColourComponent &colour, TransformComponent &t, KinematicComponent &k, AIComponent &a, CameraComponent &c, CollisionComponent &col, DetectionComponent &d, BulletComponent &bc)
+	auto AISystem = [](SceneInfo info, Entity entity, ModelComponent &m, ColourComponent &colour, TransformComponent &t, KinematicComponent &k, AIComponent &a, CollisionComponent &col, DetectionComponent &d, BulletComponent &bc)
 	{
+		//Get reference to camera
+		CameraComponent &c = info.scene.get<CameraComponent>(d.camera);
+
 		//goal: rotate t on the z axis.
 		
 		if (a.looking)
@@ -273,7 +276,7 @@ namespace game::systems
 
 		
 	};
-	SYSTEM(AISystem, ModelComponent, ColourComponent, TransformComponent, KinematicComponent, AIComponent, CameraComponent,CollisionComponent,DetectionComponent,BulletComponent);
+	SYSTEM(AISystem, ModelComponent, ColourComponent, TransformComponent, KinematicComponent, AIComponent, CollisionComponent,DetectionComponent,BulletComponent);
 	
 	auto ParticleSystem = [](auto info, auto entity, ParticleComponent &p, ColourComponent &c, TransformComponent &t, KinematicComponent &k)
 	{

@@ -70,3 +70,8 @@ void game::Scene::destroy(Entity e)
 {
 	registry_.destroy(e);
 }
+
+void game::Scene::clear()
+{
+	registry_.reset();
+}
