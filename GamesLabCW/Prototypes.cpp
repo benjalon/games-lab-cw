@@ -12,13 +12,12 @@ std::unordered_map<std::string, entt::prototype<game::Entity>> game::prototypes:
 void game::prototypes::register_prototypes()
 {
 	PROTOTYPE(Camera, CameraComponent);
-	PROTOTYPE(FirstPersonController, FirstPersonControllerComponent, CollisionComponent, TransformComponent, KinematicComponent, BulletComponent);
+	PROTOTYPE(FirstPersonController, FirstPersonControllerComponent, CollisionComponent, TransformComponent, KinematicComponent, ProjectileComponent, StatsComponent);
 
 	PROTOTYPE(Model, ModelComponent, ColourComponent, TransformComponent);
 	
 	PROTOTYPE(Bullet, ModelComponent, ColourComponent, TransformComponent, CollisionComponent, KinematicComponent);
-	PROTOTYPE(AIModel, ModelComponent, ColourComponent, TransformComponent, CollisionComponent, KinematicComponent, AIComponent, CameraComponent, BulletComponent, DetectionComponent);
-	PROTOTYPE(DetectionRadius, DetectionComponent, TransformComponent, CollisionComponent);
+	PROTOTYPE(AIModel, ModelComponent, ColourComponent, TransformComponent, CollisionComponent, KinematicComponent, AIComponent, CameraComponent, ProjectileComponent, DetectionComponent, StatsComponent);
 
 	PROTOTYPE(ParticleEffect, ParticleComponent, ColourComponent, TransformComponent, KinematicComponent);
 

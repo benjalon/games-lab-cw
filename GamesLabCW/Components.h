@@ -120,14 +120,25 @@ namespace game
 
 	struct AIComponent {
 		bool looking = true;
+		bool dead = false;
 		//CollisionComponent c;
 	};
 
-	struct BulletComponent{
+	struct ProjectileComponent{
 		std::string model_file = "models/Fireball/fireball.obj";
 	};
 
 	struct DetectionComponent {
 		CollisionComponent c;
+	};
+
+	struct StatsComponent {
+		int health;
+		int mana;
+		int keyCount = 0;
+	};
+
+	struct BulletComponent {
+		bool draw = true;
 	};
 }

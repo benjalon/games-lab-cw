@@ -30,10 +30,13 @@ namespace game::systems
 	};
 	SYSTEM(GameStateSystem, GameStateComponent);
 
-
 	//First-person control by the player
-	auto FirstPersonControllerSystem = [](SceneInfo info, auto entity, FirstPersonControllerComponent &f, CollisionComponent &c, TransformComponent &t, KinematicComponent &k, BulletComponent &bc)
+	auto FirstPersonControllerSystem = [](SceneInfo info, auto entity, FirstPersonControllerComponent &f, TransformComponent &t, KinematicComponent &k, ProjectileComponent &bc, StatsComponent &s)
 	{
+		if (s.health < 1)
+		{
+			info.scene.destroy(entity);
+		}
 		double mouse_sensitivity = 5.0;
 		double move_speed = 11.0;
 
@@ -51,10 +54,11 @@ namespace game::systems
 		//Strafe
 		k.velocity += Vector2(t.rotation.x, t.rotation.y).direction_hv_right() * move_speed *
 			(input::is_held(input::KEY_D) - input::is_held(input::KEY_A));
-
-		if (input::is_released(input::MOUSE_BUTTON_1))
-			events::dispatcher.enqueue<events::FireBullet>(info.scene, bc.model_file, t.position,t.rotation);
-
+		s.mana += info.dt;
+		if (input::is_released(input::MOUSE_BUTTON_1) && s.mana > 3) {
+			s.mana = 0;
+			events::dispatcher.enqueue<events::FireBullet>(info.scene, bc.model_file, t.position, t.rotation);
+		}
 
 		/* JUMPING SIMULATION IN ABSENCE OF COLLISIONS */
 		////Acceleration due to gravity
@@ -68,8 +72,7 @@ namespace game::systems
 		//if (input::is_pressed(input::KEY_SPACE))
 		//	k.velocity.y += 4.0;
 	};
-	SYSTEM(FirstPersonControllerSystem, FirstPersonControllerComponent, CollisionComponent, TransformComponent, KinematicComponent, BulletComponent);
-
+	SYSTEM(FirstPersonControllerSystem, FirstPersonControllerComponent, TransformComponent, KinematicComponent, ProjectileComponent, StatsComponent);
 
 	//EXAMPLE Moveable sphere to demo collisions
 	auto MoveSphereSystem = [](auto info, auto entity, auto &, TransformComponent &t)
@@ -77,7 +80,6 @@ namespace game::systems
 		t.position.z += 2.0 * info.dt * (input::is_held(input::KEY_X) - input::is_held(input::KEY_Z));
 	};
 	SYSTEM(MoveSphereSystem, MoveSphere, TransformComponent);
-
 
 	//Basic kinematic system of calculus of motion
 	auto KinematicSystem = [](auto info, auto entity, auto &t, auto &k)
@@ -87,7 +89,6 @@ namespace game::systems
 	};
 	SYSTEM(KinematicSystem, TransformComponent, KinematicComponent);
 
-
 	//Updates the spatial partitioning grid
 	auto SpatialGridSystem = [](SceneInfo info, auto entity, TransformComponent &t)
 	{
@@ -95,7 +96,6 @@ namespace game::systems
 		t.last_index = i;
 	};
 	SYSTEM(SpatialGridSystem, TransformComponent);
-
 
 	//Detects collisions, updating pools and logging events
 	auto CollisionSystem = [](SceneInfo info, auto entity, CollisionComponent &c1, TransformComponent &t1)
@@ -194,18 +194,23 @@ namespace game::systems
 	};
 	SYSTEM(AnimationSystem, ModelComponent);
 
-	auto AISystem = [](SceneInfo info, Entity entity, ModelComponent &m, ColourComponent &colour, TransformComponent &t, KinematicComponent &k, AIComponent &a, CameraComponent &c, CollisionComponent &col, BulletComponent &bc, DetectionComponent &d)
+	auto AISystem = [](SceneInfo info, Entity entity, TransformComponent &t, AIComponent &a, CameraComponent &c, ProjectileComponent &bc, StatsComponent &s)
 	{
 		//goal: rotate t on the z axis.
-		
-		if (a.looking)
+		if (s.health < 1)
 		{
-			
-			//move side to side. 
+			info.scene.destroy(entity);
 		}
-		else if (!a.looking)
+		else
 		{
-			
+			s.mana += info.dt;
+			if (a.looking)
+			{
+
+				//move side to side. 
+			}
+			else if (!a.looking)
+			{
 				// Get the positions of both Entities
 				Vector2 cameraPos = Vector2(c.position.x, c.position.z);
 				Vector2 enemyPos = Vector2(t.position.x, t.position.z);
@@ -224,28 +229,25 @@ namespace game::systems
 
 
 				// Apply acos to that value and set z-axis 360 rule. Then rotation to the AIModel
-				if(fromPlayerToEnemy.x < 0)
+				if (fromPlayerToEnemy.x < 0)
 					t.rotation.z = -(360 - glm::degrees(acos(cosinedegreesToRotate))) + 180;
 				else
 					t.rotation.z = -(glm::degrees(acos(cosinedegreesToRotate))) + 180;
 
-			
-			//if (input::is_pressed(input::KEY_LEFT_CONTROL))
-			if(false)
-			{
-				//Vector3 tmp = { matModel[2][0],matModel[2][1],matModel[2][2] };
-				Vector3 tmp = { -fmod(t.rotation.z,360), 0, 0 };
-				events::dispatcher.enqueue<events::FireBullet>(info.scene, bc.model_file, t.position, tmp);
+
+				//if (input::is_pressed(input::KEY_LEFT_CONTROL))
+				if (s.mana > 3)
+				{
+					s.mana = 0;
+					Vector3 tmp = { -fmod(t.rotation.z,360), 0, 0 };
+					events::dispatcher.enqueue<events::FireBullet>(info.scene, bc.model_file, t.position, tmp);
+				}
 			}
-			
 		}
-
 		
-
-
 		
 	};
-	SYSTEM(AISystem, ModelComponent, ColourComponent, TransformComponent, KinematicComponent, AIComponent, CameraComponent,CollisionComponent,BulletComponent, DetectionComponent);
+	SYSTEM(AISystem, TransformComponent, AIComponent, CameraComponent,ProjectileComponent, StatsComponent);
 	
 	auto ParticleSystem = [](auto info, auto entity, ParticleComponent &p, ColourComponent &c, TransformComponent &t, KinematicComponent &k)
 	{
@@ -267,5 +269,14 @@ namespace game::systems
 		renderer::update_particle(info.dt, p.texture_file, p.respawn_count, randomPosition, randomVelocity, randomColor);// , t.position);
 	};
 	SYSTEM(ParticleSystem, ParticleComponent, ColourComponent, TransformComponent, KinematicComponent);
+
+	auto BulletSystem = [](auto info, auto entity, BulletComponent &b) {
+		if (!b.draw)
+		{
+			info.scene.destroy(entity);
+		}
+
+	};
+	SYSTEM(BulletSystem, BulletComponent);
 }
 

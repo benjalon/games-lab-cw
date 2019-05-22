@@ -26,11 +26,10 @@ namespace game::events
 		{
 			HandleDetectionCollision(e);
 		}
-		else if (e.registry.has<AIComponent>(e.b) && e.registry.has<BulletComponent>(e.a)) 
+		else if (e.registry.has<AIComponent>(e.b) && e.registry.has<ProjectileComponent>(e.a)) 
 		{
 			HandleBulletCollision(e);
 		}
-
 
 		std::cout << "Enter: " << e.a << " " << e.b << std::endl;
 	}
@@ -86,32 +85,38 @@ namespace game::events
 		t.position = k.destination;
 
 		// Track win condition
-		keyCount++;
+		auto &s = e.registry.get<StatsComponent>(e.b);
+		s.keyCount++;
 	}
 
 	void HandleDoorCollision(const EnterCollision &e)
 	{
-		if (keyCount < 6) 
+		auto &s = e.registry.get<StatsComponent>(e.b);
+
+		if (s.keyCount < 6) 
 		{
 			return; // Not enough keys so you can't leave
 		}
-
-		// Game over happy days
+		else
+		{
+			//open door/end game here
+			
+		}
 	}
 
 	void HandleBulletCollision(const EnterCollision &e) {
 
-		auto &t = e.registry.get<TransformComponent>(e.b);
-		auto &c = e.registry.get<ColourComponent>(e.b);
+		auto &s = e.registry.get<StatsComponent>(e.b);
+		auto &bs = e.registry.get<BulletComponent>(e.a);
 
-		c.colour = {255,0,0};
+		bs.draw = false;
+		s.health -= 1;
 	}
 
 	void HandleDetectionCollision(const EnterCollision &e)
 	{
 		auto &ai = e.registry.get<AIComponent>(e.a);
 		ai.looking = false;
-		auto d = 1;
 
 	}
 

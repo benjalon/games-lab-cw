@@ -94,6 +94,7 @@ void game::GameEngine::run()
 {
 	// Player/camera
 	CollisionComponent c_player; c_player.radius = 3;
+	StatsComponent s_player; s_player.health = 4; s_player.mana = 1;
 	auto player = scene_.instantiate("FirstPersonController", TransformComponent{ {0,55,5} , { 180,0,0 } }, c_player);
 	auto camera = CameraComponent{ player };
 
