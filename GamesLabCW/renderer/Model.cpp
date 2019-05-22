@@ -262,7 +262,7 @@ namespace game
 		float tickTime = time * ticksPerSecond;
 		float animationTime = fmod(tickTime, scene->mAnimations[0]->mDuration);
 
-		readNodeHierarchy(21, scene->mRootNode, identity);
+		readNodeHierarchy(animationTime, scene->mRootNode, identity);
 
 		std::vector<Matrix4f> transforms(boneCount);
 
@@ -467,10 +467,10 @@ namespace game
 */
 	void Model::updateVertices()
 	{
-		for (int i = 0; i < vertices.size(); i++)
+		/*for (int i = 0; i < vertices.size(); i++)
 		{
 			std::cout << i << ": " << vertices[i].pos.x << ", " << vertices[i].pos.y << ", " << vertices[i].pos.z << "\n";
-		}
+		}*/
 
 		vbo.bind();
 		vbo.add_data(&vertices[0], sizeof(VertexData) * vertices.size());
