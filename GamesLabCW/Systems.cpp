@@ -225,9 +225,9 @@ namespace game::systems
 
 				// Apply acos to that value and set z-axis 360 rule. Then rotation to the AIModel
 				if(fromPlayerToEnemy.x < 0)
-					t.rotation.z = -(360 - glm::degrees(acos(cosinedegreesToRotate)));
+					t.rotation.z = -(360 - glm::degrees(acos(cosinedegreesToRotate))) + 180;
 				else
-					t.rotation.z = -(glm::degrees(acos(cosinedegreesToRotate)));
+					t.rotation.z = -(glm::degrees(acos(cosinedegreesToRotate))) + 180;
 
 			
 			//if (input::is_pressed(input::KEY_LEFT_CONTROL))
