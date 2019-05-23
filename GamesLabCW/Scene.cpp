@@ -41,14 +41,13 @@ void game::Scene::draw()
 	PointLightComponent *p = registry_.raw_view<PointLightComponent>().raw();
 
 	//Filter point lights to nearby only
+	std::vector<PointLightComponent> nearby;
 	if (CULL_POINT_LIGHTS)
 	{
 		auto player = registry_.view<FirstPersonControllerComponent>();
 		if (drawn_yet && player.size() > 0)
 		{
 			auto t_player = registry_.get<TransformComponent>(*player.begin());
-
-			std::vector<PointLightComponent> nearby;
 			nearby.reserve(n_p);
 			for (int i = 0; i < n_p; i++)
 			{
@@ -58,7 +57,7 @@ void game::Scene::draw()
 					to_player.z * to_player.z
 				);
 
-				if (dist < RENDER_DISTANCE - 100.0)
+				if (dist < RENDER_DISTANCE - 50.0)
 					nearby.emplace_back(p[i]);
 			}
 

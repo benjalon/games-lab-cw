@@ -38,7 +38,7 @@ namespace game
 	constexpr double RENDER_DISTANCE = 250.0;
 
 	//Cull more distant point lights
-	constexpr bool CULL_POINT_LIGHTS = false;
+	constexpr bool CULL_POINT_LIGHTS = true;
 
 	//Application window title
 	const std::string WINDOW_TITLE = "Dungeon Crawler";

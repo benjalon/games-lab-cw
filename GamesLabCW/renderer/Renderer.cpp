@@ -39,9 +39,8 @@ namespace game::renderer
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glEnable(GL_DEPTH_TEST);
-		//TODO Enable back face culling once maze models are fixed
-		//glCullFace(GL_BACK);
-		//glEnable(GL_CULL_FACE);
+		glCullFace(GL_BACK);
+		glEnable(GL_CULL_FACE);
 	}
 
 	//Returns the (potentially cached) shader using the given paramaters
@@ -345,6 +344,8 @@ namespace game::renderer
 		);
 
 		particle.Render(shader);
+
+		glEnable(GL_CULL_FACE);
 	}
 
 	void render_image(CameraComponent camera, ImageComponent &i)
