@@ -378,7 +378,7 @@ namespace game::procgen
 				KeyComponent k_key; k_key.destination = { -40, 10, 10 };
 				TransformComponent t_key; t_key.scale = { 0.5, 0.5, 0.5 }; t_key.rotation = { 0, 180, 180 };
 				t_key.position = position;
-				PointLightComponent pl_key{ {1, 180 / 255.0, 120.0 / 255.0}, 50, t_key.position };
+				PointLightComponent pl_key{ {1, 180 / 255.0, 120.0 / 255.0}, 60, t_key.position };
 				KinematicComponent kn_key; kn_key.angular_velocity = { 0, 90, 0 };
 				scene.instantiate("Key", m_key, t_key, k_key, pl_key, kn_key);
 			};
@@ -533,7 +533,7 @@ namespace game::procgen
 						player_pos = { x, y };
 				}
 
-			return { player_pos.first * cell_size, 0, player_pos.second * cell_size };
+			return { player_pos.first * cell_size, 6, player_pos.second * cell_size };
 		}
 	};
 

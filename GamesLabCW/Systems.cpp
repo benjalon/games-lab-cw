@@ -49,28 +49,31 @@ namespace game::systems
 		t.rotation.y = std::clamp(t.rotation.y, -85.0, 85.0);
 
 		//Move forward/backward
-		k.velocity = Vector2(t.rotation.x, t.rotation.y).direction_hv() * move_speed *
-			(input::is_held(input::KEY_W) - input::is_held(input::KEY_S));
+		Vector3 move_dir = Vector2(t.rotation.x, t.rotation.y).direction_hv() *	(input::is_held(input::KEY_W) - input::is_held(input::KEY_S));
 
 		//Strafe
-		k.velocity += Vector2(t.rotation.x, t.rotation.y).direction_hv_right() * move_speed *
-			(input::is_held(input::KEY_D) - input::is_held(input::KEY_A));
+		move_dir += Vector2(t.rotation.x, t.rotation.y).direction_hv_right() * (input::is_held(input::KEY_D) - input::is_held(input::KEY_A));
 
+		if (!NOCLIP)
+		{
+			//Constrain movement instruction to horizontal plane
+			move_dir.y = 0;
+
+			//Jump, if grounded
+			//if (t.position.y <= 6.001 && input::is_pressed(input::KEY_SPACE))
+			if (input::is_pressed(input::KEY_SPACE))
+				k.acceleration.y += 1500;
+
+			//Acceleration due to gravity
+			k.acceleration.y -= 50;
+		}
+
+		//Apply movement instruction
+		f.move_velocity = move_dir * move_speed;
+
+		//Fire bullet
 		if (input::is_released(input::MOUSE_BUTTON_1))
 			events::dispatcher.enqueue<events::FireBullet>(info.scene, bc.model_file, t.position, t.rotation);
-
-
-		/* JUMPING SIMULATION IN ABSENCE OF COLLISIONS */
-		////Acceleration due to gravity
-		//k.acceleration.y = -9.8;
-		////Clamp to non-neg y pos
-		//t.position.y = std::max(t.position.y, 0.0);
-		////Simulate solidness
-		//if (t.position.y == 0.0)
-		//	k.velocity.y = std::max(k.velocity.y, 0.0);
-		////Jump!
-		//if (input::is_pressed(input::KEY_SPACE))
-		//	k.velocity.y += 4.0;
 	};
 	SYSTEM(FirstPersonControllerSystem, FirstPersonControllerComponent, CollisionComponent, TransformComponent, KinematicComponent, BulletComponent);
 
@@ -84,13 +87,21 @@ namespace game::systems
 
 
 	//Basic kinematic system of calculus of motion
-	auto KinematicSystem = [](auto info, auto entity, auto &t, auto &k)
+	auto KinematicSystem = [](auto info, auto entity, TransformComponent &t, KinematicComponent &k)
 	{
-		Vector3 old_v = k.velocity;
+		//Log current as old values
+		t.position_old = t.position;
+		k.velocity_old = k.velocity;
+		k.acceleration_old = k.acceleration;
 
+		//Integrate acceleration and velocity (improved Euler)
 		k.velocity += k.acceleration * info.dt;
-		t.position += (k.velocity + old_v) / 2.0 * info.dt;
+		t.position += (k.velocity + k.velocity_old) / 2.0 * info.dt;
 
+		//Simulate momentary nature of force by resetting acceleration
+		k.acceleration = { 0, 0, 0 };
+
+		//Integrate angular velocity
 		t.rotation += k.angular_velocity * info.dt;
 	};
 	SYSTEM(KinematicSystem, TransformComponent, KinematicComponent);
@@ -306,4 +317,37 @@ namespace game::systems
 		renderer::update_particle(info.dt, p.texture_file, p.respawn_count, randomPosition, randomVelocity, randomColor);// , t.position);
 	};
 	SYSTEM(ParticleSystem, ParticleComponent, ColourComponent, TransformComponent, KinematicComponent);
+
+	auto PlayerMovementSystem = [](auto info, auto entity, FirstPersonControllerComponent &f, TransformComponent &t, KinematicComponent &k)
+	{
+		//Undo resetting of acceleration, for now
+		k.acceleration = k.acceleration_old;
+
+		//Add movement speed
+		t.position += f.move_velocity * info.dt;
+
+		//SIMULATE FLOOR COLLISION
+		double floor = 6;
+		if (!NOCLIP && t.position.y <= floor)
+		{
+			//Integrate as normal up to collision
+			double fraction = (t.position_old.y - floor) / (t.position_old.y - t.position.y);
+			double dt1 = fraction * info.dt;
+			k.velocity = k.velocity_old + k.acceleration * dt1;
+			Vector3 total_velocity = (k.velocity + k.velocity_old) / 2.0 + f.move_velocity;
+			t.position = t.position_old + total_velocity * dt1;
+
+			//Integrate without negative y component after collision
+			double dt2 = info.dt - dt1;
+			k.acceleration.y = std::max(k.acceleration.y, 0.0);
+			k.velocity.y = std::max(k.velocity.y, 0.0);
+			total_velocity.y = std::max(total_velocity.y, 0.0);
+			k.velocity += k.acceleration * dt2;
+			t.position += total_velocity * dt2;
+		}
+
+		//Reset acceleration again
+		k.acceleration = { 0, 0, 0 };
+	};
+	SYSTEM(PlayerMovementSystem, FirstPersonControllerComponent, TransformComponent, KinematicComponent);
 }

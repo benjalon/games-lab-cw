@@ -18,7 +18,10 @@ namespace game
 	/* GAME AND ENGINE */
 
 	struct GameStateComponent {};
-	struct FirstPersonControllerComponent {};
+	struct FirstPersonControllerComponent
+	{
+		Vector3 move_velocity;
+	};
 	struct PortalComponent {};
 
 	// Tracks how many keys are picked up, and where in the game they should be rendered
@@ -38,6 +41,7 @@ namespace game
 		Vector3 rotation;
 		Vector3 scale{ 1.0, 1.0, 1.0 };
 
+		Vector3 position_old;
 		SpatialGrid<Entity>::index_type last_index;
 	};
 
@@ -116,12 +120,16 @@ namespace game
 		Vector3 acceleration;
 
 		Vector3 angular_velocity;
+
+		Vector3 velocity_old;
+		Vector3 acceleration_old;
 	};
 
 	struct CollisionComponent
 	{
 		double radius = 3;
 		std::unordered_set<Entity> colliding;
+		bool solid = false;
 	};
 
 	struct MoveSphere {};

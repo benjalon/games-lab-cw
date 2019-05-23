@@ -35,10 +35,13 @@ namespace game
 	constexpr int GAME_RATE_MIN = 10;
 
 	//Maximium render distance
-	constexpr double RENDER_DISTANCE = 250.0;
+	constexpr double RENDER_DISTANCE = 300.0;
 
 	//Cull more distant point lights
 	constexpr bool CULL_POINT_LIGHTS = true;
+
+	//Allow free-flying movement through solids
+	constexpr bool NOCLIP = false;
 
 	//Application window title
 	const std::string WINDOW_TITLE = "Dungeon Crawler";
