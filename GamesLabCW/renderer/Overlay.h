@@ -5,10 +5,10 @@
 
 namespace game
 {
-	class Image
+	class Overlay
 	{
 	public:
-		Image(Texture texture, Vector2 position);
+		Overlay(Texture texture, Vector2 position);
 		void Render(GLuint shaderProgram);
 	private:
 		GLuint vao;

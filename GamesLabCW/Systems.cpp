@@ -53,7 +53,7 @@ namespace game::systems
 			(input::is_held(input::KEY_D) - input::is_held(input::KEY_A));
 
 		if (input::is_released(input::MOUSE_BUTTON_1))
-			events::dispatcher.enqueue<events::FireBullet>(info.scene, bc.model_file, t.position, t.rotation, bc.vs, bc.fs);
+			events::dispatcher.enqueue<events::FireBullet>(info.scene, bc.model_file, t.position, t.rotation, bc.vs, bc.fs, bc.particle_file);
 
 
 		/* JUMPING SIMULATION IN ABSENCE OF COLLISIONS */

@@ -51,8 +51,8 @@ void game::Scene::draw()
 			renderer::render_particle(cam, p, c, t);
 		});
 
-		registry_.view<ImageComponent>().each([&](auto, auto &i) {
-			renderer::render_image(cam, i);
+		registry_.view<OverlayComponent>().each([&](auto, auto &i) {
+			renderer::render_overlay(cam, i);
 		});
 	});
 }

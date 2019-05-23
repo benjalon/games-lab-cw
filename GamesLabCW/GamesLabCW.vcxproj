@@ -26,7 +26,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Math3D.cpp" />
     <ClCompile Include="procedural_generation\procedural_generation.cpp" />
-    <ClCompile Include="renderer\Image.cpp" />
+    <ClCompile Include="renderer\Overlay.cpp" />
     <ClCompile Include="renderer\Model.cpp" />
     <ClCompile Include="Prototypes.cpp" />
     <ClCompile Include="renderer\ParticleEffect.cpp" />
@@ -52,7 +52,7 @@
     <ClInclude Include="Input.h" />
     <ClInclude Include="Math3D.h" />
     <ClInclude Include="procedural_generation\procedural_generation.h" />
-    <ClInclude Include="renderer\Image.h" />
+    <ClInclude Include="renderer\Overlay.h" />
     <ClInclude Include="renderer\Model.h" />
     <ClInclude Include="Prototypes.h" />
     <ClInclude Include="renderer\ParticleEffect.h" />

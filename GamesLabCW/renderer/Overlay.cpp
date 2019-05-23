@@ -1,8 +1,8 @@
-#include "Image.h"
+#include "Overlay.h"
 
 namespace game
 {
-	Image::Image(Texture texture, Vector2 position) : texture(texture), position(position)
+	Overlay::Overlay(Texture texture, Vector2 position) : texture(texture), position(position)
 	{
 		// Set up mesh and attribute properties
 		GLuint vbo;
@@ -29,12 +29,10 @@ namespace game
 		glBindVertexArray(0);
 	}
 
-	void Image::Render(GLuint shaderProgram)
+	void Overlay::Render(GLuint shaderProgram)
 	{
-		// Bind array object and blend
 		glBindVertexArray(vao);
 
-		// Set uniforms for shader.0f)
 		glUniform2f(
 			glGetUniformLocation(shaderProgram, "position"),
 			(GLfloat)position.x, (GLfloat)position.y

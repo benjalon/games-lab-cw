@@ -73,7 +73,7 @@ namespace game
 		Vector3 color_modifier;
 	};
 
-	struct ImageComponent
+	struct OverlayComponent
 	{
 		std::string texture_file;
 	};
@@ -129,6 +129,7 @@ namespace game
 
 	struct BulletComponent{
 		std::string model_file = "models/Fireball/fireball.obj";
+		std::string particle_file = "models/Particles/fire2.png";
 		std::string vs = "shaders/FlatColor.vert";
 		std::string fs = "shaders/FlatColor.frag";
 	};

@@ -46,7 +46,7 @@ namespace game::events
 
 		e.scene.instantiate("Bullet", m, t, k);
 
-		ParticleComponent p_fireball; p_fireball.texture_file = "models/fire2.png"; p_fireball.respawn_count = 1;
+		ParticleComponent p_fireball; p_fireball.texture_file = e.bullet_particles; p_fireball.respawn_count = 1;
 		p_fireball.position_variation = Vector3(100, 50, 100);
 		p_fireball.velocity_variation = Vector3(100, 50, 10);
 		p_fireball.color_variation = Vector3(100, -0.5, 100);
