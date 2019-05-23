@@ -7,13 +7,11 @@ namespace game
 		// Set up mesh and attribute properties
 		GLuint vbo;
 
+		// xys used for positions, zws used for texcoords
 		GLfloat particleCoords[] = {
-			// Verts
 			0.0f, 1.0f, 0.0f, 1.0f,
 			1.0f, 0.0f, 1.0f, 0.0f,
 			0.0f, 0.0f, 0.0f, 0.0f,
-
-			// UVs
 			0.0f, 1.0f, 0.0f, 1.0f,
 			1.0f, 1.0f, 1.0f, 1.0f,
 			1.0f, 0.0f, 1.0f, 0.0f

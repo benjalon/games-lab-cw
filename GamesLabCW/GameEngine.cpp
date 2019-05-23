@@ -79,7 +79,17 @@ game::GameEngine::GameEngine(bool fullscreen, bool vsync, bool ground) :
 	renderer::load_particle_effect("models/fire.png", 30, 0.08, 0.3);
 	renderer::load_particle_effect("models/fire2.png", 80, 0.15, 1);
 
-	renderer::load_image("models/hud.png", Vector2(0, 0));
+	// The four HP levels (hearts-3 = full HP, hearts-0 = dead)
+	renderer::load_image("models/UI/hearts-3.png", Vector2(0, 0));
+	renderer::load_image("models/UI/hearts-2.png", Vector2(0, 0));
+	renderer::load_image("models/UI/hearts-1.png", Vector2(0, 0));
+	renderer::load_image("models/UI/hearts-0.png", Vector2(0, 0));
+
+	// The four MP levels (mana-3 = full, mana-0 = empty)
+	renderer::load_image("models/UI/mana-3.png", Vector2(0, 0));
+	renderer::load_image("models/UI/mana-2.png", Vector2(0, 0));
+	renderer::load_image("models/UI/mana-1.png", Vector2(0, 0));
+	renderer::load_image("models/UI/mana-0.png", Vector2(0, 0));
 
 	std::string paths[6] = {
 		"models/Skybox/hw_ruins/ruins_lf.tga",
@@ -188,8 +198,10 @@ void game::GameEngine::run()
 	scene_.instantiate("PointLight", PointLightComponent{ {1, 105.0 / 255.0, 180.0 / 255.0}, 40, { 3, 3, 22} });
 
 	// UI
-	ImageComponent i_ui; i_ui.texture_file = "models/hud.png";
-	scene_.instantiate("Image", i_ui);
+	ImageComponent i_hp; i_hp.texture_file = "models/UI/hearts-2.png";
+	scene_.instantiate("Image", i_hp);
+	ImageComponent i_mp; i_mp.texture_file = "models/UI/mana-3.png";
+	scene_.instantiate("Image", i_mp);
 
 	// Skybox
 	TransformComponent t_skybox; t_skybox.scale = { 20, 20, 20 };
