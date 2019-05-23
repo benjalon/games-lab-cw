@@ -94,7 +94,7 @@ namespace game
 		std::vector<VertexBoneData> bones;
 		std::vector<BoneInfo> boneInfos;
 		std::map<std::string, unsigned int> boneMapper;
-		std::vector<Matrix4f> transforms;
+		std::vector<glm::mat4> transforms;
 		unsigned int boneCount = 0;
 		Matrix4f globalTransform;
 		Matrix4f globalInverseTransform;

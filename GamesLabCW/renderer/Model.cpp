@@ -267,7 +267,7 @@ namespace game
 
 		// Populates transforms vector with new bone transformation matrices. 
 		for (unsigned int i = 0; i < boneCount; i++) {
-			transforms[i] = boneInfos[i].finalTransformation;
+			transforms[i] = Matrix4fToGLM(boneInfos[i].finalTransformation);
 		}
 
 		for (unsigned int i = 0; i < vertices.size(); ++i)
@@ -275,10 +275,10 @@ namespace game
 			auto currentBone = bones[i];
 
 			glm::mat4 boneTransform = 
-				Matrix4fToGLM(transforms[currentBone.ids[0]]) * currentBone.weights[0] + 
-				Matrix4fToGLM(transforms[currentBone.ids[1]]) * currentBone.weights[1] + 
-				Matrix4fToGLM(transforms[currentBone.ids[2]]) * currentBone.weights[2] +
-				Matrix4fToGLM(transforms[currentBone.ids[3]]) * currentBone.weights[3];
+				transforms[currentBone.ids[0]] * currentBone.weights[0] + 
+				transforms[currentBone.ids[1]] * currentBone.weights[1] + 
+				transforms[currentBone.ids[2]] * currentBone.weights[2] +
+				transforms[currentBone.ids[3]] * currentBone.weights[3];
 			boneTransform = glm::transpose(boneTransform);
 
 			vertices[i].pos = glm::vec3(boneTransform * glm::vec4(vertices[i].pos, 1));
