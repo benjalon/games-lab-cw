@@ -43,14 +43,14 @@ namespace game::renderer
 
 	//Returns the (potentially cached) shader using the given paramaters
 	GLuint get_shader(
-		bool textured, bool normal_mapped, size_t n_ambient, size_t n_directional, size_t n_point, std::string vertex_shader, std::string fragment_shader)
+		bool textured, bool normal_mapped, bool has_bones, size_t n_ambient, size_t n_directional, size_t n_point, std::string vertex_shader, std::string fragment_shader)
 	{
-		using Args = std::tuple<bool, bool, size_t, size_t, size_t, std::string, std::string>;
+		using Args = std::tuple<bool, bool, bool, size_t, size_t, size_t, std::string, std::string>;
 
 		//Cache of parametrised shaders
 		static std::map<Args, Shader> shaders;
 
-		Args args = std::make_tuple(textured, normal_mapped, n_ambient, n_directional, n_point,
+		Args args = std::make_tuple(textured, normal_mapped, has_bones, n_ambient, n_directional, n_point,
 			vertex_shader, fragment_shader);
 
 		//If the requested shader already exists, return it
@@ -67,6 +67,7 @@ namespace game::renderer
 
 			if (textured) define(f, "TEXTURED");
 			if (normal_mapped) define(f, "NORMAL_MAPPED");
+			if (has_bones) define(v, "HAS_BONES");
 			define(f, "N_AMBIENT " + std::to_string(n_ambient));
 			define(f, "N_DIRECTIONAL " + std::to_string(n_directional));
 			define(f, "N_POINT " + std::to_string(n_point));
@@ -140,7 +141,7 @@ namespace game::renderer
 		m.isAnimated = model.IsAnimated();
 		
 		//Determine and use appropriate shader
-		GLuint shader = get_shader(model.IsTextured(), model.IsNormalMapped(), n_ambient, n_directional, n_point, m.vertex_shader, m.fragment_shader);
+		GLuint shader = get_shader(model.IsTextured(), model.IsNormalMapped(), model.IsAnimated(), n_ambient, n_directional, n_point, m.vertex_shader, m.fragment_shader);
 		glUseProgram(shader);
 
 		//Calculate MVP matrices
@@ -311,7 +312,7 @@ namespace game::renderer
 		if (it == particleEffects.end()) return;
 		ParticleEffect &particle = it->second;
 
-		GLuint shader = get_shader(false, false, 0, 0, 0, "shaders/Particle.vert", "shaders/Particle.frag");
+		GLuint shader = get_shader(false, false, false, 0, 0, 0, "shaders/Particle.vert", "shaders/Particle.frag");
 		glUseProgram(shader);
 
 		//Calculate MVP matrices
@@ -349,7 +350,7 @@ namespace game::renderer
 		if (it == images.end()) return;
 		Image &image = it->second;
 
-		GLuint shader = get_shader(false, false, 0, 0, 0, "shaders/Image.vert", "shaders/Image.frag");
+		GLuint shader = get_shader(false, false, false, 0, 0, 0, "shaders/Image.vert", "shaders/Image.frag");
 		glUseProgram(shader);
 
 		//Calculate MVP matrices

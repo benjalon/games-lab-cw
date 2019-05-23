@@ -14,7 +14,7 @@ namespace game::renderer
 	void init();
 
 	GLuint get_shader(
-		bool textured, bool normal_mapped, size_t n_ambient, size_t n_directional, size_t n_point, std::string vertex_shader, std::string fragment_shader);
+		bool textured, bool normal_mapped, bool has_bones, size_t n_ambient, size_t n_directional, size_t n_point, std::string vertex_shader, std::string fragment_shader);
 
 	glm::mat4 proj_matrix(CameraComponent camera);
 	glm::mat4 view_matrix(CameraComponent camera);

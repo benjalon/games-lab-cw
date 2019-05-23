@@ -210,6 +210,22 @@ namespace game
 		glEnableVertexAttribArray(3);
 		glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(VertexData), (GLvoid*)offsetof(VertexData, tangent));
 
+		if (IsAnimated())
+		{
+			bbo.create();
+			bbo.add_data(&bones[0], sizeof(VertexBoneData) * bones.size());
+
+			bbo.bind();
+			bbo.upload(GL_STATIC_DRAW);
+
+			//IDs
+			glEnableVertexAttribArray(4);
+			glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(VertexBoneData), (GLvoid*)offsetof(VertexBoneData, ids));
+			//Weights
+			glEnableVertexAttribArray(4);
+			glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(VertexBoneData), (GLvoid*)offsetof(VertexBoneData, weights));
+		}
+
 		// Index-related (to ensure correct draw order)
 		ebo.bind();
 		ebo.upload(GL_STATIC_DRAW);
@@ -217,6 +233,17 @@ namespace game
 
 	void Model::Render(GLuint shaderProgram)
 	{
+		if (IsAnimated())
+		{
+			for (unsigned int i = 0; i < MAX_BONES; i++) {
+
+				char Name[128];
+				memset(Name, 0, sizeof(Name));
+				_snprintf_s(Name, sizeof(Name), "bones[%d]", i);
+				boneLocations[i] = glGetUniformLocation(shaderProgram, Name);
+			}
+		}
+
 		// Drawing stuff
 		glBindVertexArray(vao);
 
@@ -263,11 +290,11 @@ namespace game
 
 		readNodeHierarchy(animationTime, scene->mRootNode, identity);
 
-		transforms.resize(boneCount);
+		//transforms.resize(boneCount);
 
 		// Populates transforms vector with new bone transformation matrices. 
 		for (unsigned int i = 0; i < boneCount; i++) {
-			transforms[i] = Matrix4fToGLM(boneInfos[i].finalTransformation);
+			glUniformMatrix4fv(boneLocations[i], 1, TRUE, (const GLfloat*)boneInfos[i].finalTransformation.m);
 		}
 
 		/*for (unsigned int i = 0; i < vertices.size(); ++i)
@@ -417,13 +444,6 @@ namespace game
 		assert(0);
 
 		return 0;
-	}
-
-	void Model::updateVertices()
-	{
-		vbo.bind();
-		vbo.add_data(&vertices[0], sizeof(VertexData) * vertices.size());
-		vbo.upload(GL_STATIC_DRAW);
 	}
 
 	std::string Model::stripPath(std::string path)

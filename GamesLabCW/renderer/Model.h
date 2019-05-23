@@ -78,6 +78,7 @@ namespace game
 		GLuint vao;
 		VBO vbo; // Vertex buffer: stores vertex related stuff like positions and normals
 		VBO ebo; // Indices: tracks the draw order so that vertices aren't reused
+		VBO bbo;
 
 		// Buffer data: all of the vertices (including positions, uv, normal data etc.) and indices in the model
 		std::vector<VertexData> vertices;
@@ -100,6 +101,9 @@ namespace game
 		Matrix4f globalInverseTransform;
 		Matrix4f identity;
 
+		static const int MAX_BONES = 70;
+		GLuint boneLocations[MAX_BONES];
+
 		// Texture loading
 		std::vector<GLuint> materialIDs; // Diffuse, normal etc. maps are all recorded in the same group of materials and have to be indexed
 		std::vector<Texture> diffuseMaps; // AKA textures
@@ -118,28 +122,6 @@ namespace game
 		void Model::CalcInterpolatedTranslation(aiVector3D& Out, float AnimationTime, const aiNodeAnim* pNodeAnim);
 		unsigned int Model::FindRotation(float AnimationTime, const aiNodeAnim* pNodeAnim);
 		unsigned int Model::FindTranslation(float AnimationTime, const aiNodeAnim* pNodeAnim);
-		//Matrix4f Model::InitTranslationTransform(float x, float y, float z);
-		void Model::updateVertices(); // Only necessary for CPU bone animation
-
-		/*glm::mat4 MatAssimpToGLM(aiMatrix3x3 mat) 
-		{ 
-			glm::mat4 m;
-			m[0][0] = mat.a1; m[0][1] = mat.a2; m[0][2] = mat.a3; m[0][3] = 0.0f;
-			m[1][0] = mat.b1; m[1][1] = mat.b2; m[1][2] = mat.b3; m[1][3] = 0.0f;
-			m[2][0] = mat.c1; m[2][1] = mat.c2; m[2][2] = mat.c3; m[2][3] = 0.0f;
-			m[3][0] = 0.0f; m[3][1] = 0.0f; m[3][2] = 0.0f; m[3][3] = 1.0f;
-			return m;
-		}
-
-		glm::mat4 MatAssimpToGLM(aiMatrix4x4 mat)
-		{
-			glm::mat4 m;
-			m[0][0] = mat.a1; m[0][1] = mat.a2; m[0][2] = mat.a3; m[0][3] = mat.a4;
-			m[1][0] = mat.b1; m[1][1] = mat.b2; m[1][2] = mat.b3; m[1][3] = mat.b4;
-			m[2][0] = mat.c1; m[2][1] = mat.c2; m[2][2] = mat.c3; m[2][3] = mat.c4;
-			m[3][0] = mat.d1; m[3][1] = mat.d2; m[3][2] = mat.d3; m[3][3] = mat.d4;
-			return m;
-		}*/
 
 		std::string Model::stripPath(std::string path);
 		glm::mat4 Model::Matrix4fToGLM(Matrix4f mat);
