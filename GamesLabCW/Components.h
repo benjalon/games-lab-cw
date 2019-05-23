@@ -19,6 +19,7 @@ namespace game
 
 	struct GameStateComponent {};
 	struct FirstPersonControllerComponent {};
+	struct PortalComponent {};
 
 	// Tracks how many keys are picked up, and where in the game they should be rendered
 	struct KeyComponent

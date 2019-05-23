@@ -617,6 +617,7 @@ namespace game::procgen
 		p_portal.color_modifier = Vector3(0.8, 0.2, 1);
 		scene.instantiate("ParticleEffect", p_portal, TransformComponent{ Vector3(3, 5, 22) });
 		scene.instantiate("PointLight", PointLightComponent{ {1, 105.0 / 255.0, 180.0 / 255.0}, 40, { 3, 3, 22} });
+		scene.instantiate("Portal", TransformComponent{ { 3, 3, 22 } });
 
 		//UI
 		ImageComponent i_ui; i_ui.texture_file = "models/hud.png";

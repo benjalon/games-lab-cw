@@ -29,5 +29,7 @@ void game::prototypes::register_prototypes()
 	PROTOTYPE(PointLight, PointLightComponent);
 
 	PROTOTYPE(KinematicBody, TransformComponent, KinematicComponent);
+
+	PROTOTYPE(Portal, PortalComponent, CollisionComponent, TransformComponent);
 }
 

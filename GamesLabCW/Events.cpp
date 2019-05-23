@@ -17,24 +17,30 @@ namespace game::events
 	void HandleKeyCollision(const EnterCollision &);
 	void HandleDoorCollision(const EnterCollision &, Entity);
 	void HandleBulletCollision(const EnterCollision &, Entity);
+	void HandlePortalCollision(const EnterCollision &);
 
 	void SphereEnterCollideResponse(const EnterCollision &e)
 	{
 		bool b = false;
-		if (e.info.registry.has<KeyComponent, PointLightComponent, TransformComponent>(e.a) ||
-			e.info.registry.has<KeyComponent, PointLightComponent, TransformComponent>(e.b))
+		if (collide_which<KeyComponent, PointLightComponent, TransformComponent>(e, b) &&
+			collide<FirstPersonControllerComponent>(e, b))
 		{
 			HandleKeyCollision(e);
 		}
-		else if (e.info.registry.has<DoorComponent>(e.a) ||
-			(b = e.info.registry.has<DoorComponent>(e.b)))
+		else if (collide_which<DoorComponent>(e, b) &&
+			collide<FirstPersonControllerComponent>(e, b))
 		{
 			HandleDoorCollision(e, b ? e.b : e.a);
 		}
-		else if (e.info.registry.has<AIComponent>(e.a) ||
-			(b = e.info.registry.has<AIComponent>(e.b)))
+		else if (collide_which<AIComponent>(e, b) &&
+			collide<FirstPersonControllerComponent>(e, b))
 		{
 			HandleBulletCollision(e, b ? e.b : e.a);
+		}
+		else if (collide_which<PortalComponent>(e, b) &&
+			collide<FirstPersonControllerComponent>(e, b))
+		{
+			HandlePortalCollision(e);
 		}
 
 		/*std::cout << "Enter: " << e.a << " " << e.b << std::endl;*/
@@ -95,18 +101,17 @@ namespace game::events
 		
 	}
 
-	void GenerateMazeResponse(const GenerateMaze &e)
+	void HandlePortalCollision(const EnterCollision &e)
 	{
-		e.scene.clear();
-		Vector3 player_pos = procgen::generate_maze(e.scene, 21, 120, 3, 4, 6);
+		e.info.scene.clear();
+		Vector3 player_pos = procgen::generate_maze(e.info.scene, 21, 120, 3, 4, 6);
 
-		auto player = e.scene.instantiate("FirstPersonController", TransformComponent{ player_pos , { 180,0,0 } });
-		auto camera = e.scene.instantiate("Camera", CameraComponent{ player });
+		auto player = e.info.scene.instantiate("FirstPersonController", TransformComponent{ player_pos , { 180,0,0 } });
+		auto camera = e.info.scene.instantiate("Camera", CameraComponent{ player });
 
 		// Generic scene lighting
-		e.scene.instantiate("AmbientLight", AmbientLightComponent{ {1, 147.0 / 255.0, 41.0 / 255.0}, 0.2 });
-		e.scene.instantiate("DirectionalLight", DirectionalLightComponent{ {0, 0, 0}, 0, {0,0,0} });
-		e.scene.instantiate("PointLight", PointLightComponent{ {1, 147.0 / 255.0, 41.0 / 255.0}, 1, {0,5,0} });
+		e.info.scene.instantiate("AmbientLight", AmbientLightComponent{ {1, 147.0 / 255.0, 41.0 / 255.0}, 0.2 });
+		e.info.scene.instantiate("DirectionalLight", DirectionalLightComponent{ {0, 0, 0}, 0, {0,0,0} });
+		e.info.scene.instantiate("PointLight", PointLightComponent{ {1, 147.0 / 255.0, 41.0 / 255.0}, 1, {0,5,0} });
 	}
-	RESPONSE(GenerateMazeResponse, GenerateMaze);
 }
