@@ -300,7 +300,7 @@ namespace game::systems
 	auto Water = [](auto info, auto entity, WaterComponent &w, ModelComponent &m, ColourComponent &c, TransformComponent &t)
 	{
 		elapsed += info.dt;
-		renderer::update_wave(elapsed);
+		renderer::update_wave(m, elapsed);
 	};
 	SYSTEM(Water, WaterComponent, ModelComponent, ColourComponent, TransformComponent);
 }

@@ -86,7 +86,8 @@ game::GameEngine::GameEngine(bool fullscreen, bool vsync, bool ground) :
 		"models/Skybox/hw_ruins/ruins_ft.tga",
 		"models/Skybox/hw_ruins/ruins_bk.tga" };
 	renderer::load_external_map(paths, "models/Skybox/skybox.obj", TextureType::CUBE, true);
-	renderer::load_external_map(paths, "models/Water/water.obj", TextureType::CUBE, false);
+	//renderer::load_external_map(paths, "models/Water/water.obj", TextureType::CUBE, false);
+	renderer::load_external_map("models/Water/bump.dds", "models/Water/water.obj", TextureType::NORMAL);
 
 	//Remove 'loading' from title
 	glfwSetWindowTitle(window_, WINDOW_TITLE.c_str());
@@ -99,7 +100,7 @@ void game::GameEngine::run()
 	auto camera = CameraComponent{ player };
 
 	// Room stuff
-	ModelComponent m_water; m_water.model_file = "models/Water/water.obj"; m_water.vertex_shader = "shaders/Water.vert";
+	ModelComponent m_water; m_water.model_file = "models/Water/water.obj"; m_water.vertex_shader = "shaders/Water.vert"; m_water.fragment_shader = "shaders/Water.frag";
 	scene_.instantiate("Water", m_water);
 
 	ModelComponent m_room; m_room.model_file = "models/Room/room.obj";

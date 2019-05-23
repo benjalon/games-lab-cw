@@ -4,7 +4,6 @@
 //N_DIRECTIONAL - number of directional lights
 //N_POINT - number of point lights
 
-in mat4 v_mModel;
 in vec3 v_vPosition;
 in vec2 v_vTexcoord;
 in vec3 v_vNormal;

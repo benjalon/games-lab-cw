@@ -142,8 +142,10 @@ namespace game::renderer
 		m.isAnimated = model.IsAnimated();
 
 		//Determine and use appropriate shader
-		GLuint shader = get_shader(model.IsTextured(), model.IsNormalMapped(), n_ambient, n_directional, n_point, m.vertex_shader, m.fragment_shader);
-		glUseProgram(shader);
+		if (m.shader_prog == -1) {
+			m.shader_prog = get_shader(model.IsTextured(), model.IsNormalMapped(), n_ambient, n_directional, n_point, m.vertex_shader, m.fragment_shader);
+		}
+		glUseProgram(m.shader_prog);
 
 		//Calculate MVP matrices
 		glm::mat4 matProj = proj_matrix(camera);
@@ -174,18 +176,18 @@ namespace game::renderer
 			{
 			case TextureType::DIFFUSE:
 				glBindTexture(GL_TEXTURE_2D, texture.handle);
-				glUniform1i(glGetUniformLocation(shader, "texSampler"), 0);
+				glUniform1i(glGetUniformLocation(m.shader_prog, "texSampler"), 0);
 				break;
 			case TextureType::NORMAL:
 				glBindTexture(GL_TEXTURE_2D, texture.handle);
-				glUniform1i(glGetUniformLocation(shader, "normalSampler"), 0);
+				glUniform1i(glGetUniformLocation(m.shader_prog, "normalSampler"), 0);
 				break;
 			case TextureType::SPECULAR:
 				// Not yet implemented
 				break;
 			case TextureType::CUBE:
 				glBindTexture(GL_TEXTURE_CUBE_MAP, texture.handle);
-				glUniform1i(glGetUniformLocation(shader, "cubeSampler"), 0);
+				glUniform1i(glGetUniformLocation(m.shader_prog, "cubeSampler"), 0);
 				break;
 
 			default:
@@ -202,34 +204,34 @@ namespace game::renderer
 
 		//Provide MVP matrices
 		glUniformMatrix4fv(
-			glGetUniformLocation(shader, "projectionMatrix"),
+			glGetUniformLocation(m.shader_prog, "projectionMatrix"),
 			1, GL_FALSE, glm::value_ptr(matProj)
 		);
 		glUniformMatrix4fv(
-			glGetUniformLocation(shader, "viewMatrix"),
+			glGetUniformLocation(m.shader_prog, "viewMatrix"),
 			1, GL_FALSE, glm::value_ptr(matView)
 		);
 		glUniformMatrix4fv(
-			glGetUniformLocation(shader, "modelMatrix"),
+			glGetUniformLocation(m.shader_prog, "modelMatrix"),
 			1, GL_FALSE, glm::value_ptr(matModel)
 		);
 
 		//Provide flat colour component
 		glUniform4f(
-			glGetUniformLocation(shader, "flatColour"),
+			glGetUniformLocation(m.shader_prog, "flatColour"),
 			(GLfloat)c.colour.x, (GLfloat)c.colour.y, (GLfloat)c.colour.z,
 			(GLfloat)c.alpha
 		);
 
 		//Provide shininess value (used to determine how much specular highlighting the model will have)
 		glUniform1f(
-			glGetUniformLocation(shader, "shininess"),
+			glGetUniformLocation(m.shader_prog, "shininess"),
 			(GLfloat)m.shininess
 		);
 
 		// Provide camera position for eye calculations
 		glUniform3f(
-			glGetUniformLocation(shader, "cameraPosition"),
+			glGetUniformLocation(m.shader_prog, "cameraPosition"),
 			(GLfloat)camera.position.x, (GLfloat)camera.position.y, (GLfloat)camera.position.z
 		);
 
@@ -237,15 +239,15 @@ namespace game::renderer
 		for (size_t i = 0; i < n_ambient; i++)
 		{
 			std::string j = std::to_string(i);
-			glUniform3f(glGetUniformLocation(shader,
+			glUniform3f(glGetUniformLocation(m.shader_prog,
 				("ambientLights[" + j + "].colour").c_str()),
 				(GLfloat)ambients[i].colour.x,
 				(GLfloat)ambients[i].colour.y,
 				(GLfloat)ambients[i].colour.z);
-			glUniform1f(glGetUniformLocation(shader,
+			glUniform1f(glGetUniformLocation(m.shader_prog,
 				("ambientLights[" + j + "].intensity").c_str()),
 				(GLfloat)ambients[i].intensity);
-			glUniform1f(glGetUniformLocation(shader,
+			glUniform1f(glGetUniformLocation(m.shader_prog,
 				("ambientLights[" + j + "].on").c_str()),
 				(GLfloat)ambients[i].on);
 		}
@@ -254,20 +256,20 @@ namespace game::renderer
 		for (size_t i = 0; i < n_directional; i++)
 		{
 			std::string j = std::to_string(i);
-			glUniform3f(glGetUniformLocation(shader,
+			glUniform3f(glGetUniformLocation(m.shader_prog,
 				("directionalLights[" + j + "].colour").c_str()),
 				(GLfloat)directionals[i].colour.x,
 				(GLfloat)directionals[i].colour.y,
 				(GLfloat)directionals[i].colour.z);
-			glUniform1f(glGetUniformLocation(shader,
+			glUniform1f(glGetUniformLocation(m.shader_prog,
 				("directionalLights[" + j + "].intensity").c_str()),
 				(GLfloat)directionals[i].intensity);
-			glUniform3f(glGetUniformLocation(shader,
+			glUniform3f(glGetUniformLocation(m.shader_prog,
 				("directionalLights[" + j + "].direction").c_str()),
 				(GLfloat)directionals[i].direction.x,
 				(GLfloat)directionals[i].direction.y,
 				(GLfloat)directionals[i].direction.z);
-			glUniform1f(glGetUniformLocation(shader,
+			glUniform1f(glGetUniformLocation(m.shader_prog,
 				("directionalLights[" + j + "].on").c_str()),
 				(GLfloat)directionals[i].on);
 		}
@@ -276,34 +278,34 @@ namespace game::renderer
 		for (size_t i = 0; i < n_point; i++)
 		{
 			std::string j = std::to_string(i);
-			glUniform3f(glGetUniformLocation(shader,
+			glUniform3f(glGetUniformLocation(m.shader_prog,
 				("pointLights[" + j + "].colour").c_str()),
 				(GLfloat)points[i].colour.x,
 				(GLfloat)points[i].colour.y,
 				(GLfloat)points[i].colour.z);
-			glUniform1f(glGetUniformLocation(shader,
+			glUniform1f(glGetUniformLocation(m.shader_prog,
 				("pointLights[" + j + "].intensity").c_str()),
 				(GLfloat)points[i].intensity);
-			glUniform3f(glGetUniformLocation(shader,
+			glUniform3f(glGetUniformLocation(m.shader_prog,
 				("pointLights[" + j + "].position").c_str()),
 				(GLfloat)points[i].position.x,
 				(GLfloat)points[i].position.y,
 				(GLfloat)points[i].position.z);
-			glUniform1f(glGetUniformLocation(shader,
+			glUniform1f(glGetUniformLocation(m.shader_prog,
 				("pointLights[" + j + "].constant").c_str()),
 				(GLfloat)points[i].constant);
-			glUniform1f(glGetUniformLocation(shader,
+			glUniform1f(glGetUniformLocation(m.shader_prog,
 				("pointLights[" + j + "].linear").c_str()),
 				(GLfloat)points[i].linear);
-			glUniform1f(glGetUniformLocation(shader,
+			glUniform1f(glGetUniformLocation(m.shader_prog,
 				("pointLights[" + j + "].exponent").c_str()),
 				(GLfloat)points[i].exponent);
-			glUniform1f(glGetUniformLocation(shader,
+			glUniform1f(glGetUniformLocation(m.shader_prog,
 				("pointLights[" + j + "].on").c_str()),
 				(GLfloat)points[i].on);
 		}
 
-		model.Render(shader);
+		model.Render(m.shader_prog);
 	}
 
 	void render_particle(CameraComponent camera, ParticleComponent &p, ColourComponent c, TransformComponent t)
@@ -346,13 +348,15 @@ namespace game::renderer
 		particle.Render(shader);
 	}
 
-	void update_wave(float delta)
+	void update_wave(ModelComponent m, float delta)
 	{
-		GLuint shader = get_shader(false, false, 0, 0, 0, "shaders/Water.vert", "shaders/Water.frag");
-		glUseProgram(shader);
+		if (m.shader_prog == -1)
+		{
+			return;
+		}
 
 		glUniform1f(
-			glGetUniformLocation(shader, "delta"),
+			glGetUniformLocation(m.shader_prog, "delta"),
 			(GLfloat)delta
 		);
 	}

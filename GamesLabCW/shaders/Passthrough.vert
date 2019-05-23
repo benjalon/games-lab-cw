@@ -7,7 +7,6 @@ layout (location = 1) in vec2 in_TextureCoord;
 layout (location = 2) in vec3 in_Normal;
 layout (location = 3) in vec3 in_Tangent;
 
-out mat4 v_mModel;
 out vec3 v_vPosition;
 out vec2 v_vTexcoord;
 out vec3 v_vNormal;
@@ -15,7 +14,6 @@ out mat3 v_mTBN;
 
 void main()
 {
-	v_mModel = modelMatrix;
 	v_vPosition = (modelMatrix * vec4(in_Position, 1.0)).xyz;
 	v_vTexcoord = in_TextureCoord;
 

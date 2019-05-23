@@ -55,6 +55,7 @@ namespace game
 		std::string vertex_shader;
 		std::string fragment_shader;
 		bool isAnimated = false;
+		int shader_prog = -1;
 	};
 
 	struct ColourComponent

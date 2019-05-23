@@ -42,5 +42,5 @@ namespace game::renderer
 
 	void update_particle(double time, std::string texture_file, int respawn_count, Vector3 position_variation, Vector3 velocity_variation, Vector3 color_variation);
 
-	void update_wave(float delta);
+	void update_wave(ModelComponent m, float delta);
 };
