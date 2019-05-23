@@ -112,7 +112,7 @@ void game::GameEngine::run()
 	auto camera = scene_.instantiate("Camera", CameraComponent{ player });
 
 	// Minotaur model
-	ModelComponent m_minotaur; m_minotaur.model_file = "models/Minotaur/Minotaur@Jump.fbx";  m_minotaur.vertex_shader = "shaders/Water.vert"; m_minotaur.fragment_shader = "shaders/BlueSpirit.frag";
+	ModelComponent m_minotaur; m_minotaur.model_file = "models/Minotaur/Minotaur@Jump.fbx";  m_minotaur.vertex_shader = "shaders/FlatColor.vert"; m_minotaur.fragment_shader = "shaders/BlueSpirit.frag";
 	TransformComponent t_minotaur; t_minotaur.scale = { 0.15, 0.15, 0.15 }; t_minotaur.position = { 0, 9, -15 }; t_minotaur.rotation = { 90, 180, 0 };//90, 180
 	DetectionComponent d_minotaur; d_minotaur.c.radius = 10; d_minotaur.camera = camera;
 	scene_.instantiate("AIModel", m_minotaur, t_minotaur, d_minotaur);

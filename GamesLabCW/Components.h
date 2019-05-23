@@ -129,6 +129,8 @@ namespace game
 
 	struct BulletComponent{
 		std::string model_file = "models/Fireball/fireball.obj";
+		std::string vs = "shaders/FlatColor.vert";
+		std::string fs = "shaders/FlatColor.frag";
 	};
 
 	struct DetectionComponent {

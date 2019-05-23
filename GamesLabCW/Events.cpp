@@ -40,7 +40,7 @@ namespace game::events
 	void FireBulletResponse(const FireBullet &e)
 	{
 		TransformComponent t; t.scale = { 0.5, 0.5, 0.5 }; t.position = e.position; t.rotation = e.rotation;
-		ModelComponent m; m.model_file = e.bullet_file;
+		ModelComponent m; m.model_file = e.bullet_file; m.vertex_shader = e.bullet_vs; m.fragment_shader = e.bullet_fs;
 		
 		KinematicComponent k; k.velocity = Vector2(t.rotation.x, t.rotation.y).direction_hv() * 30;
 
