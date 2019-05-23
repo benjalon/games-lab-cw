@@ -368,8 +368,8 @@ namespace game::procgen
 				populate_rooms(n, min_size, max_size - 1, id_from);
 		}
 
-		//Builds the maze into the given scene
-		void build_scene(Scene &scene)
+		//Builds the maze into the given scene, returning suggested player position
+		Vector3 build_scene(Scene &scene)
 		{
 			//Utility to place key
 			auto place_key = [&](Vector3 position)
@@ -520,10 +520,24 @@ namespace game::procgen
 				key_pos = { x, y };
 				key = true;
 			}
+
+			//Calculate suggested player position as cell furthest from key
+			Coords player_pos;
+			double longest_dist = -std::numeric_limits<double>::infinity();
+			for (size_t i = 0; i < grid_.size(); i++)
+				if (!grid_[i].solid)
+				{
+					auto [x, y] = index_to_coords(i);
+					double dist = std::pow(x - key_pos.first, 2) + std::pow(y - key_pos.second, 2);
+					if (dist > longest_dist)
+						player_pos = { x, y };
+				}
+
+			return { player_pos.first * cell_size, 0, player_pos.second * cell_size };
 		}
 	};
 
-	void generate_maze(Scene &scene, size_t grid_size, int sparsification, int number_rooms, int min_room_size, int max_room_size)
+	Vector3 generate_maze(Scene &scene, size_t grid_size, int sparsification, int number_rooms, int min_room_size, int max_room_size)
 	{
 		//Prepare fully-solid grid
 		Grid g(grid_size);
@@ -542,7 +556,7 @@ namespace game::procgen
 		g.print();
 
 		//Build the map into the scene
-		g.build_scene(scene);
+		return g.build_scene(scene);
 	}
 
 	void load_hub(Scene &scene, int keys_collected)

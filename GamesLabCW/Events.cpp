@@ -98,9 +98,9 @@ namespace game::events
 	void GenerateMazeResponse(const GenerateMaze &e)
 	{
 		e.scene.clear();
-		procgen::generate_maze(e.scene, 21, 120, 3, 4, 6);
+		Vector3 player_pos = procgen::generate_maze(e.scene, 21, 120, 3, 4, 6);
 
-		auto player = e.scene.instantiate("FirstPersonController", TransformComponent{ {0,6,5} , { 180,0,0 } });
+		auto player = e.scene.instantiate("FirstPersonController", TransformComponent{ player_pos , { 180,0,0 } });
 		auto camera = e.scene.instantiate("Camera", CameraComponent{ player });
 
 		// Generic scene lighting
