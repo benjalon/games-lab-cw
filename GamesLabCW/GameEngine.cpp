@@ -75,7 +75,7 @@ game::GameEngine::GameEngine(bool fullscreen, bool vsync, bool ground) :
 	renderer::load_model("models/Fireball/fireball.obj");
 
 	//renderer::load_particle_effect("models/particle.png", 100);
-	renderer::load_particle_effect("models/star.png", 300, 0.2, 0.5);
+	renderer::load_particle_effect("models/star.png", 200, 0.2, 0.5);
 	renderer::load_particle_effect("models/fire.png", 30, 0.08, 0.3);
 	renderer::load_particle_effect("models/fire2.png", 80, 0.15, 1);
 
@@ -110,6 +110,12 @@ void game::GameEngine::run()
 	// Player/camera
 	auto player = scene_.instantiate("FirstPersonController", TransformComponent{ {0,6,5} , { 180,0,0 } });
 	auto camera = scene_.instantiate("Camera", CameraComponent{ player });
+
+	// Minotaur model
+	ModelComponent m_minotaur; m_minotaur.model_file = "models/Minotaur/Minotaur@Jump.fbx";  m_minotaur.vertex_shader = "shaders/Water.vert"; m_minotaur.fragment_shader = "shaders/BlueSpirit.frag";
+	TransformComponent t_minotaur; t_minotaur.scale = { 0.15, 0.15, 0.15 }; t_minotaur.position = { 0, 9, -15 }; t_minotaur.rotation = { 90, 180, 0 };//90, 180
+	DetectionComponent d_minotaur; d_minotaur.c.radius = 10; d_minotaur.camera = camera;
+	scene_.instantiate("AIModel", m_minotaur, t_minotaur, d_minotaur);
 
 	// Room stuff
 	ModelComponent m_water; m_water.model_file = "models/Water/water.obj"; m_water.vertex_shader = "shaders/Water.vert"; m_water.fragment_shader = "shaders/Water.frag";
@@ -152,13 +158,6 @@ void game::GameEngine::run()
 	PointLightComponent pl_key6{ {1, 180 / 255.0, 120.0 / 255.0}, 0.5, t_key6.position };
 	scene_.instantiate("Key", m_key, t_key6, k_key6, pl_key6);
 
-	// Minotaur test model
-	ModelComponent m_minotaur; m_minotaur.model_file = "models/Minotaur/Minotaur@Jump.fbx";
-	ColourComponent c_minotaur; c_minotaur.colour = { 0, 0, 255 };
-	TransformComponent t_minotaur; t_minotaur.scale = { 0.15, 0.15, 0.15 }; t_minotaur.position = { 0, 9, -15 }; t_minotaur.rotation = { 90, 180, 0 };//90, 180
-	DetectionComponent d_minotaur; d_minotaur.c.radius = 10; d_minotaur.camera = camera;
-	scene_.instantiate("AIModel", m_minotaur, t_minotaur, d_minotaur, c_minotaur);
-
 	// Torches
 	ModelComponent m_torch; m_torch.model_file = "models/Torch/torch.obj";
 
@@ -171,22 +170,22 @@ void game::GameEngine::run()
 	TransformComponent t_torch1; t_torch1.position = { 26, 0, -23 }; t_torch1.scale = { 5, 5, 5 };
 	scene_.instantiate("Model", m_torch, t_torch1);
 	scene_.instantiate("PointLight", PointLightComponent{ {1, 147.0 / 255.0, 41.0 / 255.0}, 40, {26, 7, -23} });
-	scene_.instantiate("ParticleEffect", p_torch, TransformComponent{ { 26, 8, -23 } });
+	scene_.instantiate("ParticleEffect", p_torch, TransformComponent{ { 26, 9, -23 } });
 
 	TransformComponent t_torch2; t_torch2.position = { 26, 0, 23 }; t_torch2.scale = { 5, 5, 5 };
 	scene_.instantiate("Model", m_torch, t_torch2);
 	scene_.instantiate("PointLight", PointLightComponent{ {1, 147.0 / 255.0, 41.0 / 255.0}, 40, {26, 7, 23} });
-	scene_.instantiate("ParticleEffect", p_torch, TransformComponent{ { 26, 8, 23 } });
+	scene_.instantiate("ParticleEffect", p_torch, TransformComponent{ { 26, 9, 23 } });
 
 	TransformComponent t_torch3; t_torch3.position = { -26, 6, -10 }; t_torch3.scale = { 5, 5, 5 };
 	scene_.instantiate("Model", m_torch, t_torch3);
 	scene_.instantiate("PointLight", PointLightComponent{ {1, 147.0 / 255.0, 41.0 / 255.0}, 40, { -26, 13, -10 } });
-	scene_.instantiate("ParticleEffect", p_torch, TransformComponent{ { -26, 14, -10 } });
+	scene_.instantiate("ParticleEffect", p_torch, TransformComponent{ { -26, 15, -10 } });
 
 	TransformComponent t_torch4; t_torch4.position = { -26, 6, 10 }; t_torch4.scale = { 5, 5, 5 };
 	scene_.instantiate("Model", m_torch, t_torch4);
 	scene_.instantiate("PointLight", PointLightComponent{ {1, 147.0 / 255.0, 41.0 / 255.0}, 40, { -26, 13, 10 } });
-	scene_.instantiate("ParticleEffect", p_torch, TransformComponent{ { -26, 14, 10 } });
+	scene_.instantiate("ParticleEffect", p_torch, TransformComponent{ { -26, 15, 10 } });
 
 	// Portal
 	ParticleComponent p_portal; p_portal.texture_file = "models/star.png"; p_portal.respawn_count = 1;
