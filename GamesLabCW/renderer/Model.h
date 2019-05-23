@@ -94,9 +94,11 @@ namespace game
 		std::vector<VertexBoneData> bones;
 		std::vector<BoneInfo> boneInfos;
 		std::map<std::string, unsigned int> boneMapper;
+		std::vector<Matrix4f> transforms;
 		unsigned int boneCount = 0;
 		Matrix4f globalTransform;
 		Matrix4f globalInverseTransform;
+		Matrix4f identity;
 
 		// Texture loading
 		std::vector<GLuint> materialIDs; // Diffuse, normal etc. maps are all recorded in the same group of materials and have to be indexed

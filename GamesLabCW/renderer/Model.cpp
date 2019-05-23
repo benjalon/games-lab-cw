@@ -24,6 +24,8 @@ namespace game
 
 		if (scene->HasAnimations())
 		{
+			identity.InitIdentity();
+
 			globalInverseTransform = scene->mRootNode->mTransformation;
 			globalInverseTransform.Inverse();
 		}
@@ -255,16 +257,13 @@ namespace game
 	{
 		vertices = vertices_backup;
 
-		Matrix4f identity;
-		identity.InitIdentity();
-
 		float ticksPerSecond = scene->mAnimations[0]->mTicksPerSecond;
 		float tickTime = time * ticksPerSecond;
 		float animationTime = fmod(tickTime, scene->mAnimations[0]->mDuration);
 
 		readNodeHierarchy(animationTime, scene->mRootNode, identity);
 
-		std::vector<Matrix4f> transforms(boneCount);
+		transforms.resize(boneCount);
 
 		// Populates transforms vector with new bone transformation matrices. 
 		for (unsigned int i = 0; i < boneCount; i++) {
@@ -275,16 +274,12 @@ namespace game
 		{
 			auto currentBone = bones[i];
 
-			glm::mat4 boneTransform = Matrix4fToGLM(transforms[currentBone.ids[0]]) * currentBone.weights[0];
-			boneTransform += Matrix4fToGLM(transforms[currentBone.ids[1]]) * currentBone.weights[1];
-			boneTransform += Matrix4fToGLM(transforms[currentBone.ids[2]]) * currentBone.weights[2];
-			boneTransform += Matrix4fToGLM(transforms[currentBone.ids[3]]) * currentBone.weights[3];
+			glm::mat4 boneTransform = 
+				Matrix4fToGLM(transforms[currentBone.ids[0]]) * currentBone.weights[0] + 
+				Matrix4fToGLM(transforms[currentBone.ids[1]]) * currentBone.weights[1] + 
+				Matrix4fToGLM(transforms[currentBone.ids[2]]) * currentBone.weights[2] +
+				Matrix4fToGLM(transforms[currentBone.ids[3]]) * currentBone.weights[3];
 			boneTransform = glm::transpose(boneTransform);
-
-			if (boneTransform[0][0] != 0 && boneTransform[0][1] != 0 && boneTransform[0][2] != 0)
-			{
-				int ff = 0;
-			}
 
 			vertices[i].pos = glm::vec3(boneTransform * glm::vec4(vertices[i].pos, 1));
 		}
@@ -343,26 +338,6 @@ namespace game
 			unsigned int BoneIndex = boneMapper[nodeName];
 			boneInfos[BoneIndex].finalTransformation = globalInverseTransform * GlobalTransformation *
 				boneInfos[BoneIndex].boneOffset;
-
-			std::cout << boneInfos[BoneIndex].finalTransformation.m[0][0] << ", "
-				<< boneInfos[BoneIndex].finalTransformation.m[0][1] << ", "
-				<< boneInfos[BoneIndex].finalTransformation.m[0][2] << ", "
-				<< boneInfos[BoneIndex].finalTransformation.m[0][3] << "\n";
-
-			std::cout << boneInfos[BoneIndex].finalTransformation.m[1][0] << ", "
-				<< boneInfos[BoneIndex].finalTransformation.m[1][1] << ", "
-				<< boneInfos[BoneIndex].finalTransformation.m[1][2] << ", "
-				<< boneInfos[BoneIndex].finalTransformation.m[1][3] << "\n";
-
-			std::cout << boneInfos[BoneIndex].finalTransformation.m[2][0] << ", "
-				<< boneInfos[BoneIndex].finalTransformation.m[2][1] << ", "
-				<< boneInfos[BoneIndex].finalTransformation.m[2][2] << ", "
-				<< boneInfos[BoneIndex].finalTransformation.m[2][3] << "\n";
-
-			std::cout << boneInfos[BoneIndex].finalTransformation.m[3][0] << ", "
-				<< boneInfos[BoneIndex].finalTransformation.m[3][1] << ", "
-				<< boneInfos[BoneIndex].finalTransformation.m[3][2] << ", "
-				<< boneInfos[BoneIndex].finalTransformation.m[3][3] << "\n";
 		}
 
 		// Do the same for all the node's children. 

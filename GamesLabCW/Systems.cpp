@@ -168,7 +168,7 @@ namespace game::systems
 		static double t = 0;
 		t += info.dt;
 
-		if (timeSinceLastUpdate < 0.2)
+		if (timeSinceLastUpdate < 0.1)
 		{
 			timeSinceLastUpdate += info.dt;
 			return;
