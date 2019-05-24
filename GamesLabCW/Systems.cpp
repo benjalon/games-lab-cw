@@ -31,12 +31,12 @@ namespace game::systems
 	SYSTEM(GameStateSystem, GameStateComponent);
 
 	//First-person control by the player
-	auto FirstPersonControllerSystem = [](SceneInfo info, auto entity, FirstPersonControllerComponent &f, TransformComponent &t, KinematicComponent &k, ProjectileComponent &bc, StatsComponent &s)
+	auto FirstPersonControllerSystem = [](SceneInfo info, auto entity, FirstPersonControllerComponent &f, TransformComponent &t, KinematicComponent &k, ProjectileComponent &bc)
 	{
-		if (s.health < 1)
-		{
-			info.scene.destroy(entity);
-		}
+		//if (s.health < 1)
+		//{
+		//	info.scene.destroy(entity);
+		//}
 		double mouse_sensitivity = 5.0;
 		double move_speed = 11.0;
 
@@ -54,9 +54,9 @@ namespace game::systems
 		//Strafe
 		k.velocity += Vector2(t.rotation.x, t.rotation.y).direction_hv_right() * move_speed *
 			(input::is_held(input::KEY_D) - input::is_held(input::KEY_A));
-		s.mana += info.dt;
-		if (input::is_released(input::MOUSE_BUTTON_1) && s.mana > 3) {
-			s.mana = 0;
+		//s.mana += info.dt;
+		if (input::is_released(input::MOUSE_BUTTON_1)) {
+			//s.mana = 0;
 			events::dispatcher.enqueue<events::FireBullet>(info.scene, bc.model_file, t.position, t.rotation);
 		}
 
@@ -72,7 +72,7 @@ namespace game::systems
 		//if (input::is_pressed(input::KEY_SPACE))
 		//	k.velocity.y += 4.0;
 	};
-	SYSTEM(FirstPersonControllerSystem, FirstPersonControllerComponent, TransformComponent, KinematicComponent, ProjectileComponent, StatsComponent);
+	SYSTEM(FirstPersonControllerSystem, FirstPersonControllerComponent, TransformComponent, KinematicComponent, ProjectileComponent);
 
 	//EXAMPLE Moveable sphere to demo collisions
 	auto MoveSphereSystem = [](auto info, auto entity, auto&, TransformComponent& t)
@@ -107,6 +107,8 @@ namespace game::systems
 		for (auto it = begin; it != end; ++it)
 		{
 			Entity other = *it;
+
+			if (!info.registry.valid(entity) || !info.registry.valid(other)) continue;
 
 			//Ignore self
 			if (other == entity) continue;
@@ -201,7 +203,7 @@ namespace game::systems
 		//goal: rotate t on the z axis.
 		if (s.health < 1)
 		{
-			info.scene.destroy(entity);
+			//info.scene.destroy(entity);
 		}
 		else
 		{
@@ -219,21 +221,16 @@ namespace game::systems
 				Vector2 nonNormal = cameraPos - enemyPos;
 				Vector2 fromPlayerToEnemy = Vector2(glm::normalize(nonNormal.ToGLM()));
 
-			// Get the positions of both Entities
-			Vector2 cameraPos = Vector2(c.position.x, c.position.z);
-			Vector2 enemyPos = Vector2(t.position.x, t.position.z);
-			Vector2 nonNormal = cameraPos - enemyPos;
-			Vector2 fromPlayerToEnemy = Vector2(glm::normalize(nonNormal.ToGLM()));
+		
+				glm::mat4 matModel = glm::rotate(glm::radians((float)(t.rotation.z)), glm::vec3(0, 0, 1));
 
-			glm::mat4 matModel = glm::rotate(glm::radians((float)(t.rotation.z)), glm::vec3(0, 0, 1));
-
-			// Get the current heading of the player (this should already be Normalized)
-			//glm::vec2 playerHeading = glm::vec2(t.rotation.x, t.rotation.z);
-			glm::vec2 playerHeading = glm::vec2(matModel[2][0], matModel[2][2]);
+				// Get the current heading of the player (this should already be Normalized)
+				//glm::vec2 playerHeading = glm::vec2(t.rotation.x, t.rotation.z);
+				glm::vec2 playerHeading = glm::vec2(matModel[2][0], matModel[2][2]);
 
 
-			// Now calculate the Dot product between the two (Normalized) vectors, playerHeading and fromPlayerToEnemy
-			float cosinedegreesToRotate = glm::dot(playerHeading, fromPlayerToEnemy.ToGLM());
+				// Now calculate the Dot product between the two (Normalized) vectors, playerHeading and fromPlayerToEnemy
+				float cosinedegreesToRotate = glm::dot(playerHeading, fromPlayerToEnemy.ToGLM());
 
 
 				// Apply acos to that value and set z-axis 360 rule. Then rotation to the AIModel
@@ -279,23 +276,13 @@ namespace game::systems
 	SYSTEM(ParticleSystem, ParticleComponent, ColourComponent, TransformComponent, KinematicComponent);
 
 	auto BulletSystem = [](auto info, auto entity, BulletComponent &b) {
+		b.draw = false;
 		if (!b.draw)
 		{
-			info.scene.destroy(entity);
+			//info.scene.destroy(entity);
 		}
 
 	};
 	SYSTEM(BulletSystem, BulletComponent);
 }
 
-	auto BulletSystem = [](SceneInfo info, auto entity, BulletComponent& b)
-	{
-		if (!b.draw)
-		{
-			info.scene.destroy(entity);
-			int a = 1;
-		}
-		int ba = 2;
-	};
-	SYSTEM(BulletSystem, BulletComponent);
-}

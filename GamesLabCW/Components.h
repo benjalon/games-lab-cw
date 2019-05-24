@@ -133,8 +133,8 @@ namespace game
 	};
 
 	struct StatsComponent {
-		int health;
-		int mana;
+		int health = 1;
+		int mana = 3;
 		int keyCount = 0;
 	};
 

@@ -14,6 +14,8 @@ namespace game::events
 {
 	void SphereEnterCollideResponse(const EnterCollision &e)
 	{
+		if (!e.registry.valid(e.a) || !e.registry.valid(e.b)) return;
+
 		if (e.registry.has<KeyComponent, PointLightComponent, TransformComponent>(e.a))
 		{
 			HandleKeyCollision(e);
@@ -37,6 +39,8 @@ namespace game::events
 
 	void SphereLeaveCollideResponse(const LeaveCollision &e)
 	{
+		if (!e.registry.valid(e.a) || !e.registry.valid(e.b)) return;
+
 		if (e.registry.has<DetectionComponent>(e.b) && e.registry.has< FirstPersonControllerComponent>(e.a))
 		{
 			HandleDetectionCollisionLeaving(e);
@@ -56,15 +60,14 @@ namespace game::events
 		Vector3 three = Vector2(t.rotation.y, t.rotation.z).direction_hv() * 30;;
 		Vector3 four = Vector2(t.rotation.z, t.rotation.x).direction_hv() * 30;;
 
-		e.scene.instantiate("Bullet", m, t, k);
 
-		ParticleComponent p_fireball; p_fireball.texture_file = "models/fire2.png"; p_fireball.respawn_count = 1;
+		ParticleComponent p_fireball; p_fireball.texture_file = "models/fire2.png";
+		p_fireball.respawn_count = 1;
 		p_fireball.position_variation = Vector3(100, 50, 100);
 		p_fireball.velocity_variation = Vector3(100, 50, 10);
 		p_fireball.color_variation = Vector3(100, -0.5, 100);
 		p_fireball.color_modifier = Vector3(1, 0.15, 0);
-		TransformComponent t_torch; t_torch.position = e.position;
-		e.scene.instantiate("ParticleEffect", p_fireball, t_torch, k);
+		e.scene.instantiate("Bullet", m, t, k, p_fireball);
 		
 	}
 	RESPONSE(FireBulletResponse, FireBullet);
@@ -110,6 +113,7 @@ namespace game::events
 
 		bs.draw = false;
 		s.health -= 1;
+		cout << "Hit" << endl;
 	}
 
 	void HandleDetectionCollision(const EnterCollision &e)
