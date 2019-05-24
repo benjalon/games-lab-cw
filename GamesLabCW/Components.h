@@ -124,9 +124,9 @@ namespace game
 	struct MoveSphere {};
 
 	struct AIComponent {
-		bool looking = true;
-		bool dead = false;
-		//CollisionComponent c;
+		enum State {Look, Dodge, Shoot};
+		State state;
+		double moving = 0;
 	};
 
 	struct ProjectileComponent{

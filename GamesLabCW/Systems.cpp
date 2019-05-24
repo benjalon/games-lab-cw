@@ -201,11 +201,13 @@ namespace game::systems
 	};
 	SYSTEM(AnimationSystem, ModelComponent);
 
-	auto AISystem = [](SceneInfo info, Entity entity, TransformComponent &t, AIComponent &a, ProjectileComponent &bc, StatsComponent &s, DetectionComponent &d, HitboxComponent &h)
+	auto AISystem = [](SceneInfo info, Entity entity, TransformComponent &t, AIComponent &a, ProjectileComponent &bc, StatsComponent &s, DetectionComponent &d, HitboxComponent &h, KinematicComponent &k)
 	{
 		//Get reference to camera
 		CameraComponent &c = info.scene.get<CameraComponent>(d.camera);
 		s.mana += info.dt;
+
+		
 
 		if (s.health < 1)
 		{
@@ -213,13 +215,53 @@ namespace game::systems
 		}
 		else
 		{
-			
-			if (a.looking)
+			Vector3 moveRight = glm::normalize(Vector2(-fmod(t.rotation.z + 180, 360), 0).direction_hv_right().ToGLM());
+			Vector3 moveForward = glm::normalize(Vector2(-fmod(t.rotation.z + 180, 360), 0).direction_hv().ToGLM());
+			Vector3 moveBackward = moveForward * -1;
+			Vector3 moveLeft = moveRight * -1;
+
+			if (a.state == a.Look)
+			{
+				a.moving += info.dt;
+				if (a.moving > 6)
+				{
+					a.moving = 0;
+					int speed = 4;
+					speed *= 100;
+					auto r = rand() % 4;
+					switch (r)
+					{
+					case 0:
+						k.velocity = moveRight * speed * info.dt;
+						cout << "Right" << endl;
+						break;
+					case 1:
+						k.velocity = moveForward * speed * info.dt;
+						cout << "Forward" << endl;
+						break;
+					case 2:
+						k.velocity = moveBackward * speed * info.dt;
+						cout << "Back" << endl;
+						break;
+					case 3:
+						k.velocity = moveLeft * speed * info.dt;
+						cout << "Left" << endl;
+						break;
+					default:
+						break;
+					}
+				}
+				else if (a.moving > 2)
+				{
+					k.velocity = { 0,0,0 };
+				}
+				
+			}
+			else if (a.state == a.Dodge)
 			{
 
-				//move side to side. 
 			}
-			else if (!a.looking)
+			else if (a.state == a.Shoot)
 			{
 				// Get the positions of both Entities
 				Vector2 cameraPos = Vector2(c.position.x, c.position.z);
@@ -239,15 +281,16 @@ namespace game::systems
 				else
 					t.rotation.z = -(glm::degrees(acos(cosinedegreesToRotate))) + 180;
 
-				cout << s.mana << " : " << info.dt << endl;
 
+				if (input::is_pressed(input::KEY_LEFT_CONTROL))
+				{
+					t.position.x += 1;
+				}
 
-				//if (input::is_pressed(input::KEY_LEFT_CONTROL))
 				if (s.mana > 3)
 				{
 					s.mana = 0;
 					Vector3 rotation = { -fmod(t.rotation.z+180,360), 0, 0 };
-					// bc.model_file, t.position, t.rotation, bc.vs, bc.fs, bc.particle_file
 					events::dispatcher.enqueue<events::FireBullet>(info.scene, bc.model_file, t.position, rotation, bc.vs, bc.fs, bc.particle_file,h.c.radius);
 				}
 			}
@@ -255,7 +298,7 @@ namespace game::systems
 		
 		
 	};
-	SYSTEM(AISystem, TransformComponent, AIComponent,ProjectileComponent, StatsComponent, DetectionComponent, HitboxComponent);
+	SYSTEM(AISystem, TransformComponent, AIComponent,ProjectileComponent, StatsComponent, DetectionComponent, HitboxComponent, KinematicComponent);
 	
 	auto ParticleSystem = [](auto info, auto entity, ParticleComponent &p, ColourComponent &c, TransformComponent &t, KinematicComponent &k)
 	{

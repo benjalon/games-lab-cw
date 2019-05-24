@@ -120,14 +120,14 @@ namespace game::events
 	void HandleDetectionCollision(const EnterCollision &e)
 	{
 		auto &ai = e.registry.get<AIComponent>(e.a);
-		ai.looking = false;
+		ai.state = ai.Shoot;
 
 	}
 
 	void HandleDetectionCollisionLeaving(const LeaveCollision &e)
 	{
 		auto &ai = e.registry.get<AIComponent>(e.b);
-		ai.looking = true;
+		ai.state = ai.Look;
 
 	}
 }
