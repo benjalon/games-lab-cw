@@ -276,10 +276,9 @@ namespace game::systems
 	SYSTEM(ParticleSystem, ParticleComponent, ColourComponent, TransformComponent, KinematicComponent);
 
 	auto BulletSystem = [](auto info, auto entity, BulletComponent &b) {
-		b.draw = false;
 		if (!b.draw)
 		{
-			//info.scene.destroy(entity);
+			info.scene.destroy(entity);
 		}
 
 	};

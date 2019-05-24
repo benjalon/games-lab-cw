@@ -144,7 +144,7 @@ void game::GameEngine::run()
 	ColourComponent c_minotaur; c_minotaur.colour = { 0, 0, 255 };
 	DetectionComponent d_minotaur; d_minotaur.c.radius = 30;
 	TransformComponent t_minotaur; t_minotaur.scale = { 0.15, 0.15, 0.15 }; t_minotaur.position = { 0, 55, -30 }; t_minotaur.rotation = { 90, 180, 0 };
-	CollisionComponent coll_minotaur; coll_minotaur.radius = 2.9;
+	CollisionComponent coll_minotaur; coll_minotaur.radius = 1;
 	scene_.instantiate("AIModel", m_minotaur, t_minotaur, camera, c_minotaur, d_minotaur, coll_minotaur);// d_minotaur, c_minotaur);
 	//DetectionComponent d_minotaur;
 	//CollisionComponent c_detectionRadius; c_detectionRadius.radius = 40;

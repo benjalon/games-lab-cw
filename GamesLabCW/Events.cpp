@@ -28,7 +28,7 @@ namespace game::events
 		{
 			HandleDetectionCollision(e);
 		}
-		else if (e.registry.has<AIComponent>(e.b) && e.registry.has<ProjectileComponent>(e.a)) 
+		else if (e.registry.has<AIComponent>(e.b) && e.registry.has<BulletComponent>(e.a)) 
 		{
 			HandleBulletCollision(e);
 		}
