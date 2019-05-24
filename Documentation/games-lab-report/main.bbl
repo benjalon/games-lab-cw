@@ -1,0 +1,42 @@
+\begin{thebibliography}{1}
+
+\bibitem{opengl}
+{Khronos Group}.
+\newblock Opengl, 2019.
+\newblock \hspace*{\fill}\linebreak[4]\url{https://www.opengl.org/} Accessed
+  19-May-2019.
+
+\bibitem{entt}
+Michele Caini.
+\newblock Entt, 2019.
+\newblock
+  \hspace*{\fill}\linebreak[4]\url{https://skypjack.github.io/entt/index.html}
+  Accessed 21-May-2019.
+
+\bibitem{gungeon}
+Dodge~Roll Games.
+\newblock Enter the gungeon, 2019.
+\newblock \hspace*{\fill}\linebreak[4]\url{http://dodgeroll.com/gungeon/}
+  Accessed 21-May-2019.
+
+\bibitem{tmachine}
+Adam Martin.
+\newblock Data structures for entity systems: Contiguous memory, 2014.
+\newblock
+  \hspace*{\fill}\linebreak[4]\url{http://t-machine.org/index.php/2014/03/08/data-structures-for-entity-systems-contiguous-memory/}
+  Accessed 21-May-2019.
+
+\bibitem{fowler}
+Martin Fowler.
+\newblock Callsuper, 2005.
+\newblock
+  \hspace*{\fill}\linebreak[4]\url{https://www.martinfowler.com/bliki/CallSuper.html/}
+  Accessed 21-May-2019.
+
+\bibitem{blinn1977models}
+James~F Blinn.
+\newblock Models of light reflection for computer synthesized pictures.
+\newblock In {\em ACM SIGGRAPH computer graphics}, volume~11, pages 192--198.
+  ACM, 1977.
+
+\end{thebibliography}

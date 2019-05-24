@@ -38,6 +38,9 @@ namespace game::events
 		std::string bullet_file;
 		Vector3 position;
 		Vector3 rotation;
+		std::string bullet_vs;
+		std::string bullet_fs;
+		std::string bullet_particles;
 	};
 
 

@@ -14,6 +14,8 @@
 #include "Input.h"
 #include "renderer/Texture.h"
 
+#include "procedural_generation/procedural_generation.h"
+
 game::GameEngine::GameEngine(bool fullscreen, bool vsync, bool ground) :
 	fullscreen_(fullscreen), vsync_(vsync), ground_(ground)
 {
@@ -57,24 +59,37 @@ game::GameEngine::GameEngine(bool fullscreen, bool vsync, bool ground) :
 	//Load entity prototypes
 	prototypes::register_prototypes();
 
-	//EXAMPLE Load models
+	//Load models
 	//renderer::load_model("models/Cyborg/cyborg.obj");
 	renderer::load_model("models/Room/room.obj");
 	renderer::load_model("models/Procedural/type1.obj");
 	renderer::load_model("models/Procedural/type2.obj");
 	renderer::load_model("models/Procedural/type3.obj");
 	renderer::load_model("models/Procedural/type4.obj");
+	renderer::load_model("models/Procedural/type5.obj");
 	renderer::load_model("models/Water/water.obj");
 	renderer::load_model("models/Skybox/skybox.obj");
 	renderer::load_model("models/Torch/torch.obj");
 	renderer::load_model("models/Key/Key_B_02.obj");
-	renderer::load_model("models/Minotaur/Minotaur@Jump.fbx");
+	renderer::load_model("models/Minotaur/Minotaur@Idle.fbx");
 	renderer::load_model("models/Fireball/fireball.obj");
 
 	//renderer::load_particle_effect("models/particle.png", 100);
-	renderer::load_particle_effect("models/star.png", 300, 0.2, 0.5);
-	renderer::load_particle_effect("models/fire.png", 30, 0.08, 0.3);
-	renderer::load_particle_effect("models/fire2.png", 100, 0.2, 1);
+	renderer::load_particle_effect("models/Particles/star.png", 200, 0.2, 0.5);
+	renderer::load_particle_effect("models/Particles/fire.png", 30, 0.08, 0.3);
+	renderer::load_particle_effect("models/Particles/fire2.png", 80, 0.15, 1);
+
+	// The four HP levels (hearts-3 = full HP, hearts-0 = dead)
+	renderer::load_overlay("models/UI/hearts-3.png", Vector2(0, 0));
+	renderer::load_overlay("models/UI/hearts-2.png", Vector2(0, 0));
+	renderer::load_overlay("models/UI/hearts-1.png", Vector2(0, 0));
+	renderer::load_overlay("models/UI/hearts-0.png", Vector2(0, 0));
+
+	// The four MP levels (mana-3 = full, mana-0 = empty)
+	renderer::load_overlay("models/UI/mana-3.png", Vector2(0, 0));
+	renderer::load_overlay("models/UI/mana-2.png", Vector2(0, 0));
+	renderer::load_overlay("models/UI/mana-1.png", Vector2(0, 0));
+	renderer::load_overlay("models/UI/mana-0.png", Vector2(0, 0));
 
 	std::string paths[6] = {
 		"models/Skybox/hw_ruins/ruins_lf.tga",
@@ -97,6 +112,7 @@ void game::GameEngine::run()
 	StatsComponent s_player; s_player.health = 4; s_player.mana = 1;
 	auto player = scene_.instantiate("FirstPersonController", TransformComponent{ {0,55,5} , { 180,0,0 } }, c_player);
 	auto camera = CameraComponent{ player };
+
 
 	// Room stuff
 	ModelComponent m_water; m_water.model_file = "models/Water/water.obj"; m_water.vertex_shader = "shaders/Water.vert"; m_water.fragment_shader = "shaders/Water.frag";
@@ -140,7 +156,7 @@ void game::GameEngine::run()
 	scene_.instantiate("Key", m_key, t_key6, k_key6, pl_key6);
 
 	// Minotaur test model
-	ModelComponent m_minotaur; m_minotaur.model_file = "models/Minotaur/Minotaur@Jump.fbx";
+	ModelComponent m_minotaur; m_minotaur.model_file = "models/Minotaur/Minotaur@Idle.fbx";
 	ColourComponent c_minotaur; c_minotaur.colour = { 0, 0, 255 };
 	DetectionComponent d_minotaur; d_minotaur.c.radius = 30;
 	TransformComponent t_minotaur; t_minotaur.scale = { 0.10, 0.1, 0.1 }; t_minotaur.position = { 0, 55, -30 }; t_minotaur.rotation = { 90, 180, 0 };
@@ -154,7 +170,7 @@ void game::GameEngine::run()
 	// Torches
 	ModelComponent m_torch; m_torch.model_file = "models/Torch/torch.obj";
 
-	ParticleComponent p_torch; p_torch.texture_file = "models/fire.png"; p_torch.respawn_count = 1;
+	ParticleComponent p_torch; p_torch.texture_file = "models/Particles/fire.png"; p_torch.respawn_count = 1;
 	p_torch.position_variation = Vector3(100, 50, 40);
 	p_torch.velocity_variation = Vector3(100, 50, 50);
 	p_torch.color_variation = Vector3(100, -0.5, 100);
@@ -163,31 +179,37 @@ void game::GameEngine::run()
 	TransformComponent t_torch1; t_torch1.position = { 26, 0, -23 }; t_torch1.scale = { 5, 5, 5 };
 	scene_.instantiate("Model", m_torch, t_torch1);
 	scene_.instantiate("PointLight", PointLightComponent{ {1, 147.0 / 255.0, 41.0 / 255.0}, 40, {26, 7, -23} });
-	scene_.instantiate("ParticleEffect", p_torch, TransformComponent{ { 26, 8, -23 } });
+	scene_.instantiate("ParticleEffect", p_torch, TransformComponent{ { 26, 9, -23 } });
 
 	TransformComponent t_torch2; t_torch2.position = { 26, 0, 23 }; t_torch2.scale = { 5, 5, 5 };
 	scene_.instantiate("Model", m_torch, t_torch2);
 	scene_.instantiate("PointLight", PointLightComponent{ {1, 147.0 / 255.0, 41.0 / 255.0}, 40, {26, 7, 23} });
-	scene_.instantiate("ParticleEffect", p_torch, TransformComponent{ { 26, 8, 23 } });
+	scene_.instantiate("ParticleEffect", p_torch, TransformComponent{ { 26, 9, 23 } });
 
 	TransformComponent t_torch3; t_torch3.position = { -26, 6, -10 }; t_torch3.scale = { 5, 5, 5 };
 	scene_.instantiate("Model", m_torch, t_torch3);
 	scene_.instantiate("PointLight", PointLightComponent{ {1, 147.0 / 255.0, 41.0 / 255.0}, 40, { -26, 13, -10 } });
-	scene_.instantiate("ParticleEffect", p_torch, TransformComponent{ { -26, 14, -10 } });
+	scene_.instantiate("ParticleEffect", p_torch, TransformComponent{ { -26, 15, -10 } });
 
 	TransformComponent t_torch4; t_torch4.position = { -26, 6, 10 }; t_torch4.scale = { 5, 5, 5 };
 	scene_.instantiate("Model", m_torch, t_torch4);
 	scene_.instantiate("PointLight", PointLightComponent{ {1, 147.0 / 255.0, 41.0 / 255.0}, 40, { -26, 13, 10 } });
-	scene_.instantiate("ParticleEffect", p_torch, TransformComponent{ { -26, 14, 10 } });
+	scene_.instantiate("ParticleEffect", p_torch, TransformComponent{ { -26, 15, 10 } });
 
 	// Portal
-	ParticleComponent p_portal; p_portal.texture_file = "models/star.png"; p_portal.respawn_count = 1;
+	ParticleComponent p_portal; p_portal.texture_file = "models/Particles/star.png"; p_portal.respawn_count = 1;
 	p_portal.position_variation = Vector3(100, 50, 10);
 	p_portal.velocity_variation = Vector3(100, 50, 40);
 	p_portal.color_variation = Vector3(100, -0.5, 100);
 	p_portal.color_modifier = Vector3(0.8, 0.2, 1);
 	scene_.instantiate("ParticleEffect", p_portal, TransformComponent{ Vector3(3, 5, 22) });
 	scene_.instantiate("PointLight", PointLightComponent{ {1, 105.0 / 255.0, 180.0 / 255.0}, 40, { 3, 3, 22} });
+
+	// UI
+	OverlayComponent i_hp; i_hp.texture_file = "models/UI/hearts-2.png";
+	scene_.instantiate("Overlay", i_hp);
+	OverlayComponent i_mp; i_mp.texture_file = "models/UI/mana-3.png";
+	scene_.instantiate("Overlay", i_mp);
 
 	// Skybox
 	TransformComponent t_skybox; t_skybox.scale = { 20, 20, 20 };

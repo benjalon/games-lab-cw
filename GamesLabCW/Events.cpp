@@ -33,7 +33,7 @@ namespace game::events
 			HandleBulletCollision(e);
 		}
 
-		std::cout << "Enter: " << e.a << " " << e.b << std::endl;
+		/*std::cout << "Enter: " << e.a << " " << e.b << std::endl;*/
 	}
 	RESPONSE(SphereEnterCollideResponse, EnterCollision);
 
@@ -52,17 +52,13 @@ namespace game::events
 	void FireBulletResponse(const FireBullet &e)
 	{
 		TransformComponent t; t.scale = { 0.5, 0.5, 0.5 }; t.position = e.position; t.rotation = e.rotation;
-		ModelComponent m; m.model_file = e.bullet_file;
+		ModelComponent m; m.model_file = e.bullet_file; m.vertex_shader = e.bullet_vs; m.fragment_shader = e.bullet_fs;
 		
 		KinematicComponent k; k.velocity = Vector2(t.rotation.x, t.rotation.y).direction_hv() * 30;
-		Vector3 one = Vector2(t.rotation.x, t.rotation.y).direction_hv() * 30;;
-		Vector3 two = Vector2(t.rotation.x, t.rotation.z).direction_hv() * 30;;
-		Vector3 three = Vector2(t.rotation.y, t.rotation.z).direction_hv() * 30;;
-		Vector3 four = Vector2(t.rotation.z, t.rotation.x).direction_hv() * 30;;
 
 
-		ParticleComponent p_fireball; p_fireball.texture_file = "models/fire2.png";
-		p_fireball.respawn_count = 1;
+		ParticleComponent p_fireball; p_fireball.texture_file = e.bullet_particles; p_fireball.respawn_count = 1;
+
 		p_fireball.position_variation = Vector3(100, 50, 100);
 		p_fireball.velocity_variation = Vector3(100, 50, 10);
 		p_fireball.color_variation = Vector3(100, -0.5, 100);

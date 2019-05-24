@@ -54,11 +54,9 @@ namespace game::systems
 		//Strafe
 		k.velocity += Vector2(t.rotation.x, t.rotation.y).direction_hv_right() * move_speed *
 			(input::is_held(input::KEY_D) - input::is_held(input::KEY_A));
-		//s.mana += info.dt;
-		if (input::is_released(input::MOUSE_BUTTON_1)) {
-			//s.mana = 0;
-			events::dispatcher.enqueue<events::FireBullet>(info.scene, bc.model_file, t.position, t.rotation);
-		}
+
+		if (input::is_released(input::MOUSE_BUTTON_1))
+			events::dispatcher.enqueue<events::FireBullet>(info.scene, bc.model_file, t.position, t.rotation, bc.vs, bc.fs, bc.particle_file);
 
 		/* JUMPING SIMULATION IN ABSENCE OF COLLISIONS */
 		////Acceleration due to gravity
@@ -90,12 +88,12 @@ namespace game::systems
 	SYSTEM(KinematicSystem, TransformComponent, KinematicComponent);
 
 	//Updates the spatial partitioning grid
-	auto SpatialGridSystem = [](SceneInfo info, auto entity, TransformComponent& t)
+	auto SpatialGridSystem = [](SceneInfo info, auto entity, TransformComponent &t, CollisionComponent &)
 	{
 		auto i = info.scene.spatial_grid.update(t.position, entity, t.last_index);
 		t.last_index = i;
 	};
-	SYSTEM(SpatialGridSystem, TransformComponent);
+	SYSTEM(SpatialGridSystem, TransformComponent, CollisionComponent);
 
 	//Detects collisions, updating pools and logging events
 	auto CollisionSystem = [](SceneInfo info, auto entity, CollisionComponent& c1, TransformComponent& t1)
@@ -204,6 +202,9 @@ namespace game::systems
 
 	auto AISystem = [](SceneInfo info, Entity entity, TransformComponent &t, AIComponent &a, CameraComponent &c, ProjectileComponent &bc, StatsComponent &s)
 	{
+		//Get reference to camera
+		CameraComponent &c = info.scene.get<CameraComponent>(d.camera);
+
 		//goal: rotate t on the z axis.
 		if (s.health < 1)
 		{

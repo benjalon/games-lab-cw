@@ -73,6 +73,11 @@ namespace game
 		Vector3 color_modifier;
 	};
 
+	struct OverlayComponent
+	{
+		std::string texture_file;
+	};
+
 	/* LIGHTING */
 
 	struct AmbientLightComponent
@@ -126,10 +131,14 @@ namespace game
 
 	struct ProjectileComponent{
 		std::string model_file = "models/Fireball/fireball.obj";
+		std::string particle_file = "models/Particles/fire2.png";
+		std::string vs = "shaders/FlatColor.vert";
+		std::string fs = "shaders/FlatColor.frag";
 	};
 
 	struct DetectionComponent {
 		CollisionComponent c;
+		Entity camera;
 	};
 
 	struct StatsComponent {

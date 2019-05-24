@@ -6,5 +6,8 @@ uniform sampler2D texSampler;
 
 void main()
 {
-    color = (texture(texSampler, TexCoords) * ParticleColor);
+	vec4 texColor =  texture(texSampler, TexCoords);
+	if(texColor.a < 0.1)
+		discard;
+    color = texColor * ParticleColor;
 }  

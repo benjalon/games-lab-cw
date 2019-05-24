@@ -50,6 +50,10 @@ void game::Scene::draw()
 		registry_.view<ParticleComponent, ColourComponent, TransformComponent>().each([&](auto, auto &p, auto &c, auto &t) {
 			renderer::render_particle(cam, p, c, t);
 		});
+
+		registry_.view<OverlayComponent>().each([&](auto, auto &i) {
+			renderer::render_overlay(cam, i);
+		});
 	});
 }
 
@@ -65,4 +69,9 @@ game::Entity game::Scene::instantiate(std::initializer_list<std::string> p)
 void game::Scene::destroy(Entity e)
 {
 	registry_.destroy(e);
+}
+
+void game::Scene::clear()
+{
+	registry_.reset();
 }

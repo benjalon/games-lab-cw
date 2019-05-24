@@ -20,6 +20,7 @@
 #include "VBO.h"
 #include "Model.h"
 #include "ParticleEffect.h"
+#include "Overlay.h"
 
 //Quick conversion to radians
 #define R(x) glm::radians((float)x)
@@ -28,6 +29,7 @@ namespace game::renderer
 {
 	std::unordered_map<std::string, Model> models;
 	std::unordered_map<std::string, ParticleEffect> particleEffects;
+	std::unordered_map<std::string, Overlay> overlays;
 	std::map<std::string, Texture> externalTextures;
 
 	void init()
@@ -104,6 +106,10 @@ namespace game::renderer
 
 	void load_particle_effect(std::string texture, int count, float scale, float speed) {
 		particleEffects.emplace(texture, ParticleEffect(texture, count, scale, speed)).first->second;
+	}
+
+	void load_overlay(std::string file, Vector2 position) {
+		overlays.emplace(file, Overlay(file, position)).first->second;
 	}
 
 	void load_external_map(std::string path, std::string model_path, TextureType type)
@@ -334,6 +340,46 @@ namespace game::renderer
 		);
 
 		particle.Render(shader);
+	}
+
+	void render_overlay(CameraComponent camera, OverlayComponent &i)
+	{
+		//Get the overlay, aborting if not found
+		auto it = overlays.find(i.texture_file);
+		if (it == overlays.end()) return;
+		Overlay &overlay = it->second;
+
+		GLuint shader = get_shader(false, false, 0, 0, 0, "shaders/Overlay.vert", "shaders/Overlay.frag");
+		glUseProgram(shader);
+
+		//Calculate MVP matrices
+		glm::mat4 matProj = proj_matrix(camera);
+
+		glm::mat4 matView = view_matrix(camera);
+
+		glm::mat4 matModel = glm::mat4(1);
+			
+			/*glm::translate(glm::vec3(t.position)) *
+			glm::rotate(R(t.rotation.x), glm::vec3(1, 0, 0)) *
+			glm::rotate(R(t.rotation.z), glm::vec3(0, 0, 1)) *
+			glm::rotate(R(t.rotation.y), glm::vec3(0, 1, 0)) *
+			glm::scale(glm::vec3(t.scale));
+*/
+		//Provide MVP matrices
+		glUniformMatrix4fv(
+			glGetUniformLocation(shader, "projectionMatrix"),
+			1, GL_FALSE, glm::value_ptr(matProj)
+		);
+		glUniformMatrix4fv(
+			glGetUniformLocation(shader, "viewMatrix"),
+			1, GL_FALSE, glm::value_ptr(matView)
+		);
+		glUniformMatrix4fv(
+			glGetUniformLocation(shader, "modelMatrix"),
+			1, GL_FALSE, glm::value_ptr(matModel)
+		);
+
+		overlay.Render(shader);
 	}
 
 	void animate_model(double time, std::string model_file) 

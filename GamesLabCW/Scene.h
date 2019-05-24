@@ -78,5 +78,8 @@ namespace game
 
 		//Destroys the given entity
 		void destroy(Entity e);
+
+		//Clears the entire scene, destroying all entities
+		void clear();
 	};
 }
