@@ -113,6 +113,17 @@ void game::GameEngine::run()
 	auto player = scene_.instantiate("FirstPersonController", TransformComponent{ {0,55,5} , { 180,0,0 } }, c_player);
 	auto camera = scene_.instantiate("Camera", CameraComponent{ player });
 
+	// Minotaur test model
+	//ModelComponent, ColourComponent, TransformComponent, HitboxComponent, KinematicComponent, AIComponent, CameraComponent, ProjectileComponent, DetectionComponent,StatsComponent, CollisionComponent
+	ModelComponent m_minotaur; m_minotaur.model_file = "models/Minotaur/Minotaur@Idle.fbx";
+	ColourComponent c_minotaur; c_minotaur.colour = { 0, 0, 255 };
+	DetectionComponent d_minotaur; d_minotaur.c.radius = 30; d_minotaur.camera = camera;
+	TransformComponent t_minotaur; t_minotaur.scale = { 0.10, 0.1, 0.1 }; t_minotaur.position = { 0, 55, -30 }; t_minotaur.rotation = { 90, 180, 0 };
+	HitboxComponent h_minotaur; h_minotaur.c.radius = 2.5;
+	StatsComponent s_minotaur; s_minotaur.health = 3, s_minotaur.mana = 1;
+	scene_.instantiate("AIModel", m_minotaur, c_minotaur, t_minotaur, h_minotaur, d_minotaur, s_minotaur);
+	//scene_.instantiate("AITest", m_minotaur, c_minotaur, t_minotaur, h_minotaur, d);
+
 
 	// Room stuff
 	ModelComponent m_water; m_water.model_file = "models/Water/water.obj"; m_water.vertex_shader = "shaders/Water.vert"; m_water.fragment_shader = "shaders/Water.frag";
@@ -154,14 +165,6 @@ void game::GameEngine::run()
 	TransformComponent t_key6; t_key6.scale = { 0.5, 0.5, 0.5 }; t_key6.position = { -30, 0.5, 10 }; t_key6.rotation = { 90, 180, 180 };
 	PointLightComponent pl_key6{ {1, 180 / 255.0, 120.0 / 255.0}, 0.5, t_key6.position };
 	scene_.instantiate("Key", m_key, t_key6, k_key6, pl_key6);
-
-	// Minotaur test model
-	ModelComponent m_minotaur; m_minotaur.model_file = "models/Minotaur/Minotaur@Idle.fbx";
-	ColourComponent c_minotaur; c_minotaur.colour = { 0, 0, 255 };
-	DetectionComponent d_minotaur; d_minotaur.c.radius = 30; d_minotaur.camera = camera;
-	TransformComponent t_minotaur; t_minotaur.scale = { 0.10, 0.1, 0.1 }; t_minotaur.position = { 0, 55, -30 }; t_minotaur.rotation = { 90, 180, 0 };
-	HitboxComponent h_minotaur; h_minotaur.c.radius = 2.5;
-	scene_.instantiate("AIModel", m_minotaur, t_minotaur, h_minotaur, c_minotaur, d_minotaur);
 
 	// Torches
 	ModelComponent m_torch; m_torch.model_file = "models/Torch/torch.obj";
