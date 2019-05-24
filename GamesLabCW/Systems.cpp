@@ -320,6 +320,19 @@ namespace game::systems
 
 	auto PlayerMovementSystem = [](auto info, auto entity, FirstPersonControllerComponent &f, TransformComponent &t, KinematicComponent &k)
 	{
+		//Scalar projection of a onto b
+		auto scalar_projection = [](glm::vec3 a, glm::vec3 b)
+		{
+			return glm::dot(a, b) / glm::length(b);
+		};
+
+		//Vector projection of a onto b
+		auto vector_projection = [scalar_projection](glm::vec3 a, glm::vec3 b)
+		{
+			return scalar_projection(a, b) * b / glm::length(b);
+		};
+
+
 		//Undo resetting of acceleration, for now
 		k.acceleration = k.acceleration_old;
 
@@ -327,23 +340,36 @@ namespace game::systems
 		t.position += f.move_velocity * info.dt;
 
 		//SIMULATE FLOOR COLLISION
-		double floor = 6;
-		if (!NOCLIP && t.position.y <= floor)
-		{
-			//Integrate as normal up to collision
-			double fraction = (t.position_old.y - floor) / (t.position_old.y - t.position.y);
-			double dt1 = fraction * info.dt;
-			k.velocity = k.velocity_old + k.acceleration * dt1;
-			Vector3 total_velocity = (k.velocity + k.velocity_old) / 2.0 + f.move_velocity;
-			t.position = t.position_old + total_velocity * dt1;
+		Vector3 surface_normal = { 0, 1, 0 };
+		double surface_pos = scalar_projection(Vector3(0, 6, 0), surface_normal);
 
-			//Integrate without negative y component after collision
-			double dt2 = info.dt - dt1;
-			k.acceleration.y = std::max(k.acceleration.y, 0.0);
-			k.velocity.y = std::max(k.velocity.y, 0.0);
-			total_velocity.y = std::max(total_velocity.y, 0.0);
-			k.velocity += k.acceleration * dt2;
-			t.position += total_velocity * dt2;
+		if (!NOCLIP &&
+			scalar_projection(t.position, surface_normal) <= surface_pos)
+		{
+			//Determine point of collision along surface normal
+			double s1 = scalar_projection(t.position_old, surface_normal);
+			double s2 = scalar_projection(t.position, surface_normal);
+			double fraction = (s1 - surface_pos) / (s1 - s2);
+
+			fraction = abs(fraction);
+			if (fraction <= 1)
+			{
+				//Integrate as usual up to collision
+				double dt1 = fraction * info.dt;
+				k.velocity = k.velocity_old + k.acceleration * dt1;
+				Vector3 total_velocity = (k.velocity + k.velocity_old) / 2.0 + f.move_velocity;
+				t.position = t.position_old + total_velocity * dt1;
+
+				//Integrate, removing normal component, after collision
+				double dt2 = info.dt - dt1;
+
+				k.acceleration -= vector_projection(k.acceleration, surface_normal);
+				k.velocity -= vector_projection(k.velocity, surface_normal);
+				total_velocity -= vector_projection(total_velocity, surface_normal);
+
+				k.velocity += k.acceleration * dt2;
+				t.position += total_velocity * dt2;
+			}
 		}
 
 		//Reset acceleration again
