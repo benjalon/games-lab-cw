@@ -60,21 +60,19 @@ game::GameEngine::GameEngine(bool fullscreen, bool vsync, bool ground) :
 	prototypes::register_prototypes();
 
 	//Load models
-	//renderer::load_model("models/Cyborg/cyborg.obj");
 	renderer::load_model("models/Room/room.obj");
-	/*renderer::load_model("models/Procedural/type1.obj");
+	renderer::load_model("models/Procedural/type1.obj");
 	renderer::load_model("models/Procedural/type2.obj");
 	renderer::load_model("models/Procedural/type3.obj");
 	renderer::load_model("models/Procedural/type4.obj");
 	renderer::load_model("models/Procedural/type5.obj");
-	renderer::load_model("models/Water/water.obj");*/
+	renderer::load_model("models/Water/water.obj");
 	renderer::load_model("models/Skybox/skybox.obj");
-	/*renderer::load_model("models/Torch/torch.obj");
+	renderer::load_model("models/Torch/torch.obj");
 	renderer::load_model("models/Key/Key_B_02.obj");
-	renderer::load_model("models/Fireball/fireball.obj");*/
+	renderer::load_model("models/Fireball/fireball.obj");
 	renderer::load_model("models/Minotaur/Minotaur@Jump.fbx");
 
-	//renderer::load_particle_effect("models/particle.png", 100);
 	renderer::load_particle_effect("models/Particles/star.png", 200, 0.2, 0.5);
 	renderer::load_particle_effect("models/Particles/fire.png", 30, 0.08, 0.3);
 	renderer::load_particle_effect("models/Particles/fire2.png", 80, 0.15, 1);
@@ -113,7 +111,7 @@ void game::GameEngine::run()
 
 	// Minotaur model
 	ModelComponent m_minotaur; m_minotaur.model_file = "models/Minotaur/Minotaur@Jump.fbx";  m_minotaur.vertex_shader = "shaders/FlatColor.vert"; m_minotaur.fragment_shader = "shaders/BlueSpirit.frag";
-	TransformComponent t_minotaur; t_minotaur.scale = { 0.15, 0.15, 0.15 }; t_minotaur.position = { 0, 9, -15 }; t_minotaur.rotation = { 90, 180, 0 };//90, 180
+	TransformComponent t_minotaur; t_minotaur.scale = { 0.15, 0.15, 0.15 }; t_minotaur.position = { 0, 9, -15 };
 	DetectionComponent d_minotaur; d_minotaur.c.radius = 10; d_minotaur.camera = camera;
 	scene_.instantiate("AIModel", m_minotaur, t_minotaur, d_minotaur);
 

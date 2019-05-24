@@ -159,7 +159,7 @@ namespace game::systems
 	auto AnimationSystem = [](auto info, auto entity, auto &m)
 	{
 		// Animation works but is too laggy to use
-		/*if (!m.isAnimated)*/
+		if (!m.isAnimated)
 		{
 			return;
 		}
