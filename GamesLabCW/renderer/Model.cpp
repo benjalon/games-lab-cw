@@ -270,7 +270,7 @@ namespace game
 			transforms[i] = Matrix4fToGLM(boneInfos[i].finalTransformation);
 		}
 
-		/*for (unsigned int i = 0; i < vertices.size(); ++i)
+		for (unsigned int i = 0; i < vertices.size(); ++i)
 		{
 			auto currentBone = bones[i];
 
@@ -284,7 +284,7 @@ namespace game
 			vertices[i].pos = glm::vec3(boneTransform * glm::vec4(vertices[i].pos, 1));
 		}
 
-		updateVertices();*/
+		updateVertices();
 	}
 
 	void Model::readNodeHierarchy(float animationTime, const aiNode* node, const Matrix4f& ParentTransform)
