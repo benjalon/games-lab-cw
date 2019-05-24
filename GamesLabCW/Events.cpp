@@ -45,7 +45,7 @@ namespace game::events
 		{
 			HandleDetectionCollisionLeaving(e);
 		}
-		std::cout << "Leave: " << e.a << " " << e.b << std::endl;
+		//std::cout << "Leave: " << e.a << " " << e.b << std::endl;
 	}
 	RESPONSE(SphereLeaveCollideResponse, LeaveCollision);
 
@@ -55,6 +55,12 @@ namespace game::events
 		ModelComponent m; m.model_file = e.bullet_file; m.vertex_shader = e.bullet_vs; m.fragment_shader = e.bullet_fs;
 		
 		KinematicComponent k; k.velocity = Vector2(t.rotation.x, t.rotation.y).direction_hv() * 30;
+
+		auto vel = glm::normalize(k.velocity.ToGLM());
+		double x = e.radius * 2.5;
+		glm::vec3 vel2 = { x,x,x };
+		t.position = Vector3(t.position.ToGLM() + vel * vel2);
+		//k.velocity = { 0,0,0 };
 
 
 		ParticleComponent p_fireball; p_fireball.texture_file = e.bullet_particles; p_fireball.respawn_count = 1;
@@ -109,7 +115,6 @@ namespace game::events
 
 		bs.draw = false;
 		s.health -= 1;
-		cout << "Hit" << endl;
 	}
 
 	void HandleDetectionCollision(const EnterCollision &e)

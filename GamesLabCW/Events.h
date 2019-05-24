@@ -41,6 +41,7 @@ namespace game::events
 		std::string bullet_vs;
 		std::string bullet_fs;
 		std::string bullet_particles;
+		double radius;
 	};
 
 

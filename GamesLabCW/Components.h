@@ -143,12 +143,13 @@ namespace game
 
 	struct StatsComponent {
 		int health = 3;
-		int mana = 3;
+		double mana = 3;
 		int keyCount = 0;
 	};
 
 	struct BulletComponent {
 		bool draw = true;
+		double timeAlive = 0;
 	};
 
 	struct HitboxComponent {
