@@ -18,10 +18,7 @@ namespace game
 	/* GAME AND ENGINE */
 
 	struct GameStateComponent {};
-	struct FirstPersonControllerComponent
-	{
-		Vector3 move_velocity;
-	};
+	struct FirstPersonControllerComponent {};
 	struct PortalComponent {};
 
 	// Tracks how many keys are picked up, and where in the game they should be rendered
@@ -120,6 +117,8 @@ namespace game
 		Vector3 acceleration;
 
 		Vector3 angular_velocity;
+
+		Vector3 move_velocity;
 
 		Vector3 velocity_old;
 		Vector3 acceleration_old;

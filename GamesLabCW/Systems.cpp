@@ -59,17 +59,12 @@ namespace game::systems
 			//Constrain movement instruction to horizontal plane
 			move_dir.y = 0;
 
-			//Jump, if grounded
-			//if (t.position.y <= 6.001 && input::is_pressed(input::KEY_SPACE))
-			if (input::is_pressed(input::KEY_SPACE))
-				k.acceleration.y += 1500;
-
 			//Acceleration due to gravity
 			k.acceleration.y -= 50;
 		}
 
 		//Apply movement instruction
-		f.move_velocity = move_dir * move_speed;
+		k.move_velocity = move_dir * move_speed;
 
 		//Fire bullet
 		if (input::is_released(input::MOUSE_BUTTON_1))
@@ -318,7 +313,8 @@ namespace game::systems
 	};
 	SYSTEM(ParticleSystem, ParticleComponent, ColourComponent, TransformComponent, KinematicComponent);
 
-	auto PlayerMovementSystem = [](SceneInfo info, auto entity, FirstPersonControllerComponent &f, TransformComponent &t, KinematicComponent &k)
+	//Handles collision response for kinematic bodies against solid planes
+	auto SolidPlaneSystem = [](SceneInfo info, auto entity, TransformComponent &t, KinematicComponent &k)
 	{
 		//Scalar projection of a onto b
 		auto scalar_projection = [](glm::vec3 a, glm::vec3 b)
@@ -337,7 +333,7 @@ namespace game::systems
 		k.acceleration = k.acceleration_old;
 
 		//Add movement speed
-		t.position += f.move_velocity * info.dt;
+		t.position += k.move_velocity * info.dt;
 
 		//Calculate collision response for every solid plane
 		if (!NOCLIP)
@@ -360,7 +356,7 @@ namespace game::systems
 						//Integrate as usual up to collision
 						double dt1 = fraction * info.dt;
 						k.velocity = k.velocity_old + k.acceleration * dt1;
-						Vector3 total_velocity = (k.velocity + k.velocity_old) / 2.0 + f.move_velocity;
+						Vector3 total_velocity = (k.velocity + k.velocity_old) / 2.0 + k.move_velocity;
 						t.position = t.position_old + total_velocity * dt1;
 
 						//Integrate, removing normal component, after collision
@@ -369,7 +365,7 @@ namespace game::systems
 						k.acceleration -= vector_projection(k.acceleration, normal);
 						k.velocity -= vector_projection(k.velocity, normal);
 						total_velocity -= vector_projection(total_velocity, normal);
-						f.move_velocity -= vector_projection(f.move_velocity, normal);
+						k.move_velocity -= vector_projection(k.move_velocity, normal);
 						k.velocity_old -= vector_projection(k.velocity_old, normal);
 
 						k.velocity += k.acceleration * dt2;
@@ -382,5 +378,5 @@ namespace game::systems
 		//Reset acceleration again
 		k.acceleration = { 0, 0, 0 };
 	};
-	SYSTEM(PlayerMovementSystem, FirstPersonControllerComponent, TransformComponent, KinematicComponent);
+	SYSTEM(SolidPlaneSystem, TransformComponent, KinematicComponent);
 }
