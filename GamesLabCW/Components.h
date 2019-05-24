@@ -127,6 +127,14 @@ namespace game
 		enum State {Look, Dodge, Shoot};
 		State state;
 		double moving = 0;
+		
+		//Dodge trackers
+		double dodgeCooldown = 0;
+		double dodgeMax = 5;
+		bool canDodge = dodgeCooldown > dodgeMax;
+		bool dodgeBullet = false;
+		double direction = 0;
+
 	};
 
 	struct ProjectileComponent{

@@ -2,9 +2,13 @@
  * Events.h
  * Defines the responses used for event signalling.
  */
+#define GLM_ENABLE_EXPERIMENTAL
 
 #include "Events.h"
 #include "Components.h"
+#include <glm/glm.hpp>
+#include <glm/gtx/transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 using namespace std;
 
 entt::dispatcher game::events::dispatcher{};
@@ -109,12 +113,37 @@ namespace game::events
 		}
 	}
 
-	void HandleBulletCollision(const EnterCollision &e) {
+	void HandleBulletCollision(const EnterCollision &e) 
+	{
+		auto &ai = e.registry.get<AIComponent>(e.b);
 		auto &s = e.registry.get<StatsComponent>(e.b);
 		auto &bs = e.registry.get<BulletComponent>(e.a);
 
-		bs.draw = false;
-		s.health -= 1;
+		if (ai.dodgeBullet)
+		{
+			auto& bt = e.registry.get<TransformComponent>(e.a);
+			auto& at = e.registry.get<TransformComponent>(e.b);
+			Vector2 cameraPos = Vector2(bt.position.x, bt.position.z);
+			Vector2 enemyPos = Vector2(at.position.x, at.position.z);
+			Vector2 nonNormal = cameraPos - enemyPos;
+			Vector2 fromPlayerToEnemy = Vector2(glm::normalize(nonNormal.ToGLM()));
+			glm::mat4 matModel = glm::rotate(glm::radians((float)(at.rotation.z)), glm::vec3(0, 0, 1));
+			glm::vec2 playerHeading = glm::vec2(matModel[2][0], matModel[2][2]);
+			float cosinedegreesToRotate = glm::dot(playerHeading, fromPlayerToEnemy.ToGLM());
+
+			if (fromPlayerToEnemy.x < 0)
+				ai.direction = -(360 - glm::degrees(acos(cosinedegreesToRotate))) + 180;
+			else
+				ai.direction = -(glm::degrees(acos(cosinedegreesToRotate))) + 180;
+
+			ai.state = ai.Dodge;
+			//ai.dodgeBullet = false;
+		}
+		else
+		{
+			bs.draw = false;
+			s.health -= 1;
+		}
 	}
 
 	void HandleDetectionCollision(const EnterCollision &e)
@@ -128,6 +157,5 @@ namespace game::events
 	{
 		auto &ai = e.registry.get<AIComponent>(e.b);
 		ai.state = ai.Look;
-
 	}
 }

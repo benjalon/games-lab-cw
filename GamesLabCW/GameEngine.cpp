@@ -110,7 +110,7 @@ void game::GameEngine::run()
 	// Player/camera
 	CollisionComponent c_player; c_player.radius = 3;
 	StatsComponent s_player; s_player.health = 4; s_player.mana = 1;
-	auto player = scene_.instantiate("FirstPersonController", TransformComponent{ {0,9,5} , { 180,0,0 } }, c_player);
+	auto player = scene_.instantiate("FirstPersonController", TransformComponent{ {0,65,5} , { 180,0,0 } }, c_player);
 	auto camera = scene_.instantiate("Camera", CameraComponent{ player });
 
 	// Minotaur test model
@@ -118,7 +118,7 @@ void game::GameEngine::run()
 	ModelComponent m_minotaur; m_minotaur.model_file = "models/Minotaur/Minotaur@Idle.fbx";
 	ColourComponent c_minotaur; c_minotaur.colour = { 0, 0, 255 };
 	DetectionComponent d_minotaur; d_minotaur.c.radius = 30; d_minotaur.camera = camera;
-	TransformComponent t_minotaur; t_minotaur.scale = { 0.10, 0.1, 0.1 }; t_minotaur.position = { 0, 9, -15 }; t_minotaur.rotation = { 90, 180, 0 };
+	TransformComponent t_minotaur; t_minotaur.scale = { 0.10, 0.1, 0.1 }; t_minotaur.position = { 0, 55, -15 }; t_minotaur.rotation = { 90, 180, 0 };
 	HitboxComponent h_minotaur; h_minotaur.c.radius = 2.5;
 	StatsComponent s_minotaur; s_minotaur.health = 3, s_minotaur.mana = 1;
 	scene_.instantiate("AIModel", m_minotaur, c_minotaur, t_minotaur, h_minotaur, d_minotaur, s_minotaur);

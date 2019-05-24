@@ -124,11 +124,23 @@ namespace game::systems
 				t2 = info.registry.get<TransformComponent>(other);
 			}
 
-			if (info.registry.has<HitboxComponent>(other) && info.registry.has<BulletComponent>(entity))
+			if (info.registry.has<DetectionComponent>(other) && info.registry.has<BulletComponent>(entity))
 			{
-				HitboxComponent& h = info.registry.get<HitboxComponent>(other);
-				c2 = h.c;
+				AIComponent &ai = info.registry.get<AIComponent>(other);
+
+				if (ai.dodgeCooldown > ai.dodgeMax)
+				{
+					DetectionComponent& d = info.registry.get<DetectionComponent>(other);
+					ai.dodgeBullet = true;
+					c2 = d.c; 
+				}
+				else
+				{
+					HitboxComponent& h = info.registry.get<HitboxComponent>(other);
+					c2 = h.c;
+				}
 				t2 = info.registry.get<TransformComponent>(other);
+					
 			}
 
 			//Test if currently colliding (distance between centres less than sum of radii)
@@ -215,54 +227,67 @@ namespace game::systems
 		}
 		else
 		{
-			Vector3 moveRight = glm::normalize(Vector2(-fmod(t.rotation.z + 180, 360), 0).direction_hv_right().ToGLM());
-			Vector3 moveForward = glm::normalize(Vector2(-fmod(t.rotation.z + 180, 360), 0).direction_hv().ToGLM());
-			Vector3 moveBackward = moveForward * -1;
-			Vector3 moveLeft = moveRight * -1;
+			a.dodgeCooldown += info.dt;
 
 			if (a.state == a.Look)
 			{
+				//cout << "Looking" << endl;
+
 				a.moving += info.dt;
-				if (a.moving > 6)
+				if (a.moving > 7)
 				{
+					auto r = rand() % 360;
+					auto direction = Vector2(-fmod(t.rotation.z + r, 360), 0).direction_hv().ToGLM();
+					Vector3 move = glm::normalize(direction);
 					a.moving = 0;
-					int speed = 4;
+					int speed = 2;
 					speed *= 100;
-					auto r = rand() % 4;
-					switch (r)
-					{
-					case 0:
-						k.velocity = moveRight * speed * info.dt;
-						cout << "Right" << endl;
-						break;
-					case 1:
-						k.velocity = moveForward * speed * info.dt;
-						cout << "Forward" << endl;
-						break;
-					case 2:
-						k.velocity = moveBackward * speed * info.dt;
-						cout << "Back" << endl;
-						break;
-					case 3:
-						k.velocity = moveLeft * speed * info.dt;
-						cout << "Left" << endl;
-						break;
-					default:
-						break;
-					}
+					k.velocity = move * speed * info.dt;
+					t.rotation.z = Vector2(-fmod(t.rotation.z + r, 360), 0).abs() + 180;
 				}
-				else if (a.moving > 2)
+				else if (a.moving > 4)
 				{
 					k.velocity = { 0,0,0 };
+				}
+				else if (a.dodgeCooldown > 0.7 && a.dodgeBullet)
+				{
+					k.velocity = { 0,0,0 };
+					a.dodgeBullet = false;
 				}
 				
 			}
 			else if (a.state == a.Dodge)
 			{
+				//cout << "Dodging" << endl;
+				cout << (a.dodgeCooldown > a.dodgeMax) << endl;
+
+				if (a.dodgeCooldown > a.dodgeMax)
+				{
+					k.velocity = { 0,0,0 };
+					a.dodgeCooldown = 0;
+					auto direction = Vector2(-fmod(a.direction, 360), 0).direction_hv_right().ToGLM();
+					Vector3 move = glm::normalize(direction);
+					a.moving = 0;
+					int speed = 10;
+					speed *= 100;
+					auto r = rand() % 2;
+					if (r == 1)
+					{
+						k.velocity = move * speed * info.dt;
+					}
+					else
+					{
+						k.velocity = move * speed * info.dt * -1;
+					}
+				}
+				a.state = a.Look;
+
 
 			}
 			else if (a.state == a.Shoot)
 			{
+				//cout << "Attacking" << endl;
+
 				// Get the positions of both Entities
 				Vector2 cameraPos = Vector2(c.position.x, c.position.z);
 				Vector2 enemyPos = Vector2(t.position.x, t.position.z);
@@ -293,6 +318,7 @@ namespace game::systems
 					Vector3 rotation = { -fmod(t.rotation.z+180,360), 0, 0 };
 					events::dispatcher.enqueue<events::FireBullet>(info.scene, bc.model_file, t.position, rotation, bc.vs, bc.fs, bc.particle_file,h.c.radius);
 				}
+				a.state = a.Look;
 			}
 		}
 		
