@@ -52,12 +52,12 @@ void game::Scene::draw()
 			for (int i = 0; i < n_p; i++)
 			{
 				Vector3 to_player = p[i].position - t_player.position;
-				double dist = std::sqrt(to_player.x * to_player.x +
+				double dist = to_player.x * to_player.x +
 					to_player.y * to_player.y +
-					to_player.z * to_player.z
-				);
+					to_player.z * to_player.z;
 
-				if (dist < RENDER_DISTANCE - 100.0)
+				double dist_max = RENDER_DISTANCE - 100.0;
+				if (dist < dist_max * dist_max)
 					nearby.emplace_back(p[i]);
 			}
 

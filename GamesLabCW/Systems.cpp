@@ -350,8 +350,14 @@ namespace game::systems
 					double s2 = scalar_projection(t.position, normal);
 					double fraction = (s1 - pos) / (s1 - s2);
 
+					//Absolute distance to plane centre
+					double dist = glm::length(glm::vec3(sp.position - t.position));
+
+					//Squared distance perpendicular to plane
+					double d2 = dist * dist - s2 * s2;
+
 					fraction = abs(fraction);
-					if (fraction <= 1)
+					if (fraction <= 1 && d2 <= sp.size * sp.size)
 					{
 						//Integrate as usual up to collision
 						double dt1 = fraction * info.dt;

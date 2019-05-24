@@ -521,6 +521,9 @@ namespace game::procgen
 				key = true;
 			}
 
+			//Solid floor
+			scene.instantiate("SolidPlane", SolidPlaneComponent{ { 0, 1, 0 }, { 0, -7, 0 } });
+
 			//Calculate suggested player position as cell furthest from key
 			Coords player_pos;
 			double longest_dist = -std::numeric_limits<double>::infinity();

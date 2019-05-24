@@ -134,6 +134,7 @@ namespace game
 	{
 		Vector3 normal;
 		Vector3 position;
+		double size = std::numeric_limits<double>::infinity();
 	};
 
 	struct MoveSphere {};
