@@ -22,7 +22,7 @@ std::vector<game::systems::SystemInvoker> game::systems::system_invokers;
 namespace game::systems
 {
 	//General game state system
-	auto GameStateSystem = [](auto info, auto entity, auto &g)
+	auto GameStateSystem = [](auto info, auto entity, auto& g)
 	{
 		//ESC quits the game
 		if (input::is_pressed(input::KEY_ESCAPE))
@@ -32,7 +32,7 @@ namespace game::systems
 
 
 	//First-person control by the player
-	auto FirstPersonControllerSystem = [](SceneInfo info, auto entity, FirstPersonControllerComponent &f, CollisionComponent &c, TransformComponent &t, KinematicComponent &k, BulletComponent &bc)
+	auto FirstPersonControllerSystem = [](SceneInfo info, auto entity, FirstPersonControllerComponent& f, CollisionComponent& c, TransformComponent& t, KinematicComponent& k, ProjectileComponent& bc)
 	{
 		double mouse_sensitivity = 5.0;
 		double move_speed = 11.0;
@@ -53,7 +53,7 @@ namespace game::systems
 			(input::is_held(input::KEY_D) - input::is_held(input::KEY_A));
 
 		if (input::is_released(input::MOUSE_BUTTON_1))
-			events::dispatcher.enqueue<events::FireBullet>(info.scene, bc.model_file, t.position,t.rotation);
+			events::dispatcher.enqueue<events::FireBullet>(info.scene, bc.model_file, t.position, t.rotation);
 
 
 		/* JUMPING SIMULATION IN ABSENCE OF COLLISIONS */
@@ -68,11 +68,11 @@ namespace game::systems
 		//if (input::is_pressed(input::KEY_SPACE))
 		//	k.velocity.y += 4.0;
 	};
-	SYSTEM(FirstPersonControllerSystem, FirstPersonControllerComponent, CollisionComponent, TransformComponent, KinematicComponent, BulletComponent);
+	SYSTEM(FirstPersonControllerSystem, FirstPersonControllerComponent, CollisionComponent, TransformComponent, KinematicComponent, ProjectileComponent);
 
 
 	//EXAMPLE Moveable sphere to demo collisions
-	auto MoveSphereSystem = [](auto info, auto entity, auto &, TransformComponent &t)
+	auto MoveSphereSystem = [](auto info, auto entity, auto&, TransformComponent& t)
 	{
 		t.position.z += 2.0 * info.dt * (input::is_held(input::KEY_X) - input::is_held(input::KEY_Z));
 	};
@@ -80,7 +80,7 @@ namespace game::systems
 
 
 	//Basic kinematic system of calculus of motion
-	auto KinematicSystem = [](auto info, auto entity, auto &t, auto &k)
+	auto KinematicSystem = [](auto info, auto entity, auto& t, auto& k)
 	{
 		k.velocity += k.acceleration * info.dt;
 		t.position += k.velocity * info.dt;
@@ -89,7 +89,7 @@ namespace game::systems
 
 
 	//Updates the spatial partitioning grid
-	auto SpatialGridSystem = [](SceneInfo info, auto entity, TransformComponent &t)
+	auto SpatialGridSystem = [](SceneInfo info, auto entity, TransformComponent& t)
 	{
 		auto i = info.scene.spatial_grid.update(t.position, entity, t.last_index);
 		t.last_index = i;
@@ -98,7 +98,7 @@ namespace game::systems
 
 
 	//Detects collisions, updating pools and logging events
-	auto CollisionSystem = [](SceneInfo info, auto entity, CollisionComponent &c1, TransformComponent &t1)
+	auto CollisionSystem = [](SceneInfo info, auto entity, CollisionComponent& c1, TransformComponent& t1)
 	{
 		//Get set of all nearby entities
 		auto [begin, end] = info.scene.spatial_grid.get_cells_near(t1.position);
@@ -110,21 +110,21 @@ namespace game::systems
 
 			//Ignore self
 			if (other == entity) continue;
-			
+
 			//Ignore if not collidable
 			if (!info.registry.has<CollisionComponent>(other)) continue;
-			
-			auto &[c2, t2] = info.registry.get<CollisionComponent, TransformComponent>(other);
 
-			if (info.registry.has<DetectionComponent>(other) && info.registry.has<FirstPersonControllerComponent>(entity)) 
+			auto& [c2, t2] = info.registry.get<CollisionComponent, TransformComponent>(other);
+
+			if (info.registry.has<DetectionComponent>(other) && info.registry.has<FirstPersonControllerComponent>(entity))
 			{
-				DetectionComponent &d = info.registry.get<DetectionComponent>(other);
+				DetectionComponent& d = info.registry.get<DetectionComponent>(other);
 				c2 = d.c;
 				t2 = info.registry.get<TransformComponent>(other);
 			}
-			
-			
-			
+
+
+
 
 			//Test if currently colliding (distance between centres less than sum of radii)
 			double d2 = sqrt(std::pow(t2.position.x - t1.position.x, 2) +
@@ -134,7 +134,7 @@ namespace game::systems
 			double sumRad = c1.radius + c2.radius;
 			bool currently_colliding = d2 < sumRad;
 
-			
+
 
 			bool was_colliding = utility::contains(c1.colliding, other);
 
@@ -160,9 +160,9 @@ namespace game::systems
 	SYSTEM(CollisionSystem, CollisionComponent, TransformComponent);
 
 	//Makes a camera follow its target
-	auto MoveCameraSystem = [](SceneInfo info, auto entity, CameraComponent &c)
+	auto MoveCameraSystem = [](SceneInfo info, auto entity, CameraComponent& c)
 	{
-		TransformComponent &t = info.scene.get<TransformComponent>(c.follow);
+		TransformComponent& t = info.scene.get<TransformComponent>(c.follow);
 		c.position = t.position;
 		c.orientation = { t.rotation.x, t.rotation.y };
 		//cout << " X:" << t.rotation.x << " Y:" << t.rotation.y << " Z:" << t.rotation.x*t.rotation.y << endl;
@@ -170,7 +170,7 @@ namespace game::systems
 	SYSTEM(MoveCameraSystem, CameraComponent);
 
 	//Animation system
-	auto AnimationSystem = [](auto info, auto entity, auto &m)
+	auto AnimationSystem = [](auto info, auto entity, auto& m)
 	{
 		// Currently animation isn't finished
 		//if (!m.isAnimated)
@@ -194,65 +194,59 @@ namespace game::systems
 	};
 	SYSTEM(AnimationSystem, ModelComponent);
 
-	auto AISystem = [](SceneInfo info, Entity entity, ModelComponent &m, ColourComponent &colour, TransformComponent &t, KinematicComponent &k, AIComponent &a, CameraComponent &c, CollisionComponent &col, BulletComponent &bc, DetectionComponent &d)
+	auto AISystem = [](SceneInfo info, Entity entity, TransformComponent& t,  AIComponent& a, CameraComponent& c, ProjectileComponent& bc)
 	{
 		//goal: rotate t on the z axis.
-		
 		if (a.looking)
 		{
-			
+
 			//move side to side. 
 		}
 		else if (!a.looking)
 		{
-			
-				// Get the positions of both Entities
-				Vector2 cameraPos = Vector2(c.position.x, c.position.z);
-				Vector2 enemyPos = Vector2(t.position.x, t.position.z);
-				Vector2 nonNormal = cameraPos - enemyPos;
-				Vector2 fromPlayerToEnemy = Vector2(glm::normalize(nonNormal.ToGLM()));
 
-				glm::mat4 matModel = glm::rotate(glm::radians((float)(t.rotation.z)), glm::vec3(0, 0, 1));
+			// Get the positions of both Entities
+			Vector2 cameraPos = Vector2(c.position.x, c.position.z);
+			Vector2 enemyPos = Vector2(t.position.x, t.position.z);
+			Vector2 nonNormal = cameraPos - enemyPos;
+			Vector2 fromPlayerToEnemy = Vector2(glm::normalize(nonNormal.ToGLM()));
 
-				// Get the current heading of the player (this should already be Normalized)
-				//glm::vec2 playerHeading = glm::vec2(t.rotation.x, t.rotation.z);
-				glm::vec2 playerHeading = glm::vec2(matModel[2][0], matModel[2][2]);
+			glm::mat4 matModel = glm::rotate(glm::radians((float)(t.rotation.z)), glm::vec3(0, 0, 1));
 
-
-				// Now calculate the Dot product between the two (Normalized) vectors, playerHeading and fromPlayerToEnemy
-				float cosinedegreesToRotate = glm::dot(playerHeading, fromPlayerToEnemy.ToGLM());
+			// Get the current heading of the player (this should already be Normalized)
+			//glm::vec2 playerHeading = glm::vec2(t.rotation.x, t.rotation.z);
+			glm::vec2 playerHeading = glm::vec2(matModel[2][0], matModel[2][2]);
 
 
-				// Apply acos to that value and set z-axis 360 rule. Then rotation to the AIModel
-				if(fromPlayerToEnemy.x < 0)
-					t.rotation.z = -(360 - glm::degrees(acos(cosinedegreesToRotate))) + 180;
-				else
-					t.rotation.z = -(glm::degrees(acos(cosinedegreesToRotate))) + 180;
+			// Now calculate the Dot product between the two (Normalized) vectors, playerHeading and fromPlayerToEnemy
+			float cosinedegreesToRotate = glm::dot(playerHeading, fromPlayerToEnemy.ToGLM());
 
-			
+
+			// Apply acos to that value and set z-axis 360 rule. Then rotation to the AIModel
+			if (fromPlayerToEnemy.x < 0)
+				t.rotation.z = -(360 - glm::degrees(acos(cosinedegreesToRotate))) + 180;
+			else
+				t.rotation.z = -(glm::degrees(acos(cosinedegreesToRotate))) + 180;
+
+
 			//if (input::is_pressed(input::KEY_LEFT_CONTROL))
-			if(false)
+			if (false)
 			{
-				//Vector3 tmp = { matModel[2][0],matModel[2][1],matModel[2][2] };
 				Vector3 tmp = { -fmod(t.rotation.z,360), 0, 0 };
 				events::dispatcher.enqueue<events::FireBullet>(info.scene, bc.model_file, t.position, tmp);
 			}
-			
+
 		}
 
-		
-
-
-		
 	};
-	SYSTEM(AISystem, ModelComponent, ColourComponent, TransformComponent, KinematicComponent, AIComponent, CameraComponent,CollisionComponent,BulletComponent, DetectionComponent);
-	
-	auto ParticleSystem = [](auto info, auto entity, ParticleComponent &p, ColourComponent &c, TransformComponent &t, KinematicComponent &k)
+	SYSTEM(AISystem, TransformComponent, AIComponent, CameraComponent, ProjectileComponent);
+
+	auto ParticleSystem = [](auto info, auto entity, ParticleComponent& p, ColourComponent& c, TransformComponent& t, KinematicComponent& k)
 	{
 		Vector3 randomPosition = Vector3(
-				((fmod(rand(), p.position_variation.x)) - p.position_variation.y) / p.position_variation.z,
-				((fmod(rand(), p.position_variation.x)) - p.position_variation.y) / p.position_variation.z,
-				((fmod(rand(), p.position_variation.x)) - p.position_variation.y) / p.position_variation.z);
+			((fmod(rand(), p.position_variation.x)) - p.position_variation.y) / p.position_variation.z,
+			((fmod(rand(), p.position_variation.x)) - p.position_variation.y) / p.position_variation.z,
+			((fmod(rand(), p.position_variation.x)) - p.position_variation.y) / p.position_variation.z);
 
 		Vector3 randomVelocity = Vector3(
 			((fmod(rand(), p.velocity_variation.x)) - p.velocity_variation.y) / p.velocity_variation.z,
@@ -267,5 +261,15 @@ namespace game::systems
 		renderer::update_particle(info.dt, p.texture_file, p.respawn_count, randomPosition, randomVelocity, randomColor);// , t.position);
 	};
 	SYSTEM(ParticleSystem, ParticleComponent, ColourComponent, TransformComponent, KinematicComponent);
-}
 
+	auto BulletSystem = [](SceneInfo info, auto entity, BulletComponent& b)
+	{
+		if (!b.draw)
+		{
+			info.scene.destroy(entity);
+			int a = 1;
+		}
+		int ba = 2;
+	};
+	SYSTEM(BulletSystem, BulletComponent);
+}

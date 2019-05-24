@@ -101,10 +101,14 @@ namespace game::events
 
 	void HandleBulletCollision(const EnterCollision &e) {
 
-		auto &t = e.registry.get<TransformComponent>(e.b);
-		auto &c = e.registry.get<ColourComponent>(e.b);
-
-		c.colour = {255,0,0};
+		//e.b = target
+		//e.a = bullet
+		if (e.registry.has<BulletComponent>(e.a))
+		{
+			auto& b = e.registry.get<BulletComponent>(e.a);
+			b.draw = false;
+		}
+		int a = 1;
 	}
 
 	void HandleDetectionCollision(const EnterCollision &e)

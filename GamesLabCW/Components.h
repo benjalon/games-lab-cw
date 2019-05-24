@@ -123,11 +123,21 @@ namespace game
 		//CollisionComponent c;
 	};
 
-	struct BulletComponent{
+	struct ProjectileComponent{
 		std::string model_file = "models/Fireball/fireball.obj";
 	};
 
 	struct DetectionComponent {
 		CollisionComponent c;
+	};
+
+	struct BulletComponent {
+		bool draw = true;
+	};
+
+	struct StatsComponent {
+		int health;
+		int manna; 
+		int keyCount = 0;
 	};
 }
