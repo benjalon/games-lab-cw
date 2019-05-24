@@ -129,7 +129,12 @@ namespace game
 	{
 		double radius = 3;
 		std::unordered_set<Entity> colliding;
-		bool solid = false;
+	};
+
+	struct SolidPlaneComponent
+	{
+		Vector3 normal;
+		Vector3 position;
 	};
 
 	struct MoveSphere {};

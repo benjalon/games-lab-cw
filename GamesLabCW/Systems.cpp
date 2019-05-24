@@ -318,7 +318,7 @@ namespace game::systems
 	};
 	SYSTEM(ParticleSystem, ParticleComponent, ColourComponent, TransformComponent, KinematicComponent);
 
-	auto PlayerMovementSystem = [](auto info, auto entity, FirstPersonControllerComponent &f, TransformComponent &t, KinematicComponent &k)
+	auto PlayerMovementSystem = [](SceneInfo info, auto entity, FirstPersonControllerComponent &f, TransformComponent &t, KinematicComponent &k)
 	{
 		//Scalar projection of a onto b
 		auto scalar_projection = [](glm::vec3 a, glm::vec3 b)
@@ -339,37 +339,44 @@ namespace game::systems
 		//Add movement speed
 		t.position += f.move_velocity * info.dt;
 
-		//SIMULATE FLOOR COLLISION
-		Vector3 surface_normal = { 0, 1, 0 };
-		double surface_pos = scalar_projection(Vector3(0, 6, 0), surface_normal);
-
-		if (!NOCLIP &&
-			scalar_projection(t.position, surface_normal) <= surface_pos)
+		//Calculate collision response for every solid plane
+		if (!NOCLIP)
 		{
-			//Determine point of collision along surface normal
-			double s1 = scalar_projection(t.position_old, surface_normal);
-			double s2 = scalar_projection(t.position, surface_normal);
-			double fraction = (s1 - surface_pos) / (s1 - s2);
-
-			fraction = abs(fraction);
-			if (fraction <= 1)
+			info.registry.view<SolidPlaneComponent>().each([&](auto entity, SolidPlaneComponent &sp)
 			{
-				//Integrate as usual up to collision
-				double dt1 = fraction * info.dt;
-				k.velocity = k.velocity_old + k.acceleration * dt1;
-				Vector3 total_velocity = (k.velocity + k.velocity_old) / 2.0 + f.move_velocity;
-				t.position = t.position_old + total_velocity * dt1;
+				Vector3 normal = sp.normal;
+				double pos = scalar_projection(sp.position, normal);
 
-				//Integrate, removing normal component, after collision
-				double dt2 = info.dt - dt1;
+				if (scalar_projection(t.position, normal) <= pos)
+				{
+					//Determine point of collision along surface normal
+					double s1 = scalar_projection(t.position_old, normal);
+					double s2 = scalar_projection(t.position, normal);
+					double fraction = (s1 - pos) / (s1 - s2);
 
-				k.acceleration -= vector_projection(k.acceleration, surface_normal);
-				k.velocity -= vector_projection(k.velocity, surface_normal);
-				total_velocity -= vector_projection(total_velocity, surface_normal);
+					fraction = abs(fraction);
+					if (fraction <= 1)
+					{
+						//Integrate as usual up to collision
+						double dt1 = fraction * info.dt;
+						k.velocity = k.velocity_old + k.acceleration * dt1;
+						Vector3 total_velocity = (k.velocity + k.velocity_old) / 2.0 + f.move_velocity;
+						t.position = t.position_old + total_velocity * dt1;
 
-				k.velocity += k.acceleration * dt2;
-				t.position += total_velocity * dt2;
-			}
+						//Integrate, removing normal component, after collision
+						double dt2 = info.dt - dt1;
+
+						k.acceleration -= vector_projection(k.acceleration, normal);
+						k.velocity -= vector_projection(k.velocity, normal);
+						total_velocity -= vector_projection(total_velocity, normal);
+						f.move_velocity -= vector_projection(f.move_velocity, normal);
+						k.velocity_old -= vector_projection(k.velocity_old, normal);
+
+						k.velocity += k.acceleration * dt2;
+						t.position += total_velocity * dt2;
+					}
+				}
+			});
 		}
 
 		//Reset acceleration again

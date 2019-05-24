@@ -573,6 +573,10 @@ namespace game::procgen
 		TransformComponent t_room; t_room.position.y = 10; t_room.scale = { 0.5, 0.5, 0.5 };
 		scene.instantiate("Model", m_room, t_room);
 
+		//Solid planes
+		scene.instantiate("SolidPlane", SolidPlaneComponent{ { 0, 1, 0 }, { 0, 6, 0 } });
+		scene.instantiate("SolidPlane", SolidPlaneComponent{ { -1, 0, 0 }, { 30, 0, 0 } });
+
 		//Minotaur test model
 		ModelComponent m_minotaur; m_minotaur.model_file = "models/Minotaur/Minotaur@Jump.fbx";
 		ColourComponent c_minotaur; c_minotaur.colour = { 0, 0, 255 };
