@@ -562,7 +562,7 @@ namespace game::procgen
 	void load_hub(Scene &scene, int keys_collected)
 	{
 		//Player/camera
-		auto player = scene.instantiate("FirstPersonController", TransformComponent{ {0,6,5} , { 180,0,0 } });
+		auto player = scene.instantiate("FirstPersonController", TransformComponent{ {0,6,5} , { 180,0,0 } }, CollisionComponent{ 6 });
 		auto camera = scene.instantiate("Camera", CameraComponent{ player });
 
 		//Room stuff
@@ -574,7 +574,7 @@ namespace game::procgen
 		scene.instantiate("Model", m_room, t_room);
 
 		//Solid planes
-		scene.instantiate("SolidPlane", SolidPlaneComponent{ { 0, 1, 0 }, { 0, 6, 0 } });
+		scene.instantiate("SolidPlane", SolidPlaneComponent{ { 0, 1, 0 }, { 0, 0, 0 } });
 		scene.instantiate("SolidPlane", SolidPlaneComponent{ { -1, 0, 0 }, { 30, 0, 0 } });
 
 		//Minotaur test model

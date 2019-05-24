@@ -57,7 +57,7 @@ void game::Scene::draw()
 					to_player.z * to_player.z
 				);
 
-				if (dist < RENDER_DISTANCE - 50.0)
+				if (dist < RENDER_DISTANCE - 100.0)
 					nearby.emplace_back(p[i]);
 			}
 

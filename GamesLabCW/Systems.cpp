@@ -314,7 +314,7 @@ namespace game::systems
 	SYSTEM(ParticleSystem, ParticleComponent, ColourComponent, TransformComponent, KinematicComponent);
 
 	//Handles collision response for kinematic bodies against solid planes
-	auto SolidPlaneSystem = [](SceneInfo info, auto entity, TransformComponent &t, KinematicComponent &k)
+	auto SolidPlaneSystem = [](SceneInfo info, auto entity, TransformComponent &t, KinematicComponent &k, CollisionComponent &c)
 	{
 		//Scalar projection of a onto b
 		auto scalar_projection = [](glm::vec3 a, glm::vec3 b)
@@ -341,7 +341,7 @@ namespace game::systems
 			info.registry.view<SolidPlaneComponent>().each([&](auto entity, SolidPlaneComponent &sp)
 			{
 				Vector3 normal = sp.normal;
-				double pos = scalar_projection(sp.position, normal);
+				double pos = scalar_projection(sp.position, normal) + c.radius;
 
 				if (scalar_projection(t.position, normal) <= pos)
 				{
@@ -378,5 +378,5 @@ namespace game::systems
 		//Reset acceleration again
 		k.acceleration = { 0, 0, 0 };
 	};
-	SYSTEM(SolidPlaneSystem, TransformComponent, KinematicComponent);
+	SYSTEM(SolidPlaneSystem, TransformComponent, KinematicComponent, CollisionComponent);
 }
