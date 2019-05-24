@@ -137,7 +137,7 @@ void game::GameEngine::run()
 	KeyComponent k_key6; k_key6.destination = { -40, 20, -10 };
 	TransformComponent t_key6; t_key6.scale = { 0.5, 0.5, 0.5 }; t_key6.position = { -30, 0.5, 10 }; t_key6.rotation = { 90, 180, 180 };
 	PointLightComponent pl_key6{ {1, 180 / 255.0, 120.0 / 255.0}, 0.5, t_key6.position };
-	//scene_.instantiate("Key", m_key, t_key6, k_key6, pl_key6);
+	scene_.instantiate("Key", m_key, t_key6, k_key6, pl_key6);
 
 	// Minotaur test model
 	ModelComponent m_minotaur; m_minotaur.model_file = "models/Minotaur/Minotaur@Jump.fbx";

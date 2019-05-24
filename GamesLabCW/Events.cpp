@@ -105,7 +105,6 @@ namespace game::events
 	}
 
 	void HandleBulletCollision(const EnterCollision &e) {
-
 		auto &s = e.registry.get<StatsComponent>(e.b);
 		auto &bs = e.registry.get<BulletComponent>(e.a);
 

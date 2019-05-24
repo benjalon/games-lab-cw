@@ -22,7 +22,7 @@ std::vector<game::systems::SystemInvoker> game::systems::system_invokers;
 namespace game::systems
 {
 	//General game state system
-	auto GameStateSystem = [](auto info, auto entity, auto &g)
+	auto GameStateSystem = [](auto info, auto entity, auto& g)
 	{
 		//ESC quits the game
 		if (input::is_pressed(input::KEY_ESCAPE))
@@ -75,14 +75,14 @@ namespace game::systems
 	SYSTEM(FirstPersonControllerSystem, FirstPersonControllerComponent, TransformComponent, KinematicComponent, ProjectileComponent, StatsComponent);
 
 	//EXAMPLE Moveable sphere to demo collisions
-	auto MoveSphereSystem = [](auto info, auto entity, auto &, TransformComponent &t)
+	auto MoveSphereSystem = [](auto info, auto entity, auto&, TransformComponent& t)
 	{
 		t.position.z += 2.0 * info.dt * (input::is_held(input::KEY_X) - input::is_held(input::KEY_Z));
 	};
 	SYSTEM(MoveSphereSystem, MoveSphere, TransformComponent);
 
 	//Basic kinematic system of calculus of motion
-	auto KinematicSystem = [](auto info, auto entity, auto &t, auto &k)
+	auto KinematicSystem = [](auto info, auto entity, auto& t, auto& k)
 	{
 		k.velocity += k.acceleration * info.dt;
 		t.position += k.velocity * info.dt;
@@ -90,7 +90,7 @@ namespace game::systems
 	SYSTEM(KinematicSystem, TransformComponent, KinematicComponent);
 
 	//Updates the spatial partitioning grid
-	auto SpatialGridSystem = [](SceneInfo info, auto entity, TransformComponent &t)
+	auto SpatialGridSystem = [](SceneInfo info, auto entity, TransformComponent& t)
 	{
 		auto i = info.scene.spatial_grid.update(t.position, entity, t.last_index);
 		t.last_index = i;
@@ -98,7 +98,7 @@ namespace game::systems
 	SYSTEM(SpatialGridSystem, TransformComponent);
 
 	//Detects collisions, updating pools and logging events
-	auto CollisionSystem = [](SceneInfo info, auto entity, CollisionComponent &c1, TransformComponent &t1)
+	auto CollisionSystem = [](SceneInfo info, auto entity, CollisionComponent& c1, TransformComponent& t1)
 	{
 		//Get set of all nearby entities
 		auto [begin, end] = info.scene.spatial_grid.get_cells_near(t1.position);
@@ -110,21 +110,21 @@ namespace game::systems
 
 			//Ignore self
 			if (other == entity) continue;
-			
+
 			//Ignore if not collidable
 			if (!info.registry.has<CollisionComponent>(other)) continue;
-			
-			auto &[c2, t2] = info.registry.get<CollisionComponent, TransformComponent>(other);
 
-			if (info.registry.has<DetectionComponent>(other) && info.registry.has<FirstPersonControllerComponent>(entity)) 
+			auto& [c2, t2] = info.registry.get<CollisionComponent, TransformComponent>(other);
+
+			if (info.registry.has<DetectionComponent>(other) && info.registry.has<FirstPersonControllerComponent>(entity))
 			{
-				DetectionComponent &d = info.registry.get<DetectionComponent>(other);
+				DetectionComponent& d = info.registry.get<DetectionComponent>(other);
 				c2 = d.c;
 				t2 = info.registry.get<TransformComponent>(other);
 			}
-			
-			
-			
+
+
+
 
 			//Test if currently colliding (distance between centres less than sum of radii)
 			double d2 = sqrt(std::pow(t2.position.x - t1.position.x, 2) +
@@ -134,7 +134,7 @@ namespace game::systems
 			double sumRad = c1.radius + c2.radius;
 			bool currently_colliding = d2 < sumRad;
 
-			
+
 
 			bool was_colliding = utility::contains(c1.colliding, other);
 
@@ -160,7 +160,7 @@ namespace game::systems
 	SYSTEM(CollisionSystem, CollisionComponent, TransformComponent);
 
 	//Makes a camera follow its target
-	auto MoveCameraSystem = [](SceneInfo info, auto entity, CameraComponent &c)
+	auto MoveCameraSystem = [](SceneInfo info, auto entity, CameraComponent& c)
 	{
 		if (info.registry.valid(c.follow))
 		{
@@ -172,7 +172,7 @@ namespace game::systems
 	SYSTEM(MoveCameraSystem, CameraComponent);
 
 	//Animation system
-	auto AnimationSystem = [](auto info, auto entity, auto &m)
+	auto AnimationSystem = [](auto info, auto entity, auto& m)
 	{
 		// Currently animation isn't finished
 		//if (!m.isAnimated)
@@ -219,15 +219,21 @@ namespace game::systems
 				Vector2 nonNormal = cameraPos - enemyPos;
 				Vector2 fromPlayerToEnemy = Vector2(glm::normalize(nonNormal.ToGLM()));
 
-				glm::mat4 matModel = glm::rotate(glm::radians((float)(t.rotation.z)), glm::vec3(0, 0, 1));
+			// Get the positions of both Entities
+			Vector2 cameraPos = Vector2(c.position.x, c.position.z);
+			Vector2 enemyPos = Vector2(t.position.x, t.position.z);
+			Vector2 nonNormal = cameraPos - enemyPos;
+			Vector2 fromPlayerToEnemy = Vector2(glm::normalize(nonNormal.ToGLM()));
 
-				// Get the current heading of the player (this should already be Normalized)
-				//glm::vec2 playerHeading = glm::vec2(t.rotation.x, t.rotation.z);
-				glm::vec2 playerHeading = glm::vec2(matModel[2][0], matModel[2][2]);
+			glm::mat4 matModel = glm::rotate(glm::radians((float)(t.rotation.z)), glm::vec3(0, 0, 1));
+
+			// Get the current heading of the player (this should already be Normalized)
+			//glm::vec2 playerHeading = glm::vec2(t.rotation.x, t.rotation.z);
+			glm::vec2 playerHeading = glm::vec2(matModel[2][0], matModel[2][2]);
 
 
-				// Now calculate the Dot product between the two (Normalized) vectors, playerHeading and fromPlayerToEnemy
-				float cosinedegreesToRotate = glm::dot(playerHeading, fromPlayerToEnemy.ToGLM());
+			// Now calculate the Dot product between the two (Normalized) vectors, playerHeading and fromPlayerToEnemy
+			float cosinedegreesToRotate = glm::dot(playerHeading, fromPlayerToEnemy.ToGLM());
 
 
 				// Apply acos to that value and set z-axis 360 rule. Then rotation to the AIModel
@@ -254,9 +260,9 @@ namespace game::systems
 	auto ParticleSystem = [](auto info, auto entity, ParticleComponent &p, ColourComponent &c, TransformComponent &t, KinematicComponent &k)
 	{
 		Vector3 randomPosition = Vector3(
-				((fmod(rand(), p.position_variation.x)) - p.position_variation.y) / p.position_variation.z,
-				((fmod(rand(), p.position_variation.x)) - p.position_variation.y) / p.position_variation.z,
-				((fmod(rand(), p.position_variation.x)) - p.position_variation.y) / p.position_variation.z);
+			((fmod(rand(), p.position_variation.x)) - p.position_variation.y) / p.position_variation.z,
+			((fmod(rand(), p.position_variation.x)) - p.position_variation.y) / p.position_variation.z,
+			((fmod(rand(), p.position_variation.x)) - p.position_variation.y) / p.position_variation.z);
 
 		Vector3 randomVelocity = Vector3(
 			((fmod(rand(), p.velocity_variation.x)) - p.velocity_variation.y) / p.velocity_variation.z,
@@ -282,3 +288,14 @@ namespace game::systems
 	SYSTEM(BulletSystem, BulletComponent);
 }
 
+	auto BulletSystem = [](SceneInfo info, auto entity, BulletComponent& b)
+	{
+		if (!b.draw)
+		{
+			info.scene.destroy(entity);
+			int a = 1;
+		}
+		int ba = 2;
+	};
+	SYSTEM(BulletSystem, BulletComponent);
+}
