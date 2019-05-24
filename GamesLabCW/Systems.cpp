@@ -162,10 +162,12 @@ namespace game::systems
 	//Makes a camera follow its target
 	auto MoveCameraSystem = [](SceneInfo info, auto entity, CameraComponent &c)
 	{
-		TransformComponent &t = info.scene.get<TransformComponent>(c.follow);
-		c.position = t.position;
-		c.orientation = { t.rotation.x, t.rotation.y };
-		//cout << " X:" << t.rotation.x << " Y:" << t.rotation.y << " Z:" << t.rotation.x*t.rotation.y << endl;
+		if (info.registry.valid(c.follow))
+		{
+			TransformComponent &t = info.scene.get<TransformComponent>(c.follow);
+				c.position = t.position;
+				c.orientation = { t.rotation.x, t.rotation.y };
+		}
 	};
 	SYSTEM(MoveCameraSystem, CameraComponent);
 
