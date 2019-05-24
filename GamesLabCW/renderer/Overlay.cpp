@@ -1,22 +1,20 @@
-#include "Image.h"
+#include "Overlay.h"
 
 namespace game
 {
-	Image::Image(Texture texture, Vector2 position) : texture(texture), position(position)
+	Overlay::Overlay(Texture texture, Vector2 position) : texture(texture), position(position)
 	{
 		// Set up mesh and attribute properties
 		GLuint vbo;
 
+		// xys used for positions, zws used for texcoords
 		GLfloat squareCoords[] = {
-			// Verts
-			0.0f, 1.0f, 0.0f, 1.0f,
-			1.0f, 0.0f, 1.0f, 0.0f,
-			0.0f, 0.0f, 0.0f, 0.0f,
-
-			// UVs
-			0.0f, 1.0f, 0.0f, 1.0f,
+			-1.0f, 1.0f, 0.0f, 1.0f,
+			1.0f, -1.0f, 1.0f, 0.0f,
+			-1.0f, -1.0f, 0.0f, 0.0f,
+			-1.0f, 1.0f, 0.0f, 1.0f,
 			1.0f, 1.0f, 1.0f, 1.0f,
-			1.0f, 0.0f, 1.0f, 0.0f
+			1.0f, -1.0f, 1.0f, 0.0f
 		};
 
 		glGenVertexArrays(1, &this->vao);
@@ -31,13 +29,10 @@ namespace game
 		glBindVertexArray(0);
 	}
 
-	void Image::Render(GLuint shaderProgram)
+	void Overlay::Render(GLuint shaderProgram)
 	{
-		// Bind array object and blend
 		glBindVertexArray(vao);
-		//glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
-		// Set uniforms for shader.0f)
 		glUniform2f(
 			glGetUniformLocation(shaderProgram, "position"),
 			(GLfloat)position.x, (GLfloat)position.y
@@ -48,10 +43,6 @@ namespace game
 		glUniform1i(glGetUniformLocation(shaderProgram, "texSampler"), 0);
 		glBindVertexArray(this->vao);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
-		glBindVertexArray(0);
-
-		// Reset array object and blend setting
-		//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glBindVertexArray(0);
 	}
 }

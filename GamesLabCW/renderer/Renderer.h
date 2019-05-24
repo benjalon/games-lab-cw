@@ -22,7 +22,7 @@ namespace game::renderer
 	//Loads the given model
 	void load_model(std::string file);
 	void load_particle_effect(std::string texture, int count, float scale, float speed);
-	void load_image(std::string file, Vector2 position);
+	void load_overlay(std::string file, Vector2 position);
 
 	// external textures for a given model
 	void load_external_map(std::string path, std::string model_path, TextureType type);
@@ -36,7 +36,7 @@ namespace game::renderer
 
 	void render_particle(CameraComponent camera, ParticleComponent &model, ColourComponent c, TransformComponent t);
 
-	void render_image(CameraComponent camera, ImageComponent &i);
+	void render_overlay(CameraComponent camera, OverlayComponent &i);
 
 	void animate_model(double time, std::string model_file);
 

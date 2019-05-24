@@ -20,7 +20,7 @@
 #include "VBO.h"
 #include "Model.h"
 #include "ParticleEffect.h"
-#include "Image.h"
+#include "Overlay.h"
 
 //Quick conversion to radians
 #define R(x) glm::radians((float)x)
@@ -29,7 +29,7 @@ namespace game::renderer
 {
 	std::unordered_map<std::string, Model> models;
 	std::unordered_map<std::string, ParticleEffect> particleEffects;
-	std::unordered_map<std::string, Image> images;
+	std::unordered_map<std::string, Overlay> overlays;
 	std::map<std::string, Texture> externalTextures;
 
 	void init()
@@ -108,8 +108,8 @@ namespace game::renderer
 		particleEffects.emplace(texture, ParticleEffect(texture, count, scale, speed)).first->second;
 	}
 
-	void load_image(std::string file, Vector2 position) {
-		images.emplace(file, Image(file, position)).first->second;
+	void load_overlay(std::string file, Vector2 position) {
+		overlays.emplace(file, Overlay(file, position)).first->second;
 	}
 
 	void load_external_map(std::string path, std::string model_path, TextureType type)
@@ -342,14 +342,14 @@ namespace game::renderer
 		particle.Render(shader);
 	}
 
-	void render_image(CameraComponent camera, ImageComponent &i)
+	void render_overlay(CameraComponent camera, OverlayComponent &i)
 	{
-		//Get the image, aborting if not found
-		auto it = images.find(i.texture_file);
-		if (it == images.end()) return;
-		Image &image = it->second;
+		//Get the overlay, aborting if not found
+		auto it = overlays.find(i.texture_file);
+		if (it == overlays.end()) return;
+		Overlay &overlay = it->second;
 
-		GLuint shader = get_shader(false, false, 0, 0, 0, "shaders/Image.vert", "shaders/Image.frag");
+		GLuint shader = get_shader(false, false, 0, 0, 0, "shaders/Overlay.vert", "shaders/Overlay.frag");
 		glUseProgram(shader);
 
 		//Calculate MVP matrices
@@ -379,7 +379,7 @@ namespace game::renderer
 			1, GL_FALSE, glm::value_ptr(matModel)
 		);
 
-		image.Render(shader);
+		overlay.Render(shader);
 	}
 
 	void animate_model(double time, std::string model_file) 

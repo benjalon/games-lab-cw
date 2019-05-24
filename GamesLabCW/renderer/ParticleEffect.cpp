@@ -7,13 +7,11 @@ namespace game
 		// Set up mesh and attribute properties
 		GLuint vbo;
 
+		// xys used for positions, zws used for texcoords
 		GLfloat particleCoords[] = {
-			// Verts
 			0.0f, 1.0f, 0.0f, 1.0f,
 			1.0f, 0.0f, 1.0f, 0.0f,
 			0.0f, 0.0f, 0.0f, 0.0f,
-
-			// UVs
 			0.0f, 1.0f, 0.0f, 1.0f,
 			1.0f, 1.0f, 1.0f, 1.0f,
 			1.0f, 0.0f, 1.0f, 0.0f
@@ -108,18 +106,19 @@ namespace game
 		glBindVertexArray(0);
 	}
 
-	// Stores the index of the last particle used (for quick access to next dead particle)
+	// Stores ID of last used particle for fast access
 	GLuint lastUsedParticle = 0;
 	GLuint ParticleEffect::firstUnusedParticle()
 	{
-		// First search from last used particle, this will usually return almost instantly
+		// Find last used particle
 		for (GLuint i = lastUsedParticle; i < this->amount; ++i) {
 			if (this->particles[i].Life <= 0.0f) {
 				lastUsedParticle = i;
 				return i;
 			}
 		}
-		// Otherwise, do a linear search
+		
+		// Last used not found, do simple search
 		for (GLuint i = 0; i < lastUsedParticle; ++i) {
 			if (i >= particles.size()) {
 				i = particles.size() - 1;
@@ -131,7 +130,7 @@ namespace game
 				return i;
 			}
 		}
-		// All particles are taken, override the first one (note that if it repeatedly hits this case, more particles should be reserved)
+
 		lastUsedParticle = 0;
 		return 0;
 	}
