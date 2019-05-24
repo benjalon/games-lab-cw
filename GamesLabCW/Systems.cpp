@@ -166,12 +166,9 @@ namespace game::systems
 	//Makes a camera follow its target
 	auto MoveCameraSystem = [](SceneInfo info, auto entity, CameraComponent& c)
 	{
-		if (info.registry.valid(c.follow))
-		{
-			TransformComponent &t = info.scene.get<TransformComponent>(c.follow);
-				c.position = t.position;
-				c.orientation = { t.rotation.x, t.rotation.y };
-		}
+		TransformComponent& t = info.scene.get<TransformComponent>(c.follow);
+		c.position = t.position;
+		c.orientation = { t.rotation.x, t.rotation.y };
 	};
 	SYSTEM(MoveCameraSystem, CameraComponent);
 
@@ -200,12 +197,11 @@ namespace game::systems
 	};
 	SYSTEM(AnimationSystem, ModelComponent);
 
-	auto AISystem = [](SceneInfo info, Entity entity, TransformComponent &t, AIComponent &a, CameraComponent &c, ProjectileComponent &bc, StatsComponent &s)
+	auto AISystem = [](SceneInfo info, Entity entity, TransformComponent &t, AIComponent &a, ProjectileComponent &bc, StatsComponent &s, DetectionComponent &d)
 	{
 		//Get reference to camera
 		CameraComponent &c = info.scene.get<CameraComponent>(d.camera);
 
-		//goal: rotate t on the z axis.
 		if (s.health < 1)
 		{
 			//info.scene.destroy(entity);
@@ -228,13 +224,7 @@ namespace game::systems
 
 		
 				glm::mat4 matModel = glm::rotate(glm::radians((float)(t.rotation.z)), glm::vec3(0, 0, 1));
-
-				// Get the current heading of the player (this should already be Normalized)
-				//glm::vec2 playerHeading = glm::vec2(t.rotation.x, t.rotation.z);
 				glm::vec2 playerHeading = glm::vec2(matModel[2][0], matModel[2][2]);
-
-
-				// Now calculate the Dot product between the two (Normalized) vectors, playerHeading and fromPlayerToEnemy
 				float cosinedegreesToRotate = glm::dot(playerHeading, fromPlayerToEnemy.ToGLM());
 
 
@@ -257,7 +247,7 @@ namespace game::systems
 		
 		
 	};
-	SYSTEM(AISystem, TransformComponent, AIComponent, CameraComponent,ProjectileComponent, StatsComponent);
+	SYSTEM(AISystem, TransformComponent, AIComponent,ProjectileComponent, StatsComponent, DetectionComponent);
 	
 	auto ParticleSystem = [](auto info, auto entity, ParticleComponent &p, ColourComponent &c, TransformComponent &t, KinematicComponent &k)
 	{

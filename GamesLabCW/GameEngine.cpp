@@ -111,7 +111,7 @@ void game::GameEngine::run()
 	CollisionComponent c_player; c_player.radius = 3;
 	StatsComponent s_player; s_player.health = 4; s_player.mana = 1;
 	auto player = scene_.instantiate("FirstPersonController", TransformComponent{ {0,55,5} , { 180,0,0 } }, c_player);
-	auto camera = CameraComponent{ player };
+	auto camera = scene_.instantiate("Camera", CameraComponent{ player });
 
 
 	// Room stuff
@@ -158,14 +158,10 @@ void game::GameEngine::run()
 	// Minotaur test model
 	ModelComponent m_minotaur; m_minotaur.model_file = "models/Minotaur/Minotaur@Idle.fbx";
 	ColourComponent c_minotaur; c_minotaur.colour = { 0, 0, 255 };
-	DetectionComponent d_minotaur; d_minotaur.c.radius = 30;
+	DetectionComponent d_minotaur; d_minotaur.c.radius = 30; d_minotaur.camera = camera;
 	TransformComponent t_minotaur; t_minotaur.scale = { 0.10, 0.1, 0.1 }; t_minotaur.position = { 0, 55, -30 }; t_minotaur.rotation = { 90, 180, 0 };
-	CollisionComponent coll_minotaur; coll_minotaur.radius = 2.5;
-	HitboxComponent h_minotaur; h_minotaur.c = coll_minotaur;
-	scene_.instantiate("AIModel", m_minotaur, t_minotaur, camera, h_minotaur, c_minotaur, d_minotaur);// d_minotaur, c_minotaur);
-	//DetectionComponent d_minotaur;
-	//CollisionComponent c_detectionRadius; c_detectionRadius.radius = 40;
-	//scene_.instantiate("DetectionRadius", d_minotaur, t_minotaur, c_detectionRadius);
+	HitboxComponent h_minotaur; h_minotaur.c.radius = 2.5;
+	scene_.instantiate("AIModel", m_minotaur, t_minotaur, h_minotaur, c_minotaur, d_minotaur);
 
 	// Torches
 	ModelComponent m_torch; m_torch.model_file = "models/Torch/torch.obj";
