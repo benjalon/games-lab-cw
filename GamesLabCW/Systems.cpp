@@ -125,8 +125,12 @@ namespace game::systems
 				t2 = info.registry.get<TransformComponent>(other);
 			}
 
-
-
+			if (info.registry.has<HitboxComponent>(other) && info.registry.has<BulletComponent>(entity))
+			{
+				HitboxComponent& h = info.registry.get<HitboxComponent>(other);
+				c2 = h.c;
+				t2 = info.registry.get<TransformComponent>(other);
+			}
 
 			//Test if currently colliding (distance between centres less than sum of radii)
 			double d2 = sqrt(std::pow(t2.position.x - t1.position.x, 2) +
