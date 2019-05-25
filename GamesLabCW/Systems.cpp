@@ -336,7 +336,7 @@ namespace game::systems
 		t.position += k.move_velocity * info.dt;
 
 		//Calculate collision response for every solid plane
-		if (!NOCLIP)
+		if (!NOCLIP && k.solid)
 		{
 			info.registry.view<SolidPlaneComponent>().each([&](auto entity, SolidPlaneComponent &sp)
 			{

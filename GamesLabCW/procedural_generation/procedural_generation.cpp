@@ -574,7 +574,7 @@ namespace game::procgen
 	void load_hub(Scene &scene, int keys_collected)
 	{
 		//Player/camera
-		auto player = scene.instantiate("FirstPersonController", TransformComponent{ {0,6,5} , { 180,0,0 } }, CollisionComponent{ 6 });
+		auto player = scene.instantiate("FirstPersonController", TransformComponent{ {0,6,5} , { 180,0,0 } }, CollisionComponent{ 6 }, KinematicComponent{ true });
 		auto camera = scene.instantiate("Camera", CameraComponent{ player });
 
 		//Room stuff
