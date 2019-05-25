@@ -348,13 +348,14 @@ namespace game::systems
 					//Determine point of collision along surface normal
 					double s1 = scalar_projection(t.position_old, normal);
 					double s2 = scalar_projection(t.position, normal);
+					double depth = s2 - pos;
 					double fraction = (s1 - pos) / (s1 - s2);
 
 					//Absolute distance to plane centre
 					double dist = glm::length(glm::vec3(sp.position - t.position));
 
 					//Squared distance perpendicular to plane
-					double d2 = dist * dist - s2 * s2;
+					double d2 = dist * dist - depth * depth;
 
 					fraction = abs(fraction);
 					if (fraction <= 1 && d2 <= sp.size * sp.size)
