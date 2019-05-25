@@ -421,6 +421,9 @@ namespace game::procgen
 			//Separation between cells to prevent z-fighting
 			double give = -0.001;
 
+			//Size of individual solid planes
+			double plane_size = cell_size / 2 + 2;
+
 			//Has the key been instantiated yet?
 			bool key = false;
 			Coords key_pos;
@@ -505,6 +508,12 @@ namespace game::procgen
 
 							break;
 						}
+
+						//Place solid collision planes
+						if (west) scene.instantiate("SolidPlane", SolidPlaneComponent{ { 1, 0, 0 }, t.position + Vector3(-cell_size / 2, 0, 0), plane_size });
+						if (east) scene.instantiate("SolidPlane", SolidPlaneComponent{ { -1, 0, 0 }, t.position + Vector3(cell_size / 2, 0, 0), plane_size });
+						if (north) scene.instantiate("SolidPlane", SolidPlaneComponent{ { 0, 0, 1 }, t.position + Vector3(0, 0, -cell_size / 2), plane_size });
+						if (south) scene.instantiate("SolidPlane", SolidPlaneComponent{ { 0, 0, -1 }, t.position + Vector3(0, 0, cell_size / 2), plane_size });
 					}
 
 			//If there were no dead ends, place key in random cell
