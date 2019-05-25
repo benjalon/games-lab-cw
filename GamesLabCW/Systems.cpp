@@ -371,11 +371,11 @@ namespace game::systems
 
 						k.acceleration -= vector_projection(k.acceleration, normal);
 						k.velocity -= vector_projection(k.velocity, normal);
-						total_velocity -= vector_projection(total_velocity, normal);
 						k.move_velocity -= vector_projection(k.move_velocity, normal);
 						k.velocity_old -= vector_projection(k.velocity_old, normal);
 
 						k.velocity += k.acceleration * dt2;
+						total_velocity = (k.velocity + k.velocity_old) / 2.0 + k.move_velocity;
 						t.position += total_velocity * dt2;
 					}
 				}
