@@ -531,7 +531,7 @@ namespace game::procgen
 				if (!grid_[i].solid)
 				{
 					auto [x, y] = index_to_coords(i);
-					double dist = x - key_pos.first + y - key_pos.second;
+					double dist = abs(x - key_pos.first) + abs(y - key_pos.second);
 					if (dist > longest_dist)
 						player_pos = { x, y };
 				}
