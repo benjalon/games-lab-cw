@@ -577,8 +577,11 @@ namespace game::procgen
 		scene.instantiate("Model", m_room, t_room);
 
 		//Solid planes
-		scene.instantiate("SolidPlane", SolidPlaneComponent{ { 0, 1, 0 }, { 0, 0, 0 } });
-		scene.instantiate("SolidPlane", SolidPlaneComponent{ { -1, 0, 0 }, { 30, 0, 0 } });
+		scene.instantiate("SolidPlane", SolidPlaneComponent{ { 0, 1, 0 }, { 0, 0, 0 } }); //floor
+		scene.instantiate("SolidPlane", SolidPlaneComponent{ { -1, 0, 0 }, { 30, 0, 0 } }); //right wall
+		scene.instantiate("SolidPlane", SolidPlaneComponent{ { 1, 0, 0 }, { -35, 0, 0 } }); //left wall
+		scene.instantiate("SolidPlane", SolidPlaneComponent{ { 0, 0, -1 }, { 0, 0, 30 } }); //back wall
+		scene.instantiate("SolidPlane", SolidPlaneComponent{ { 0, 0, 1 }, { 0, 0, -30 } }); //front wall
 
 		//Minotaur test model
 		ModelComponent m_minotaur; m_minotaur.model_file = "models/Minotaur/Minotaur@Jump.fbx";
