@@ -16,6 +16,9 @@ namespace game::events
 	//Instructs the game engine to quit
 	struct QuitGame {};
 
+	//Instructs the game engine to toggle fullscreen
+	struct ToggleFullscreen {};
+
 	//Represents two entities entering a collision
 	struct EnterCollision
 	{

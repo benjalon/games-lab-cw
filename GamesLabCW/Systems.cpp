@@ -28,9 +28,9 @@ namespace game::systems
 		if (input::is_pressed(input::KEY_ESCAPE))
 			events::dispatcher.trigger<events::QuitGame>();
 
-		//EXAMPLE Simulate collision with portal
-		if (input::is_pressed(input::KEY_ENTER))
-			events::dispatcher.enqueue<events::GenerateMaze>(info.scene);
+		//F11 toggles fullscreen
+		if (input::is_pressed(input::KEY_F11))
+			events::dispatcher.trigger<events::ToggleFullscreen>();
 	};
 	SYSTEM(GameStateSystem, GameStateComponent);
 

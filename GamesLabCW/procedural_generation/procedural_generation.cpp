@@ -396,7 +396,7 @@ namespace game::procgen
 				t_torch.position = position;
 
 				scene.instantiate("Model", t_torch, ModelComponent{ "models/Torch/torch.obj" });
-				scene.instantiate("PointLight", PointLightComponent{ {1, 147.0 / 255.0, 41.0 / 255.0}, 40,
+				scene.instantiate("PointLight", PointLightComponent{ {1, 147.0 / 255.0, 41.0 / 255.0}, 45,
 					t_torch.position + Vector3(0, 8, 0)
 					});
 				scene.instantiate("ParticleEffect", p_torch, TransformComponent{
@@ -419,7 +419,7 @@ namespace game::procgen
 			double cell_size = model_size * scale;
 
 			//Separation between cells to prevent z-fighting
-			double give = 0.001;
+			double give = -0.001;
 
 			//Has the key been instantiated yet?
 			bool key = false;
@@ -524,14 +524,14 @@ namespace game::procgen
 			//Solid floor
 			scene.instantiate("SolidPlane", SolidPlaneComponent{ { 0, 1, 0 }, { 0, -7, 0 } });
 
-			//Calculate suggested player position as cell furthest from key
+			//Calculate suggested player position as cell furthest from key (Manhattan distance)
 			Coords player_pos;
 			double longest_dist = -std::numeric_limits<double>::infinity();
 			for (size_t i = 0; i < grid_.size(); i++)
 				if (!grid_[i].solid)
 				{
 					auto [x, y] = index_to_coords(i);
-					double dist = std::pow(x - key_pos.first, 2) + std::pow(y - key_pos.second, 2);
+					double dist = x - key_pos.first + y - key_pos.second;
 					if (dist > longest_dist)
 						player_pos = { x, y };
 				}

@@ -43,6 +43,7 @@ game::GameEngine::GameEngine(bool fullscreen, bool vsync, bool ground) :
 
 	//Set event handlers
 	events::dispatcher.sink<events::QuitGame>().connect<&GameEngine::quit>(this);
+	events::dispatcher.sink<events::ToggleFullscreen>().connect<&GameEngine::toggle_fullscreen>(this);
 	for (auto &r : events::responses)
 		r->log();
 
@@ -150,6 +151,14 @@ void game::GameEngine::draw()
 void game::GameEngine::quit(const events::QuitGame &)
 {
 	glfwSetWindowShouldClose(window_, true);
+}
+
+void game::GameEngine::toggle_fullscreen(const events::ToggleFullscreen &)
+{
+	fullscreen_ = !fullscreen_;
+	glfwSetWindowMonitor(window_, (fullscreen_ ? glfwGetPrimaryMonitor() : nullptr),
+		0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, GLFW_DONT_CARE);
+	if (vsync_) glfwSwapInterval(1);
 }
 
 void game::GameEngine::key_callback(GLFWwindow *window, int key, int scancode, int action, int mods)
