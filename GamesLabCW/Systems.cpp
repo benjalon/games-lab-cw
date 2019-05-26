@@ -34,13 +34,24 @@ namespace game::systems
 	};
 	SYSTEM(GameStateSystem, GameStateComponent);
 
-	//First-person control by the player
-	auto FirstPersonControllerSystem = [](SceneInfo info, auto entity, FirstPersonControllerComponent &f, TransformComponent &t, KinematicComponent &k, ProjectileComponent &bc, CollisionComponent &c)
+	auto OverlaySystem = [](SceneInfo info, auto entity, OverlayComponent &o)
 	{
-		//if (s.health < 1)
-		//{
-		//	info.scene.destroy(entity);
-		//}
+		info.scene.destroy(entity);
+	};
+	SYSTEM(OverlaySystem, OverlayComponent);
+
+	//First-person control by the player
+	auto FirstPersonControllerSystem = [](SceneInfo info, auto entity, FirstPersonControllerComponent &f, TransformComponent &t, KinematicComponent &k, ProjectileComponent &bc, CollisionComponent &c, StatsComponent &s)
+	{
+		s.mana += info.dt;
+		if (s.mana > 3)
+		{
+			s.mana = 3;
+		}
+		if (s.health < 1)
+		{
+			info.scene.destroy(entity);
+		}
 		double mouse_sensitivity = 5.0;
 		double move_speed = 30.0;
 
@@ -71,10 +82,54 @@ namespace game::systems
 		k.move_velocity = move_dir * move_speed;
 
 		//Fire bullet
-		if (input::is_released(input::MOUSE_BUTTON_1))
-			events::dispatcher.enqueue<events::FireBullet>(info.scene, bc.model_file, t.position, t.rotation, bc.vs, bc.fs, bc.particle_file, c.radius);
+		if (input::is_released(input::MOUSE_BUTTON_1) && s.mana >= 3)
+		{
+			s.mana = 0;
+			events::dispatcher.enqueue<events::FireBullet>(info.scene, bc.model_file, t.position, t.rotation, bc.vs, bc.fs, bc.particle_file, c.radius, true);
+		}
+
+		OverlayComponent i_hp; 
+		OverlayComponent i_mp; 
+		
+		switch (s.health)
+		{
+		case 1:
+			i_hp.texture_file = "models/UI/hearts-1.png";
+			break;
+		case 2:
+			i_hp.texture_file = "models/UI/hearts-2.png";
+			break;
+		case 3:
+			i_hp.texture_file = "models/UI/hearts-3.png";
+			break;
+		default:
+			i_hp.texture_file = "models/UI/hearts-3.png";
+			break;
+		}
+
+		switch (int(s.mana))
+		{
+		case 0:
+			i_mp.texture_file = "models/UI/mana-0.png";
+			break;
+		case 1:
+			i_mp.texture_file = "models/UI/mana-1.png";
+			break;
+		case 2:
+			i_mp.texture_file = "models/UI/mana-2.png";
+			break;
+		case 3:
+			i_mp.texture_file = "models/UI/mana-3.png";
+			break;
+		default:
+			i_mp.texture_file = "models/UI/mana-3.png";
+			break;
+		}
+
+		info.scene.instantiate("Overlay", i_hp);
+		info.scene.instantiate("Overlay", i_mp);
 	};
-	SYSTEM(FirstPersonControllerSystem, FirstPersonControllerComponent, TransformComponent, KinematicComponent, ProjectileComponent, CollisionComponent);
+	SYSTEM(FirstPersonControllerSystem, FirstPersonControllerComponent, TransformComponent, KinematicComponent, ProjectileComponent, CollisionComponent, StatsComponent);
 
 	//EXAMPLE Moveable sphere to demo collisions
 	auto MoveSphereSystem = [](auto info, auto entity, auto&, TransformComponent& t)
@@ -142,8 +197,9 @@ namespace game::systems
 			if (info.registry.has<DetectionComponent>(other) && info.registry.has<BulletComponent>(entity))
 			{
 				AIComponent &ai = info.registry.get<AIComponent>(other);
+				BulletComponent& bc = info.registry.get<BulletComponent>(entity);
 
-				if (ai.dodgeCooldown > ai.dodgeMax)
+				if (ai.dodgeCooldown > ai.dodgeMax && bc.isPlayers)
 				{
 					DetectionComponent& d = info.registry.get<DetectionComponent>(other);
 					ai.dodgeBullet = true;
@@ -257,16 +313,16 @@ namespace game::systems
 					a.moving = 0;
 					int speed = 2;
 					speed *= 100;
-					k.velocity = move * speed * info.dt;
+					k.move_velocity = move * speed * info.dt;
 					t.rotation.z = Vector2(-fmod(t.rotation.z + r, 360), 0).abs() + 180;
 				}
 				else if (a.moving > 4)
 				{
-					k.velocity = { 0,0,0 };
+					k.move_velocity = { 0,0,0 };
 				}
-				else if (a.dodgeCooldown > 0.7 && a.dodgeBullet)
+				else if (a.dodgeCooldown > 0.5 && a.dodgeBullet)
 				{
-					k.velocity = { 0,0,0 };
+					k.move_velocity = { 0,0,0 };
 					a.dodgeBullet = false;
 				}
 				
@@ -278,7 +334,7 @@ namespace game::systems
 
 				if (a.dodgeCooldown > a.dodgeMax)
 				{
-					k.velocity = { 0,0,0 };
+					k.move_velocity = { 0,0,0 };
 					a.dodgeCooldown = 0;
 					auto direction = Vector2(-fmod(a.direction, 360), 0).direction_hv_right().ToGLM();
 					Vector3 move = glm::normalize(direction);
@@ -288,11 +344,11 @@ namespace game::systems
 					auto r = rand() % 2;
 					if (r == 1)
 					{
-						k.velocity = move * speed * info.dt;
+						k.move_velocity = move * speed * info.dt;
 					}
 					else
 					{
-						k.velocity = move * speed * info.dt * -1;
+						k.move_velocity = move * speed * info.dt * -1;
 					}
 				}
 				a.state = a.Look;
@@ -308,7 +364,6 @@ namespace game::systems
 				Vector2 enemyPos = Vector2(t.position.x, t.position.z);
 				Vector2 nonNormal = cameraPos - enemyPos;
 				Vector2 fromPlayerToEnemy = Vector2(glm::normalize(nonNormal.ToGLM()));
-
 		
 				glm::mat4 matModel = glm::rotate(glm::radians((float)(t.rotation.z)), glm::vec3(0, 0, 1));
 				glm::vec2 playerHeading = glm::vec2(matModel[2][0], matModel[2][2]);
@@ -319,21 +374,15 @@ namespace game::systems
 				if (fromPlayerToEnemy.x < 0)
 					t.rotation.z = -(360 - glm::degrees(acos(cosinedegreesToRotate))) + 180;
 				else
-					t.rotation.z = -(glm::degrees(acos(cosinedegreesToRotate))) + 180;
-
-
-				if (input::is_pressed(input::KEY_LEFT_CONTROL))
-				{
-					t.position.x += 1;
-				}
+					t.rotation.z = -(glm::degrees(acos(cosinedegreesToRotate))) + 180; 
 
 				if (s.mana > 3)
 				{
 					s.mana = 0;
 					Vector3 rotation = { -fmod(t.rotation.z+180,360), 0, 0 };
-					events::dispatcher.enqueue<events::FireBullet>(info.scene, bc.model_file, t.position, rotation, bc.vs, bc.fs, bc.particle_file,h.c.radius);
+					events::dispatcher.enqueue<events::FireBullet>(info.scene, bc.model_file, t.position, rotation, bc.vs, bc.fs, bc.particle_file,h.c.radius, false);
 				}
-				a.state = a.Look;
+				//a.state = a.Look;
 			}
 		}
 		

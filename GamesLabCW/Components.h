@@ -175,6 +175,7 @@ namespace game
 	struct BulletComponent {
 		bool draw = true;
 		double timeAlive = 0;
+		bool isPlayers = false;
 	};
 
 	struct HitboxComponent {
