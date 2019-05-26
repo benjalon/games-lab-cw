@@ -38,6 +38,7 @@ namespace game
 		Vector3& operator-=(const Vector3 &other);
 
 		Vector3 operator*(const double &other);
+		Vector3 operator/(const double &other);
 
 		//Allows implicit casting to glm
 		operator glm::vec3() const;

@@ -21,6 +21,9 @@ namespace game
 		//Registry of entities
 		entt::registry<> registry_;
 
+		//Has this scene been drawn yet after the last clear?
+		bool drawn_yet = false;
+
 	public:
 		//Spatial partitioning grid of entities
 		SpatialGrid<Entity> spatial_grid;
@@ -81,5 +84,19 @@ namespace game
 
 		//Clears the entire scene, destroying all entities
 		void clear();
+	};
+
+
+	//Struct of general-purpose information to be passed to systems, events etc.
+	struct SceneInfo
+	{
+		//Reference to the current scene
+		Scene &scene;
+
+		//Delta time (seconds since last update)
+		double dt;
+
+		//The registry in use
+		entt::registry<> &registry;
 	};
 }

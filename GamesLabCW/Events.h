@@ -2,6 +2,7 @@
  * Events.h
  * Defines the interface for event signalling.
  */
+
 #pragma once
 
 #include <entt/entt.hpp>
@@ -15,10 +16,13 @@ namespace game::events
 	//Instructs the game engine to quit
 	struct QuitGame {};
 
+	//Instructs the game engine to toggle fullscreen
+	struct ToggleFullscreen {};
+
 	//Represents two entities entering a collision
 	struct EnterCollision
 	{
-		entt::registry<> &registry;
+		SceneInfo info;
 		Entity a;
 		Entity b;
 	};
@@ -26,7 +30,7 @@ namespace game::events
 	//Represents two entities leaving a collision
 	struct LeaveCollision
 	{
-		entt::registry<> &registry;
+		SceneInfo info;
 		Entity a;
 		Entity b;
 	};
@@ -41,7 +45,11 @@ namespace game::events
 		std::string bullet_vs;
 		std::string bullet_fs;
 		std::string bullet_particles;
+		double radius;
 	};
+
+	//Represents a maze generation
+	struct GenerateMaze { Scene &scene; };
 
 
 	/* EVENTS AND RESPONSES IMPLEMENTATION */
@@ -77,10 +85,21 @@ namespace game::events
 			responses.push_back(std::make_unique<Response<T, Function>>());
 		}
 	};
-		
-	void HandleKeyCollision(const EnterCollision &e);
-	void HandleBulletCollision(const EnterCollision &e);
-	void HandleDoorCollision(const EnterCollision &e);
+
+	//Utility for determining collision participants (b is set to true if members hold for e.b)
+	template <typename... Ts, typename T>
+	bool collide_which(const T e, bool &b)
+	{
+		b = e.info.registry.has<Ts...>(e.b);
+		return b || e.info.registry.has<Ts...>(e.a);
+	}
+
+	//Utility for determining collision participants (only one of the entities is checked)
+	template <typename... Ts, typename T>
+	bool collide(const T e, bool b)
+	{
+		return e.info.registry.has<Ts...>(b ? e.a : e.b);
+	}
 }
 
 //Registers a function as a response to an event

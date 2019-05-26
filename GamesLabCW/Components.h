@@ -19,6 +19,7 @@ namespace game
 
 	struct GameStateComponent {};
 	struct FirstPersonControllerComponent {};
+	struct PortalComponent {};
 
 	// Tracks how many keys are picked up, and where in the game they should be rendered
 	struct KeyComponent
@@ -37,6 +38,7 @@ namespace game
 		Vector3 rotation;
 		Vector3 scale{ 1.0, 1.0, 1.0 };
 
+		Vector3 position_old;
 		SpatialGrid<Entity>::index_type last_index;
 	};
 
@@ -111,8 +113,16 @@ namespace game
 
 	struct KinematicComponent
 	{
-		Vector3 velocity;
-		Vector3 acceleration;
+		bool solid = false; //Is this blocked by SolidPlanes?
+
+		Vector3 velocity; //Current velocity
+		Vector3 acceleration; //Current acceleration (reset every tick)
+		Vector3 angular_velocity; //Current angular velocity
+
+		Vector3 move_velocity; //Instruct movement
+
+		Vector3 velocity_old; //Last tick's velocity
+		Vector3 acceleration_old; //Last tick's acceleration
 	};
 
 	struct CollisionComponent
@@ -121,13 +131,30 @@ namespace game
 		std::unordered_set<Entity> colliding;
 	};
 
+	struct SolidPlaneComponent
+	{
+		Vector3 normal;
+		Vector3 position;
+		double size = std::numeric_limits<double>::infinity();
+	};
+
 	struct MoveSphere {};
 
 	struct AIComponent {
-		bool looking = true;
+		enum State {Look, Dodge, Shoot};
+		State state;
+		double moving = 0;
+		
+		//Dodge trackers
+		double dodgeCooldown = 0;
+		double dodgeMax = 5;
+		bool canDodge = dodgeCooldown > dodgeMax;
+		bool dodgeBullet = false;
+		double direction = 0;
+
 	};
 
-	struct BulletComponent{
+	struct ProjectileComponent{
 		std::string model_file = "models/Fireball/fireball.obj";
 		std::string particle_file = "models/Particles/fire2.png";
 		std::string vs = "shaders/FlatColor.vert";
@@ -137,5 +164,20 @@ namespace game
 	struct DetectionComponent {
 		CollisionComponent c;
 		Entity camera;
+	};
+
+	struct StatsComponent {
+		int health = 3;
+		double mana = 3;
+		int keyCount = 0;
+	};
+
+	struct BulletComponent {
+		bool draw = true;
+		double timeAlive = 0;
+	};
+
+	struct HitboxComponent {
+		CollisionComponent c;
 	};
 }

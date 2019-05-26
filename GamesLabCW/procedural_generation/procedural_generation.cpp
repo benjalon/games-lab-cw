@@ -368,9 +368,42 @@ namespace game::procgen
 				populate_rooms(n, min_size, max_size - 1, id_from);
 		}
 
-		//Builds the maze into the given scene
-		void build_scene(Scene &scene)
+		//Builds the maze into the given scene, returning suggested player position
+		Vector3 build_scene(Scene &scene)
 		{
+			//Utility to place key
+			auto place_key = [&](Vector3 position)
+			{
+				ModelComponent m_key; m_key.model_file = "models/Key/Key_B_02.obj";
+				KeyComponent k_key; k_key.destination = { -40, 10, 10 };
+				TransformComponent t_key; t_key.scale = { 0.5, 0.5, 0.5 }; t_key.rotation = { 0, 180, 180 };
+				t_key.position = position;
+				PointLightComponent pl_key{ {1, 180 / 255.0, 120.0 / 255.0}, 60, t_key.position };
+				KinematicComponent kn_key; kn_key.angular_velocity = { 0, 90, 0 };
+				scene.instantiate("Key", m_key, t_key, k_key, pl_key, kn_key);
+			};
+
+			//Utility to place torch
+			auto place_torch = [&](Vector3 position)
+			{
+				ParticleComponent p_torch; p_torch.texture_file = "models/Particles/fire.png"; p_torch.respawn_count = 10;
+				p_torch.position_variation = Vector3(100, 50, 40);
+				p_torch.velocity_variation = Vector3(100, 50, 50);
+				p_torch.color_variation = Vector3(100, -0.5, 100);
+				p_torch.color_modifier = Vector3(1, 0.15, 0);
+
+				TransformComponent t_torch; t_torch.scale = { 5, 5, 5 };
+				t_torch.position = position;
+
+				scene.instantiate("Model", t_torch, ModelComponent{ "models/Torch/torch.obj" });
+				scene.instantiate("PointLight", PointLightComponent{ {1, 147.0 / 255.0, 41.0 / 255.0}, 45,
+					t_torch.position + Vector3(0, 8, 0)
+					});
+				scene.instantiate("ParticleEffect", p_torch, TransformComponent{
+					t_torch.position + Vector3(0, 8, 0)
+					});
+			};
+
 			//Instantiate models for each cell type
 			ModelComponent m_type_1; m_type_1.model_file = "models/Procedural/type1.obj";
 			ModelComponent m_type_2; m_type_2.model_file = "models/Procedural/type2.obj";
@@ -380,13 +413,20 @@ namespace game::procgen
 
 			//Parameters of model
 			double model_size = 20.0;
-			double scale = 0.5;
+			double scale = 1.2;
 
 			//Effective size
 			double cell_size = model_size * scale;
 
 			//Separation between cells to prevent z-fighting
-			double give = 0.001;
+			double give = -0.001;
+
+			//Size of individual solid planes
+			double plane_size = cell_size / 2 + 2;
+
+			//Has the key been instantiated yet?
+			bool key = false;
+			Coords key_pos;
 
 			//Instantiate correct type for each cell in grid
 			for (int x = 1; x < size_ - 1; x++)
@@ -444,6 +484,9 @@ namespace game::procgen
 								else if (north && west) t.rotation = { 0, 270.0, 0 };
 
 								scene.instantiate("Model", m_type_2, t);
+
+								//Instantiate torch
+								place_torch({ x * cell_size, -11.5, y * cell_size });
 							}
 							break;
 
@@ -454,13 +497,59 @@ namespace game::procgen
 							else if (!south) t.rotation = { 0, 270.0, 0 };
 
 							scene.instantiate("Model", m_type_4, t);
+
+							//Instantiate key
+							if (!key)
+							{
+								place_key({ x * cell_size, 0.5, y * cell_size });
+								key_pos = { x, y };
+								key = true;
+							}
+
 							break;
 						}
+
+						//Place solid collision planes
+						if (west) scene.instantiate("SolidPlane", SolidPlaneComponent{ { 1, 0, 0 }, t.position + Vector3(-cell_size / 2, 0, 0), plane_size });
+						if (east) scene.instantiate("SolidPlane", SolidPlaneComponent{ { -1, 0, 0 }, t.position + Vector3(cell_size / 2, 0, 0), plane_size });
+						if (north) scene.instantiate("SolidPlane", SolidPlaneComponent{ { 0, 0, 1 }, t.position + Vector3(0, 0, -cell_size / 2), plane_size });
+						if (south) scene.instantiate("SolidPlane", SolidPlaneComponent{ { 0, 0, -1 }, t.position + Vector3(0, 0, cell_size / 2), plane_size });
 					}
+
+			//If there were no dead ends, place key in random cell
+			if (!key)
+			{
+				std::uniform_int_distribution<size_t> index_dist(0, size_ - 1);
+				size_t i = index_dist(rng());
+				while (!grid_[i].solid)
+					i = index_dist(rng());
+
+				auto [x, y] = index_to_coords(i);
+				place_key({ x * cell_size, 0.5, y * cell_size });
+				key_pos = { x, y };
+				key = true;
+			}
+
+			//Solid floor
+			scene.instantiate("SolidPlane", SolidPlaneComponent{ { 0, 1, 0 }, { 0, -7, 0 } });
+
+			//Calculate suggested player position as cell furthest from key (Manhattan distance)
+			Coords player_pos;
+			double longest_dist = -std::numeric_limits<double>::infinity();
+			for (size_t i = 0; i < grid_.size(); i++)
+				if (!grid_[i].solid)
+				{
+					auto [x, y] = index_to_coords(i);
+					double dist = abs(x - key_pos.first) + abs(y - key_pos.second);
+					if (dist > longest_dist)
+						player_pos = { x, y };
+				}
+
+			return { player_pos.first * cell_size, 6, player_pos.second * cell_size };
 		}
 	};
 
-	void generate_maze(Scene &scene, size_t grid_size, int sparsification, int number_rooms, int min_room_size, int max_room_size)
+	Vector3 generate_maze(Scene &scene, size_t grid_size, int sparsification, int number_rooms, int min_room_size, int max_room_size)
 	{
 		//Prepare fully-solid grid
 		Grid g(grid_size);
@@ -479,6 +568,108 @@ namespace game::procgen
 		g.print();
 
 		//Build the map into the scene
-		g.build_scene(scene);
+		return g.build_scene(scene);
+	}
+
+	void load_hub(Scene &scene, int keys_collected)
+	{
+		//Player/camera
+		StatsComponent s_player; s_player.health = 4; s_player.mana = 1;
+		auto player = scene.instantiate("FirstPersonController", TransformComponent{ {0,6,5} , { 180,0,0 } }, CollisionComponent{ 6 }, KinematicComponent{ true });
+		auto camera = scene.instantiate("Camera", CameraComponent{ player });
+
+		//Room stuff
+		ModelComponent m_water; m_water.model_file = "models/Water/water.obj"; m_water.vertex_shader = "shaders/Water.vert"; m_water.fragment_shader = "shaders/Water.frag";
+		scene.instantiate("Model", m_water);
+
+		ModelComponent m_room; m_room.model_file = "models/Room/room.obj";
+		TransformComponent t_room; t_room.position.y = 10; t_room.scale = { 0.5, 0.5, 0.5 };
+		scene.instantiate("Model", m_room, t_room);
+
+		//Solid planes
+		scene.instantiate("SolidPlane", SolidPlaneComponent{ { 0, 1, 0 }, { 0, 0, 0 } }); //floor
+		scene.instantiate("SolidPlane", SolidPlaneComponent{ { -1, 0, 0 }, { 30, 0, 0 } }); //right wall
+		scene.instantiate("SolidPlane", SolidPlaneComponent{ { 1, 0, 0 }, { -35, 0, 0 } }); //left wall
+		scene.instantiate("SolidPlane", SolidPlaneComponent{ { 0, 0, -1 }, { 0, 0, 30 } }); //back wall
+		scene.instantiate("SolidPlane", SolidPlaneComponent{ { 0, 0, 1 }, { 0, 0, -30 } }); //front wall
+
+		// Minotaur test model
+		//ModelComponent, ColourComponent, TransformComponent, HitboxComponent, KinematicComponent, AIComponent, CameraComponent, ProjectileComponent, DetectionComponent,StatsComponent, CollisionComponent
+		ModelComponent m_minotaur; m_minotaur.model_file = "models/Minotaur/Minotaur@Idle.fbx";
+		ColourComponent c_minotaur; c_minotaur.colour = { 0, 0, 255 };
+		DetectionComponent d_minotaur; d_minotaur.c.radius = 30; d_minotaur.camera = camera;
+		TransformComponent t_minotaur; t_minotaur.scale = { 0.10, 0.1, 0.1 }; t_minotaur.position = { 0, 9, -15 }; t_minotaur.rotation = { 90, 180, 0 };
+		HitboxComponent h_minotaur; h_minotaur.c.radius = 2.5;
+		StatsComponent s_minotaur; s_minotaur.health = 3, s_minotaur.mana = 1;
+		scene.instantiate("AIModel", m_minotaur, c_minotaur, t_minotaur, h_minotaur, d_minotaur, s_minotaur);
+
+		//Torches
+		ModelComponent m_torch; m_torch.model_file = "models/Torch/torch.obj";
+
+		ParticleComponent p_torch; p_torch.texture_file = "models/Particles/fire.png"; p_torch.respawn_count = 1;
+		p_torch.position_variation = Vector3(100, 50, 40);
+		p_torch.velocity_variation = Vector3(100, 50, 50);
+		p_torch.color_variation = Vector3(100, -0.5, 100);
+		p_torch.color_modifier = Vector3(1, 0.15, 0);
+
+		TransformComponent t_torch1; t_torch1.position = { 26, 0, -23 }; t_torch1.scale = { 5, 5, 5 };
+		scene.instantiate("Model", m_torch, t_torch1);
+		scene.instantiate("PointLight", PointLightComponent{ {1, 147.0 / 255.0, 41.0 / 255.0}, 40, {26, 7, -23} });
+		scene.instantiate("ParticleEffect", p_torch, TransformComponent{ { 26, 8, -23 } });
+
+		TransformComponent t_torch2; t_torch2.position = { 26, 0, 23 }; t_torch2.scale = { 5, 5, 5 };
+		scene.instantiate("Model", m_torch, t_torch2);
+		scene.instantiate("PointLight", PointLightComponent{ {1, 147.0 / 255.0, 41.0 / 255.0}, 40, {26, 7, 23} });
+		scene.instantiate("ParticleEffect", p_torch, TransformComponent{ { 26, 8, 23 } });
+
+		TransformComponent t_torch3; t_torch3.position = { -26, 0, -10 }; t_torch3.scale = { 5, 5, 5 };
+		scene.instantiate("Model", m_torch, t_torch3);
+		scene.instantiate("PointLight", PointLightComponent{ {1, 147.0 / 255.0, 41.0 / 255.0}, 40, { -26, 7, -10 } });
+		scene.instantiate("ParticleEffect", p_torch, TransformComponent{ { -26, 8, -10 } });
+
+		TransformComponent t_torch4; t_torch4.position = { -26, 0, 10 }; t_torch4.scale = { 5, 5, 5 };
+		scene.instantiate("Model", m_torch, t_torch4);
+		scene.instantiate("PointLight", PointLightComponent{ {1, 147.0 / 255.0, 41.0 / 255.0}, 40, { -26, 7, 10 } });
+		scene.instantiate("ParticleEffect", p_torch, TransformComponent{ { -26, 8, 10 } });
+
+		//Portal
+		ParticleComponent p_portal; p_portal.texture_file = "models/Particles/star.png"; p_portal.respawn_count = 1;
+		p_portal.position_variation = Vector3(100, 50, 10);
+		p_portal.velocity_variation = Vector3(100, 50, 40);
+		p_portal.color_variation = Vector3(100, -0.5, 100);
+		p_portal.color_modifier = Vector3(0.8, 0.2, 1);
+		scene.instantiate("ParticleEffect", p_portal, TransformComponent{ Vector3(3, 5, 22) });
+		scene.instantiate("PointLight", PointLightComponent{ {1, 105.0 / 255.0, 180.0 / 255.0}, 40, { 3, 3, 22} });
+		scene.instantiate("Portal", TransformComponent{ { 3, 3, 22 } });
+
+		//UI
+		OverlayComponent i_hp; i_hp.texture_file = "models/UI/hearts-2.png";
+		scene.instantiate("Overlay", i_hp);
+		OverlayComponent i_mp; i_mp.texture_file = "models/UI/mana-3.png";
+		scene.instantiate("Overlay", i_mp);
+
+		//Skybox
+		TransformComponent t_skybox; t_skybox.scale = { 20, 20, 20 };
+		ModelComponent m_skybox; m_skybox.model_file = "models/Skybox/skybox.obj"; m_skybox.vertex_shader = "shaders/Skybox.vert"; m_skybox.fragment_shader = "shaders/Skybox.frag";
+		scene.instantiate("Model", m_skybox, t_skybox);
+
+		//Generic scene lighting
+		scene.instantiate("AmbientLight", AmbientLightComponent{ {1, 147.0 / 255.0, 41.0 / 255.0}, 0.01 });
+		scene.instantiate("DirectionalLight", DirectionalLightComponent{ {0, 0, 0}, 0, {0,0,0} });
+
+		//Add keys to door, depending on number of keys collected
+		ModelComponent m_key; m_key.model_file = "models/Key/Key_B_02.obj";
+
+		for (int i = 0; i < keys_collected; i++)
+		{
+			TransformComponent t; t.scale = { 0.5, 0.5, 0.5 }; t.rotation = { 90, 180, 180 };
+
+			if (i < 3)
+				t.position = { -40, 10 + i * 5.0, 10 };
+			else
+				t.position = { -40, 10 + (i - 3) * 5.0, -10 };
+
+			scene.instantiate("Model", t, ModelComponent{ "models/Key/Key_B_02.obj" });
+		}
 	}
 }
