@@ -1,13 +1,13 @@
-# Blender MTL File: 'None'
+# Blender MTL File: 'torch.obj'
 # Material Count: 1
 
 newmtl Brazier_Material
-Ns 62.745098
+Ns 60.784314
 Ka 0.500000 0.500000 0.500000
 Kd 0.400000 0.400000 0.400000
 Ks 0.250000 0.250000 0.250000
 Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
-illum 3
+illum 2
 map_Kd Brazier_Material_Base_Color.tga.png
