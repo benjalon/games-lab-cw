@@ -350,6 +350,8 @@ namespace game::renderer
 
 	void render_overlay(CameraComponent camera, OverlayComponent &i)
 	{
+		glDisable(GL_CULL_FACE);
+
 		//Get the overlay, aborting if not found
 		auto it = overlays.find(i.texture_file);
 		if (it == overlays.end()) return;
@@ -386,6 +388,8 @@ namespace game::renderer
 		);
 
 		overlay.Render(shader);
+
+		glEnable(GL_CULL_FACE);
 	}
 
 	void animate_model(double time, std::string model_file) 
