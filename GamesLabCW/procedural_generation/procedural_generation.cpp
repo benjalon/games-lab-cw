@@ -622,15 +622,15 @@ namespace game::procgen
 		scene.instantiate("PointLight", PointLightComponent{ {1, 147.0 / 255.0, 41.0 / 255.0}, 40, {26, 7, 23} });
 		scene.instantiate("ParticleEffect", p_torch, TransformComponent{ { 26, 8, 23 } });
 
-		TransformComponent t_torch3; t_torch3.position = { -26, 6, -10 }; t_torch3.scale = { 5, 5, 5 };
+		TransformComponent t_torch3; t_torch3.position = { -26, 0, -10 }; t_torch3.scale = { 5, 5, 5 };
 		scene.instantiate("Model", m_torch, t_torch3);
-		scene.instantiate("PointLight", PointLightComponent{ {1, 147.0 / 255.0, 41.0 / 255.0}, 40, { -26, 13, -10 } });
-		scene.instantiate("ParticleEffect", p_torch, TransformComponent{ { -26, 14, -10 } });
+		scene.instantiate("PointLight", PointLightComponent{ {1, 147.0 / 255.0, 41.0 / 255.0}, 40, { -26, 7, -10 } });
+		scene.instantiate("ParticleEffect", p_torch, TransformComponent{ { -26, 8, -10 } });
 
-		TransformComponent t_torch4; t_torch4.position = { -26, 6, 10 }; t_torch4.scale = { 5, 5, 5 };
+		TransformComponent t_torch4; t_torch4.position = { -26, 0, 10 }; t_torch4.scale = { 5, 5, 5 };
 		scene.instantiate("Model", m_torch, t_torch4);
-		scene.instantiate("PointLight", PointLightComponent{ {1, 147.0 / 255.0, 41.0 / 255.0}, 40, { -26, 13, 10 } });
-		scene.instantiate("ParticleEffect", p_torch, TransformComponent{ { -26, 14, 10 } });
+		scene.instantiate("PointLight", PointLightComponent{ {1, 147.0 / 255.0, 41.0 / 255.0}, 40, { -26, 7, 10 } });
+		scene.instantiate("ParticleEffect", p_torch, TransformComponent{ { -26, 8, 10 } });
 
 		//Portal
 		ParticleComponent p_portal; p_portal.texture_file = "models/Particles/star.png"; p_portal.respawn_count = 1;
