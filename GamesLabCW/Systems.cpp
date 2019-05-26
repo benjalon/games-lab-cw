@@ -22,7 +22,7 @@ std::vector<game::systems::SystemInvoker> game::systems::system_invokers;
 namespace game::systems
 {
 	//General game state system
-	auto GameStateSystem = [](auto info, auto entity, auto &g)
+	auto GameStateSystem = [](auto info, auto entity, auto& g)
 	{
 		//ESC quits the game
 		if (input::is_pressed(input::KEY_ESCAPE))
@@ -30,10 +30,13 @@ namespace game::systems
 	};
 	SYSTEM(GameStateSystem, GameStateComponent);
 
-
 	//First-person control by the player
-	auto FirstPersonControllerSystem = [](SceneInfo info, auto entity, FirstPersonControllerComponent &f, CollisionComponent &c, TransformComponent &t, KinematicComponent &k, BulletComponent &bc)
+	auto FirstPersonControllerSystem = [](SceneInfo info, auto entity, FirstPersonControllerComponent &f, TransformComponent &t, KinematicComponent &k, ProjectileComponent &bc, CollisionComponent &c)
 	{
+		//if (s.health < 1)
+		//{
+		//	info.scene.destroy(entity);
+		//}
 		double mouse_sensitivity = 5.0;
 		double move_speed = 11.0;
 
@@ -43,6 +46,7 @@ namespace game::systems
 
 		//Clamp y rotation to avoid flipping
 		t.rotation.y = std::clamp(t.rotation.y, -85.0, 85.0);
+		
 
 		//Move forward/backward
 		k.velocity = Vector2(t.rotation.x, t.rotation.y).direction_hv() * move_speed *
@@ -53,8 +57,7 @@ namespace game::systems
 			(input::is_held(input::KEY_D) - input::is_held(input::KEY_A));
 
 		if (input::is_released(input::MOUSE_BUTTON_1))
-			events::dispatcher.enqueue<events::FireBullet>(info.scene, bc.model_file, t.position, t.rotation, bc.vs, bc.fs, bc.particle_file);
-
+			events::dispatcher.enqueue<events::FireBullet>(info.scene, bc.model_file, t.position, t.rotation, bc.vs, bc.fs, bc.particle_file, c.radius);
 
 		/* JUMPING SIMULATION IN ABSENCE OF COLLISIONS */
 		////Acceleration due to gravity
@@ -68,25 +71,22 @@ namespace game::systems
 		//if (input::is_pressed(input::KEY_SPACE))
 		//	k.velocity.y += 4.0;
 	};
-	SYSTEM(FirstPersonControllerSystem, FirstPersonControllerComponent, CollisionComponent, TransformComponent, KinematicComponent, BulletComponent);
-
+	SYSTEM(FirstPersonControllerSystem, FirstPersonControllerComponent, TransformComponent, KinematicComponent, ProjectileComponent, CollisionComponent);
 
 	//EXAMPLE Moveable sphere to demo collisions
-	auto MoveSphereSystem = [](auto info, auto entity, auto &, TransformComponent &t)
+	auto MoveSphereSystem = [](auto info, auto entity, auto&, TransformComponent& t)
 	{
 		t.position.z += 2.0 * info.dt * (input::is_held(input::KEY_X) - input::is_held(input::KEY_Z));
 	};
 	SYSTEM(MoveSphereSystem, MoveSphere, TransformComponent);
 
-
 	//Basic kinematic system of calculus of motion
-	auto KinematicSystem = [](auto info, auto entity, auto &t, auto &k)
+	auto KinematicSystem = [](auto info, auto entity, auto& t, auto& k)
 	{
 		k.velocity += k.acceleration * info.dt;
 		t.position += k.velocity * info.dt;
 	};
 	SYSTEM(KinematicSystem, TransformComponent, KinematicComponent);
-
 
 	//Updates the spatial partitioning grid
 	auto SpatialGridSystem = [](SceneInfo info, auto entity, TransformComponent &t, CollisionComponent &)
@@ -96,9 +96,8 @@ namespace game::systems
 	};
 	SYSTEM(SpatialGridSystem, TransformComponent, CollisionComponent);
 
-
 	//Detects collisions, updating pools and logging events
-	auto CollisionSystem = [](SceneInfo info, auto entity, CollisionComponent &c1, TransformComponent &t1)
+	auto CollisionSystem = [](SceneInfo info, auto entity, CollisionComponent& c1, TransformComponent& t1)
 	{
 		//Get set of all nearby entities
 		auto [begin, end] = info.scene.spatial_grid.get_cells_near(t1.position);
@@ -108,20 +107,52 @@ namespace game::systems
 		{
 			Entity other = *it;
 
+			if (!info.registry.valid(entity) || !info.registry.valid(other)) continue;
+
 			//Ignore self
 			if (other == entity) continue;
 
 			//Ignore if not collidable
 			if (!info.registry.has<CollisionComponent>(other)) continue;
 
-			auto &[c2, t2] = info.registry.get<CollisionComponent, TransformComponent>(other);
+			auto& [c2, t2] = info.registry.get<CollisionComponent, TransformComponent>(other);
+
+			if (info.registry.has<DetectionComponent>(other) && info.registry.has<FirstPersonControllerComponent>(entity))
+			{
+				DetectionComponent& d = info.registry.get<DetectionComponent>(other);
+				c2 = d.c;
+				t2 = info.registry.get<TransformComponent>(other);
+			}
+
+			if (info.registry.has<DetectionComponent>(other) && info.registry.has<BulletComponent>(entity))
+			{
+				AIComponent &ai = info.registry.get<AIComponent>(other);
+
+				if (ai.dodgeCooldown > ai.dodgeMax)
+				{
+					DetectionComponent& d = info.registry.get<DetectionComponent>(other);
+					ai.dodgeBullet = true;
+					c2 = d.c; 
+				}
+				else
+				{
+					HitboxComponent& h = info.registry.get<HitboxComponent>(other);
+					c2 = h.c;
+				}
+				t2 = info.registry.get<TransformComponent>(other);
+					
+			}
 
 			//Test if currently colliding (distance between centres less than sum of radii)
-			double d2 = std::pow(t2.position.x - t1.position.x, 2) +
+			double d2 = sqrt(std::pow(t2.position.x - t1.position.x, 2) +
 				std::pow(t2.position.y - t1.position.y, 2) +
-				std::pow(t2.position.z - t1.position.z, 2);
+				std::pow(t2.position.z - t1.position.z, 2));
 
-			bool currently_colliding = d2 < std::pow(c1.radius + c2.radius, 2);
+			double sumRad = c1.radius + c2.radius;
+			bool currently_colliding = d2 < sumRad;
+
+
+
 			bool was_colliding = utility::contains(c1.colliding, other);
 
 			//Log entering of collision
@@ -129,7 +160,7 @@ namespace game::systems
 			{
 				c1.colliding.insert(other);
 				c2.colliding.insert(entity);
-
+				//cout << "d2:" << d2 << " sumRad:" << sumRad << endl;
 				events::dispatcher.enqueue<events::EnterCollision>(info.registry, entity, other);
 			}
 
@@ -138,7 +169,7 @@ namespace game::systems
 			{
 				c1.colliding.erase(other);
 				c2.colliding.erase(entity);
-
+				//cout << "d2:" << d2 << " sumRad:" << sumRad << endl;
 				events::dispatcher.enqueue<events::LeaveCollision>(info.registry, entity, other);
 			}
 		}
@@ -146,17 +177,19 @@ namespace game::systems
 	SYSTEM(CollisionSystem, CollisionComponent, TransformComponent);
 
 	//Makes a camera follow its target
-	auto MoveCameraSystem = [](SceneInfo info, auto entity, CameraComponent &c)
+	auto MoveCameraSystem = [](SceneInfo info, auto entity, CameraComponent& c)
 	{
-		TransformComponent &t = info.scene.get<TransformComponent>(c.follow);
-		c.position = t.position;
-		c.orientation = { t.rotation.x, t.rotation.y };
-		//cout << " X:" << t.rotation.x << " Y:" << t.rotation.y << " Z:" << t.rotation.x*t.rotation.y << endl;
+		if (info.registry.valid(c.follow))
+		{
+			TransformComponent& t = info.scene.get<TransformComponent>(c.follow);
+			c.position = t.position;
+			c.orientation = { t.rotation.x, t.rotation.y };
+		}
 	};
 	SYSTEM(MoveCameraSystem, CameraComponent);
 
 	//Animation system
-	auto AnimationSystem = [](auto info, auto entity, auto &m)
+	auto AnimationSystem = [](auto info, auto entity, auto& m)
 	{
 		// Currently animation isn't finished
 		//if (!m.isAnimated)
@@ -180,110 +213,125 @@ namespace game::systems
 	};
 	SYSTEM(AnimationSystem, ModelComponent);
 
-	auto AISystem = [](SceneInfo info, Entity entity, ModelComponent &m, ColourComponent &colour, TransformComponent &t, KinematicComponent &k, AIComponent &a, CollisionComponent &col, DetectionComponent &d, BulletComponent &bc)
+	auto AISystem = [](SceneInfo info, Entity entity, TransformComponent &t, AIComponent &a, ProjectileComponent &bc, StatsComponent &s, DetectionComponent &d, HitboxComponent &h, KinematicComponent &k)
 	{
 		//Get reference to camera
 		CameraComponent &c = info.scene.get<CameraComponent>(d.camera);
+		s.mana += info.dt;
 
-		//goal: rotate t on the z axis.
 		
-		if (a.looking)
+
+		if (s.health < 1)
 		{
-			a.looking = false;
-			//move side to side. 
+			info.scene.destroy(entity);
 		}
-		else if (!a.looking)
+		else
 		{
-			if (true)
+			a.dodgeCooldown += info.dt;
+
+			if (a.state == a.Look)
 			{
+				//cout << "Looking" << endl;
+
+				a.moving += info.dt;
+				if (a.moving > 7)
+				{
+					auto r = rand() % 360;
+					auto direction = Vector2(-fmod(t.rotation.z + r, 360), 0).direction_hv().ToGLM();
+					Vector3 move = glm::normalize(direction);
+					a.moving = 0;
+					int speed = 2;
+					speed *= 100;
+					k.velocity = move * speed * info.dt;
+					t.rotation.z = Vector2(-fmod(t.rotation.z + r, 360), 0).abs() + 180;
+				}
+				else if (a.moving > 4)
+				{
+					k.velocity = { 0,0,0 };
+				}
+				else if (a.dodgeCooldown > 0.7 && a.dodgeBullet)
+				{
+					k.velocity = { 0,0,0 };
+					a.dodgeBullet = false;
+				}
+				
+			}
+			else if (a.state == a.Dodge)
+			{
+				//cout << "Dodging" << endl;
+				cout << (a.dodgeCooldown > a.dodgeMax) << endl;
+
+				if (a.dodgeCooldown > a.dodgeMax)
+				{
+					k.velocity = { 0,0,0 };
+					a.dodgeCooldown = 0;
+					auto direction = Vector2(-fmod(a.direction, 360), 0).direction_hv_right().ToGLM();
+					Vector3 move = glm::normalize(direction);
+					a.moving = 0;
+					int speed = 10;
+					speed *= 100;
+					auto r = rand() % 2;
+					if (r == 1)
+					{
+						k.velocity = move * speed * info.dt;
+					}
+					else
+					{
+						k.velocity = move * speed * info.dt * -1;
+					}
+				}
+				a.state = a.Look;
+
+
+			}
+			else if (a.state == a.Shoot)
+			{
+				//cout << "Attacking" << endl;
+
 				// Get the positions of both Entities
 				Vector2 cameraPos = Vector2(c.position.x, c.position.z);
 				Vector2 enemyPos = Vector2(t.position.x, t.position.z);
-				Vector2 fromPlayerToEnemy = cameraPos - enemyPos;
-				fromPlayerToEnemy = Vector2(glm::normalize(fromPlayerToEnemy.ToGLM()));
+				Vector2 nonNormal = cameraPos - enemyPos;
+				Vector2 fromPlayerToEnemy = Vector2(glm::normalize(nonNormal.ToGLM()));
 
+		
 				glm::mat4 matModel = glm::rotate(glm::radians((float)(t.rotation.z)), glm::vec3(0, 0, 1));
-
-				// Get the current heading of the player (this should already be Normalized)
-				//glm::vec2 playerHeading = glm::vec2(t.rotation.x, t.rotation.z);
 				glm::vec2 playerHeading = glm::vec2(matModel[2][0], matModel[2][2]);
-
-
-				// Now calculate the Dot product between the two (Normalized) vectors, playerHeading and fromPlayerToEnemy
-				// Note: this process is different between 2-dimensional and 3-dimensional vectors, 
-				//  so I'll just represent this process by a function
 				float cosinedegreesToRotate = glm::dot(playerHeading, fromPlayerToEnemy.ToGLM());
 
 
-				// Apply this rotation to the player
-				//player.Rotate(radiansToRotate);
-				if(fromPlayerToEnemy.x < 0)
-					t.rotation.z = -(360 - glm::degrees(acos(cosinedegreesToRotate)));
+				// Apply acos to that value and set z-axis 360 rule. Then rotation to the AIModel
+				if (fromPlayerToEnemy.x < 0)
+					t.rotation.z = -(360 - glm::degrees(acos(cosinedegreesToRotate))) + 180;
 				else
-					t.rotation.z = -(glm::degrees(acos(cosinedegreesToRotate)));
-
-				//t.rotation.z = rotate *-1;
-				//cout << fromPlayerToEnemy.x << " " << fromPlayerToEnemy.y << " " <<  cosinedegreesToRotate << " " << t.rotation.z << endl;// ":" << fromPlayerToEnemy << ":" << degreesToRotate << endl;
+					t.rotation.z = -(glm::degrees(acos(cosinedegreesToRotate))) + 180;
 
 
-				
+				if (input::is_pressed(input::KEY_LEFT_CONTROL))
+				{
+					t.position.x += 1;
+				}
+
+				if (s.mana > 3)
+				{
+					s.mana = 0;
+					Vector3 rotation = { -fmod(t.rotation.z+180,360), 0, 0 };
+					events::dispatcher.enqueue<events::FireBullet>(info.scene, bc.model_file, t.position, rotation, bc.vs, bc.fs, bc.particle_file,h.c.radius);
+				}
+				a.state = a.Look;
 			}
-			else {
-				// Get the positions of both Entities
-				Vector3 cameraPos = c.position;
-				Vector3 enemyPos = t.position;
-				Vector3 direction = enemyPos - cameraPos;
-
-
-				// Get the current heading of the player (this should already be Normalized)
-				//glm::vec3 playerHeading = glm::radians(glm::vec3(t.rotation.x, t.rotation.z));
-				//Vector3 playerHeading = Vector2(t.rotation.x, t.rotation.y).direction_hv();
-
-				// Now calculate the Dot product between the two (Normalized) vectors, playerHeading and fromPlayerToEnemy
-				// Note: this process is different between 2-dimensional and 3-dimensional vectors, 
-				//  so I'll just represent this process by a function
-				//float rotate = glm::dot(playerHeading.ToGLM(), fromPlayerToEnemy.ToGLM());
-
-				
-				//auto g = glm::lookAt(t.position.ToGLM(), glm::normalize(direction.ToGLM()) + enemyPos.ToGLM(), { 0.0f, 1.0f, 0.0f });
-
-				//t.follow = true;
-				//t.lookAt = glm::inverse(g);
-				
-				//auto b = glm::look
-				// Apply this rotation to the player
-				//player.Rotate(radiansToRotate);
-				//rotate.x = glm::degrees(rotate.x);
-				//rotate.y = glm::degrees(rotate.y);
-				//rotate.z = glm::degrees(rotate.z);
-				//float radius = 180.0;
-				//t.rotation.z = rotate;
-			}
-			
-			
-
-			
-			if (input::is_pressed(input::KEY_LEFT_CONTROL))
-			{
-				Vector3 tmp = { t.rotation.x,t.rotation.z,t.rotation.y }; //really shitty doesn't work
-				events::dispatcher.enqueue<events::FireBullet>(info.scene, bc.model_file, t.position, tmp);
-			}
-			
 		}
-
 		
-
-
 		
 	};
-	SYSTEM(AISystem, ModelComponent, ColourComponent, TransformComponent, KinematicComponent, AIComponent, CollisionComponent,DetectionComponent,BulletComponent);
+	SYSTEM(AISystem, TransformComponent, AIComponent,ProjectileComponent, StatsComponent, DetectionComponent, HitboxComponent, KinematicComponent);
 	
 	auto ParticleSystem = [](auto info, auto entity, ParticleComponent &p, ColourComponent &c, TransformComponent &t, KinematicComponent &k)
 	{
 		Vector3 randomPosition = Vector3(
-				((fmod(rand(), p.position_variation.x)) - p.position_variation.y) / p.position_variation.z,
-				((fmod(rand(), p.position_variation.x)) - p.position_variation.y) / p.position_variation.z,
-				((fmod(rand(), p.position_variation.x)) - p.position_variation.y) / p.position_variation.z);
+			((fmod(rand(), p.position_variation.x)) - p.position_variation.y) / p.position_variation.z,
+			((fmod(rand(), p.position_variation.x)) - p.position_variation.y) / p.position_variation.z,
+			((fmod(rand(), p.position_variation.x)) - p.position_variation.y) / p.position_variation.z);
 
 		Vector3 randomVelocity = Vector3(
 			((fmod(rand(), p.velocity_variation.x)) - p.velocity_variation.y) / p.velocity_variation.z,
@@ -298,4 +346,16 @@ namespace game::systems
 		renderer::update_particle(info.dt, p.texture_file, p.respawn_count, randomPosition, randomVelocity, randomColor);// , t.position);
 	};
 	SYSTEM(ParticleSystem, ParticleComponent, ColourComponent, TransformComponent, KinematicComponent);
+
+	auto BulletSystem = [](auto info, auto entity, BulletComponent &b) {
+
+		b.timeAlive += info.dt;
+		if (!b.draw || b.timeAlive > 5)
+		{
+			info.scene.destroy(entity);
+		}
+
+	};
+	SYSTEM(BulletSystem, BulletComponent);
 }
+

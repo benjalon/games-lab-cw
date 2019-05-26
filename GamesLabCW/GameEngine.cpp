@@ -108,14 +108,21 @@ game::GameEngine::GameEngine(bool fullscreen, bool vsync, bool ground) :
 void game::GameEngine::run()
 {
 	// Player/camera
-	auto player = scene_.instantiate("FirstPersonController", TransformComponent{ {0,6,5} , { 180,0,0 } });
+	CollisionComponent c_player; c_player.radius = 3;
+	StatsComponent s_player; s_player.health = 4; s_player.mana = 1;
+	auto player = scene_.instantiate("FirstPersonController", TransformComponent{ {0,65,5} , { 180,0,0 } }, c_player);
 	auto camera = scene_.instantiate("Camera", CameraComponent{ player });
 
-	// Minotaur model
+	// Minotaur test model
+	//ModelComponent, ColourComponent, TransformComponent, HitboxComponent, KinematicComponent, AIComponent, CameraComponent, ProjectileComponent, DetectionComponent,StatsComponent, CollisionComponent
 	ModelComponent m_minotaur; m_minotaur.model_file = "models/Minotaur/Minotaur@Idle.fbx";
-	TransformComponent t_minotaur; t_minotaur.scale = { 0.15, 0.15, 0.15 }; t_minotaur.position = { 0, 9, -15 }; t_minotaur.rotation = { 90, 180, 0 };//90, 180
-	DetectionComponent d_minotaur; d_minotaur.c.radius = 10; d_minotaur.camera = camera;
-	scene_.instantiate("AIModel", m_minotaur, t_minotaur, d_minotaur);
+	ColourComponent c_minotaur; c_minotaur.colour = { 0, 0, 255 };
+	DetectionComponent d_minotaur; d_minotaur.c.radius = 30; d_minotaur.camera = camera;
+	TransformComponent t_minotaur; t_minotaur.scale = { 0.10, 0.1, 0.1 }; t_minotaur.position = { 0, 55, -15 }; t_minotaur.rotation = { 90, 180, 0 };
+	HitboxComponent h_minotaur; h_minotaur.c.radius = 2.5;
+	StatsComponent s_minotaur; s_minotaur.health = 3, s_minotaur.mana = 1;
+	scene_.instantiate("AIModel", m_minotaur, c_minotaur, t_minotaur, h_minotaur, d_minotaur, s_minotaur);
+
 
 	// Room stuff
 	ModelComponent m_water; m_water.model_file = "models/Water/water.obj"; m_water.vertex_shader = "shaders/Water.vert"; m_water.fragment_shader = "shaders/Water.frag";
@@ -131,27 +138,27 @@ void game::GameEngine::run()
 	KeyComponent k_key1; k_key1.destination = { -40, 10, 10 };
 	TransformComponent t_key1; t_key1.scale = { 0.5, 0.5, 0.5 }; t_key1.position = { 0, 0.5, 15 }; t_key1.rotation = { 90, 180, 180 };
 	PointLightComponent pl_key1{ {1, 180 / 255.0, 120.0 / 255.0}, 0.5, t_key1.position };
-	scene_.instantiate("Key", m_key, t_key1, k_key1, pl_key1);
+	//scene_.instantiate("Key", m_key, t_key1, k_key1, pl_key1);
 
 	KeyComponent k_key2; k_key2.destination = { -40, 15, 10 };
 	TransformComponent t_key2; t_key2.scale = { 0.5, 0.5, 0.5 }; t_key2.position = { 0, 0.5, -15 }; t_key2.rotation = { 90, 180, 180 };
 	PointLightComponent pl_key2{ {1, 180 / 255.0, 120.0 / 255.0}, 0.5, t_key2.position };
-	scene_.instantiate("Key", m_key, t_key2, k_key2, pl_key2);
+	//scene_.instantiate("Key", m_key, t_key2, k_key2, pl_key2);
 
 	KeyComponent k_key3; k_key3.destination = { -40, 20, 10 };
 	TransformComponent t_key3; t_key3.scale = { 0.5, 0.5, 0.5 }; t_key3.position = { 10, 0.5, 15 }; t_key3.rotation = { 90, 180, 180 };
 	PointLightComponent pl_key3{ {1, 180 / 255.0, 120.0 / 255.0}, 0.5, t_key3.position };
-	scene_.instantiate("Key", m_key, t_key3, k_key3, pl_key3);
+	//scene_.instantiate("Key", m_key, t_key3, k_key3, pl_key3);
 
 	KeyComponent k_key4; k_key4.destination = { -40, 10, -10 };
 	TransformComponent t_key4; t_key4.scale = { 0.5, 0.5, 0.5 }; t_key4.position = { -10, 0.5, 15 }; t_key4.rotation = { 90, 180, 180 };
 	PointLightComponent pl_key4{ {1, 180 / 255.0, 120.0 / 255.0}, 0.5, t_key4.position };
-	scene_.instantiate("Key", m_key, t_key4, k_key4, pl_key4);
+	//scene_.instantiate("Key", m_key, t_key4, k_key4, pl_key4);
 
 	KeyComponent k_key5; k_key5.destination = { -40, 15, -10 };
 	TransformComponent t_key5; t_key5.scale = { 0.5, 0.5, 0.5 }; t_key5.position = { 30, 0.5, 10 }; t_key5.rotation = { 90, 180, 180 };
 	PointLightComponent pl_key5{ {1, 180 / 255.0, 120.0 / 255.0}, 0.5, t_key5.position };
-	scene_.instantiate("Key", m_key, t_key5, k_key5, pl_key5);
+	//scene_.instantiate("Key", m_key, t_key5, k_key5, pl_key5);
 
 	KeyComponent k_key6; k_key6.destination = { -40, 20, -10 };
 	TransformComponent t_key6; t_key6.scale = { 0.5, 0.5, 0.5 }; t_key6.position = { -30, 0.5, 10 }; t_key6.rotation = { 90, 180, 180 };

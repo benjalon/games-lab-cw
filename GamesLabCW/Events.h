@@ -41,6 +41,7 @@ namespace game::events
 		std::string bullet_vs;
 		std::string bullet_fs;
 		std::string bullet_particles;
+		double radius;
 	};
 
 
@@ -81,6 +82,8 @@ namespace game::events
 	void HandleKeyCollision(const EnterCollision &e);
 	void HandleBulletCollision(const EnterCollision &e);
 	void HandleDoorCollision(const EnterCollision &e);
+	void HandleDetectionCollision(const EnterCollision &e);
+	void HandleDetectionCollisionLeaving(const LeaveCollision &e);
 }
 
 //Registers a function as a response to an event

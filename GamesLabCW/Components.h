@@ -124,10 +124,20 @@ namespace game
 	struct MoveSphere {};
 
 	struct AIComponent {
-		bool looking = true;
+		enum State {Look, Dodge, Shoot};
+		State state;
+		double moving = 0;
+		
+		//Dodge trackers
+		double dodgeCooldown = 0;
+		double dodgeMax = 5;
+		bool canDodge = dodgeCooldown > dodgeMax;
+		bool dodgeBullet = false;
+		double direction = 0;
+
 	};
 
-	struct BulletComponent{
+	struct ProjectileComponent{
 		std::string model_file = "models/Fireball/fireball.obj";
 		std::string particle_file = "models/Particles/fire2.png";
 		std::string vs = "shaders/FlatColor.vert";
@@ -137,5 +147,20 @@ namespace game
 	struct DetectionComponent {
 		CollisionComponent c;
 		Entity camera;
+	};
+
+	struct StatsComponent {
+		int health = 3;
+		double mana = 3;
+		int keyCount = 0;
+	};
+
+	struct BulletComponent {
+		bool draw = true;
+		double timeAlive = 0;
+	};
+
+	struct HitboxComponent {
+		CollisionComponent c;
 	};
 }
