@@ -2,6 +2,7 @@
  * Events.h
  * Defines the responses used for event signalling.
  */
+
 #define GLM_ENABLE_EXPERIMENTAL
 
 #include "Events.h"
@@ -20,8 +21,9 @@ namespace game::events
 {
 	void HandleKeyCollision(const EnterCollision &, Entity);
 	void HandleDoorCollision(const EnterCollision &, Entity);
-	void HandleBulletCollision(const EnterCollision &, Entity);
+	void HandleBulletCollision(const EnterCollision &, Entity, Entity);
 	void HandlePortalCollision(const EnterCollision &);
+	void HandleDetectionCollision(const EnterCollision &, Entity);
 	void HandleDetectionCollisionLeaving(const LeaveCollision &);
 
 	void SphereEnterCollideResponse(const EnterCollision &e)
@@ -40,14 +42,19 @@ namespace game::events
 			HandleDoorCollision(e, b ? e.a : e.b);
 		}
 		else if (collide_which<AIComponent>(e, b) &&
-			collide<FirstPersonControllerComponent>(e, b))
+			collide<BulletComponent>(e, b))
 		{
-			HandleBulletCollision(e, b ? e.b : e.a);
+			HandleBulletCollision(e, b ? e.a : e.b, b ? e.b : e.a);
 		}
 		else if (collide_which<PortalComponent>(e, b) &&
 			collide<FirstPersonControllerComponent>(e, b))
 		{
 			HandlePortalCollision(e);
+		}
+		else if (collide_which<DetectionComponent>(e, b) &&
+			collide<FirstPersonControllerComponent>(e, b))
+		{
+			HandleDetectionCollision(e, b ? e.b : e.a);
 		}
 	}
 	RESPONSE(SphereEnterCollideResponse, EnterCollision);
@@ -113,16 +120,16 @@ namespace game::events
 		}
 	}
 
-	void HandleBulletCollision(const EnterCollision &e, Entity) 
+	void HandleBulletCollision(const EnterCollision &e, Entity bullet, Entity aic)
 	{
-		auto &ai = e.info.registry.get<AIComponent>(e.b);
-		auto &s = e.info.registry.get<StatsComponent>(e.b);
-		auto &bs = e.info.registry.get<BulletComponent>(e.a);
+		auto &ai = e.info.registry.get<AIComponent>(aic);
+		auto &s = e.info.registry.get<StatsComponent>(aic);
+		auto &bs = e.info.registry.get<BulletComponent>(bullet);
 
 		if (ai.dodgeBullet)
 		{
-			auto& bt = e.info.registry.get<TransformComponent>(e.a);
-			auto& at = e.info.registry.get<TransformComponent>(e.b);
+			auto& bt = e.info.registry.get<TransformComponent>(bullet);
+			auto& at = e.info.registry.get<TransformComponent>(aic);
 			Vector2 cameraPos = Vector2(bt.position.x, bt.position.z);
 			Vector2 enemyPos = Vector2(at.position.x, at.position.z);
 			Vector2 nonNormal = cameraPos - enemyPos;
@@ -146,9 +153,9 @@ namespace game::events
 		}
 	}
 
-	void HandleDetectionCollision(const EnterCollision &e)
+	void HandleDetectionCollision(const EnterCollision &e, Entity aic)
 	{
-		auto &ai = e.info.registry.get<AIComponent>(e.a);
+		auto &ai = e.info.registry.get<AIComponent>(aic);
 		ai.state = ai.Shoot;
 
 	}
