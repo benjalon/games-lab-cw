@@ -598,7 +598,7 @@ namespace game::procgen
 		ModelComponent m_minotaur; m_minotaur.model_file = "models/Minotaur/Minotaur@Idle.fbx";
 		ColourComponent c_minotaur; c_minotaur.colour = { 0, 0, 255 };
 		DetectionComponent d_minotaur; d_minotaur.c.radius = 30; d_minotaur.camera = camera;
-		TransformComponent t_minotaur; t_minotaur.scale = { 0.10, 0.1, 0.1 }; t_minotaur.position = { 0, 9, -15 }; t_minotaur.rotation = { 90, 180, 0 };
+		TransformComponent t_minotaur; t_minotaur.scale = { 0.10, 0.1, 0.1 }; t_minotaur.position = { 0, 9, -15 }; /*t_minotaur.rotation = { 90, 180, 0 };*/
 		HitboxComponent h_minotaur; h_minotaur.c.radius = 2.5;
 		StatsComponent s_minotaur; s_minotaur.health = 3, s_minotaur.mana = 1;
 		scene.instantiate("AIModel", m_minotaur, c_minotaur, t_minotaur, h_minotaur, d_minotaur, s_minotaur);
