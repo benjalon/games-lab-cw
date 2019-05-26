@@ -386,7 +386,7 @@ namespace game::procgen
 			//Utility to place torch
 			auto place_torch = [&](Vector3 position)
 			{
-				ParticleComponent p_torch; p_torch.texture_file = "models/fire.png"; p_torch.respawn_count = 10;
+				ParticleComponent p_torch; p_torch.texture_file = "models/Particles/fire.png"; p_torch.respawn_count = 10;
 				p_torch.position_variation = Vector3(100, 50, 40);
 				p_torch.velocity_variation = Vector3(100, 50, 50);
 				p_torch.color_variation = Vector3(100, -0.5, 100);
@@ -606,7 +606,7 @@ namespace game::procgen
 		//Torches
 		ModelComponent m_torch; m_torch.model_file = "models/Torch/torch.obj";
 
-		ParticleComponent p_torch; p_torch.texture_file = "models/fire.png"; p_torch.respawn_count = 1;
+		ParticleComponent p_torch; p_torch.texture_file = "models/Particles/fire.png"; p_torch.respawn_count = 1;
 		p_torch.position_variation = Vector3(100, 50, 40);
 		p_torch.velocity_variation = Vector3(100, 50, 50);
 		p_torch.color_variation = Vector3(100, -0.5, 100);
@@ -633,7 +633,7 @@ namespace game::procgen
 		scene.instantiate("ParticleEffect", p_torch, TransformComponent{ { -26, 14, 10 } });
 
 		//Portal
-		ParticleComponent p_portal; p_portal.texture_file = "models/star.png"; p_portal.respawn_count = 1;
+		ParticleComponent p_portal; p_portal.texture_file = "models/Particles/star.png"; p_portal.respawn_count = 1;
 		p_portal.position_variation = Vector3(100, 50, 10);
 		p_portal.velocity_variation = Vector3(100, 50, 40);
 		p_portal.color_variation = Vector3(100, -0.5, 100);
