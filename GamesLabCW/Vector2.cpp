@@ -84,6 +84,11 @@ game::Vector2 game::Vector2::operator*(const double &other)
 	return Vector2(this->x * other, this->y * other);
 }
 
+game::Vector2 game::Vector2::operator/(const double &other)
+{
+	return Vector2(this->x / other, this->y / other);
+}
+
 game::Vector2::operator glm::vec2() const
 {
 	return glm::vec2(x, y);

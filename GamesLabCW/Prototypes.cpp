@@ -29,7 +29,7 @@ void game::prototypes::register_prototypes()
 
 	PROTOTYPE(Overlay, OverlayComponent);
 
-	PROTOTYPE(Key, ModelComponent, ColourComponent, CollisionComponent, TransformComponent, KeyComponent, PointLightComponent);
+	PROTOTYPE(Key, ModelComponent, ColourComponent, CollisionComponent, TransformComponent, KeyComponent, PointLightComponent, KinematicComponent);
 
 	PROTOTYPE(AmbientLight, AmbientLightComponent);
 
@@ -38,5 +38,8 @@ void game::prototypes::register_prototypes()
 	PROTOTYPE(PointLight, PointLightComponent);
 
 	PROTOTYPE(KinematicBody, TransformComponent, KinematicComponent);
+	PROTOTYPE(SolidPlane, SolidPlaneComponent);
+
+	PROTOTYPE(Portal, PortalComponent, CollisionComponent, TransformComponent);
 }
 

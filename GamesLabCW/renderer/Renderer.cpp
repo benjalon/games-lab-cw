@@ -39,6 +39,8 @@ namespace game::renderer
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glEnable(GL_DEPTH_TEST);
+		glCullFace(GL_BACK);
+		glEnable(GL_CULL_FACE);
 	}
 
 	//Returns the (potentially cached) shader using the given paramaters
@@ -306,6 +308,8 @@ namespace game::renderer
 
 	void render_particle(CameraComponent camera, ParticleComponent &p, ColourComponent c, TransformComponent t)
 	{
+		glDisable(GL_CULL_FACE);
+
 		//Get the particle, aborting if not found
 		auto it = particleEffects.find(p.texture_file);
 		if (it == particleEffects.end()) return;
@@ -340,6 +344,8 @@ namespace game::renderer
 		);
 
 		particle.Render(shader);
+
+		glEnable(GL_CULL_FACE);
 	}
 
 	void render_overlay(CameraComponent camera, OverlayComponent &i)

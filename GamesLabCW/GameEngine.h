@@ -34,8 +34,17 @@ namespace game
 	//Minimum game rate (Hz)
 	constexpr int GAME_RATE_MIN = 10;
 
+	//Maximium render distance
+	constexpr double RENDER_DISTANCE = 300.0;
+
+	//Cull more distant point lights
+	constexpr bool CULL_POINT_LIGHTS = true;
+
+	//Allow free-flying movement through solids
+	constexpr bool NOCLIP = false;
+
 	//Application window title
-	const std::string WINDOW_TITLE = "Dungeon Crawler";
+	const std::string WINDOW_TITLE = "DunCraw: The Third Realm";
 
 
 	class GameEngine
@@ -69,6 +78,9 @@ namespace game
 
 		//Handler to quit the game
 		void quit(const events::QuitGame &);
+
+		//Handler to toggle fullscreen
+		void toggle_fullscreen(const events::ToggleFullscreen &);
 
 
 		//Key input callback

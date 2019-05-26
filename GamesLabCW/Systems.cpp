@@ -27,6 +27,10 @@ namespace game::systems
 		//ESC quits the game
 		if (input::is_pressed(input::KEY_ESCAPE))
 			events::dispatcher.trigger<events::QuitGame>();
+
+		//F11 toggles fullscreen
+		if (input::is_pressed(input::KEY_F11))
+			events::dispatcher.trigger<events::ToggleFullscreen>();
 	};
 	SYSTEM(GameStateSystem, GameStateComponent);
 
@@ -38,7 +42,7 @@ namespace game::systems
 		//	info.scene.destroy(entity);
 		//}
 		double mouse_sensitivity = 5.0;
-		double move_speed = 11.0;
+		double move_speed = 30.0;
 
 		//Rotate using cursor offsetW
 		t.rotation.x += mouse_sensitivity * input::cursor_pos.x * info.dt;
@@ -49,27 +53,26 @@ namespace game::systems
 		
 
 		//Move forward/backward
-		k.velocity = Vector2(t.rotation.x, t.rotation.y).direction_hv() * move_speed *
-			(input::is_held(input::KEY_W) - input::is_held(input::KEY_S));
+		Vector3 move_dir = Vector2(t.rotation.x, t.rotation.y).direction_hv() *	(input::is_held(input::KEY_W) - input::is_held(input::KEY_S));
 
 		//Strafe
-		k.velocity += Vector2(t.rotation.x, t.rotation.y).direction_hv_right() * move_speed *
-			(input::is_held(input::KEY_D) - input::is_held(input::KEY_A));
+		move_dir += Vector2(t.rotation.x, t.rotation.y).direction_hv_right() * (input::is_held(input::KEY_D) - input::is_held(input::KEY_A));
 
+		if (!NOCLIP)
+		{
+			//Constrain movement instruction to horizontal plane
+			move_dir.y = 0;
+
+			//Acceleration due to gravity
+			k.acceleration.y -= 50;
+		}
+
+		//Apply movement instruction
+		k.move_velocity = move_dir * move_speed;
+
+		//Fire bullet
 		if (input::is_released(input::MOUSE_BUTTON_1))
 			events::dispatcher.enqueue<events::FireBullet>(info.scene, bc.model_file, t.position, t.rotation, bc.vs, bc.fs, bc.particle_file, c.radius);
-
-		/* JUMPING SIMULATION IN ABSENCE OF COLLISIONS */
-		////Acceleration due to gravity
-		//k.acceleration.y = -9.8;
-		////Clamp to non-neg y pos
-		//t.position.y = std::max(t.position.y, 0.0);
-		////Simulate solidness
-		//if (t.position.y == 0.0)
-		//	k.velocity.y = std::max(k.velocity.y, 0.0);
-		////Jump!
-		//if (input::is_pressed(input::KEY_SPACE))
-		//	k.velocity.y += 4.0;
 	};
 	SYSTEM(FirstPersonControllerSystem, FirstPersonControllerComponent, TransformComponent, KinematicComponent, ProjectileComponent, CollisionComponent);
 
@@ -81,10 +84,22 @@ namespace game::systems
 	SYSTEM(MoveSphereSystem, MoveSphere, TransformComponent);
 
 	//Basic kinematic system of calculus of motion
-	auto KinematicSystem = [](auto info, auto entity, auto& t, auto& k)
+	auto KinematicSystem = [](auto info, auto entity, TransformComponent &t, KinematicComponent &k)
 	{
+		//Log current as old values
+		t.position_old = t.position;
+		k.velocity_old = k.velocity;
+		k.acceleration_old = k.acceleration;
+
+		//Integrate acceleration and velocity (improved Euler)
 		k.velocity += k.acceleration * info.dt;
-		t.position += k.velocity * info.dt;
+		t.position += (k.velocity + k.velocity_old) / 2.0 * info.dt;
+
+		//Simulate momentary nature of force by resetting acceleration
+		k.acceleration = { 0, 0, 0 };
+
+		//Integrate angular velocity
+		t.rotation += k.angular_velocity * info.dt;
 	};
 	SYSTEM(KinematicSystem, TransformComponent, KinematicComponent);
 
@@ -160,8 +175,8 @@ namespace game::systems
 			{
 				c1.colliding.insert(other);
 				c2.colliding.insert(entity);
-				//cout << "d2:" << d2 << " sumRad:" << sumRad << endl;
-				events::dispatcher.enqueue<events::EnterCollision>(info.registry, entity, other);
+
+				events::dispatcher.enqueue<events::EnterCollision>(info, entity, other);
 			}
 
 			//Log leaving of collision
@@ -169,8 +184,8 @@ namespace game::systems
 			{
 				c1.colliding.erase(other);
 				c2.colliding.erase(entity);
-				//cout << "d2:" << d2 << " sumRad:" << sumRad << endl;
-				events::dispatcher.enqueue<events::LeaveCollision>(info.registry, entity, other);
+
+				events::dispatcher.enqueue<events::LeaveCollision>(info, entity, other);
 			}
 		}
 	};
@@ -357,5 +372,79 @@ namespace game::systems
 
 	};
 	SYSTEM(BulletSystem, BulletComponent);
+	
+	//Handles collision response for kinematic bodies against solid planes
+	auto SolidPlaneSystem = [](SceneInfo info, auto entity, TransformComponent &t, KinematicComponent &k, CollisionComponent &c)
+	{
+		//Scalar projection of a onto b
+		auto scalar_projection = [](glm::vec3 a, glm::vec3 b)
+		{
+			return glm::dot(a, b) / glm::length(b);
+		};
+
+		//Vector projection of a onto b
+		auto vector_projection = [scalar_projection](glm::vec3 a, glm::vec3 b)
+		{
+			return scalar_projection(a, b) * b / glm::length(b);
+		};
+
+
+		//Undo resetting of acceleration, for now
+		k.acceleration = k.acceleration_old;
+
+		//Add movement speed
+		t.position += k.move_velocity * info.dt;
+
+		//Calculate collision response for every solid plane
+		if (!NOCLIP && k.solid)
+		{
+			info.registry.view<SolidPlaneComponent>().each([&](auto entity, SolidPlaneComponent &sp)
+			{
+				Vector3 normal = sp.normal;
+				double pos = scalar_projection(sp.position, normal) + c.radius;
+
+				if (scalar_projection(t.position, normal) <= pos)
+				{
+					//Determine point of collision along surface normal
+					double s1 = scalar_projection(t.position_old, normal);
+					double s2 = scalar_projection(t.position, normal);
+					double depth = s2 - pos;
+					double fraction = (s1 - pos) / (s1 - s2);
+
+					//Absolute distance to plane centre
+					double dist = glm::length(glm::vec3(sp.position - t.position));
+
+					//Squared distance perpendicular to plane
+					double d2 = dist * dist - depth * depth;
+
+					fraction = abs(fraction);
+					if (fraction <= 1 && d2 <= sp.size * sp.size)
+					{
+						//Integrate as usual up to collision
+						double dt1 = fraction * info.dt;
+						k.velocity = k.velocity_old + k.acceleration * dt1;
+						Vector3 total_velocity = (k.velocity + k.velocity_old) / 2.0 + k.move_velocity;
+						t.position = t.position_old + total_velocity * dt1;
+
+						//Integrate, removing normal component, after collision
+						double dt2 = info.dt - dt1;
+
+						k.acceleration -= vector_projection(k.acceleration, normal);
+						k.velocity -= vector_projection(k.velocity, normal);
+						k.move_velocity -= vector_projection(k.move_velocity, normal);
+						k.velocity_old -= vector_projection(k.velocity_old, normal);
+
+						k.velocity += k.acceleration * dt2;
+						total_velocity = (k.velocity + k.velocity_old) / 2.0 + k.move_velocity;
+						t.position += total_velocity * dt2;
+					}
+				}
+			});
+		}
+
+		//Reset acceleration again
+		k.acceleration = { 0, 0, 0 };
+	};
+	SYSTEM(SolidPlaneSystem, TransformComponent, KinematicComponent, CollisionComponent);
 }
 

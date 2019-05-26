@@ -60,6 +60,7 @@ namespace game
 		Vector2& operator-=(const Vector2 &other);
 
 		Vector2 operator*(const double &other);
+		Vector2 operator/(const double &other);
 
 		//Allows implicit casting to glm
 		operator glm::vec2() const;
