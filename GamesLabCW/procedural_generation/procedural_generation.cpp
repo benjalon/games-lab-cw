@@ -396,12 +396,17 @@ namespace game::procgen
 				t_torch.position = position;
 
 				scene.instantiate("Model", t_torch, ModelComponent{ "models/Torch/torch.obj" });
-				scene.instantiate("PointLight", PointLightComponent{ {1, 147.0 / 255.0, 41.0 / 255.0}, 45,
-					t_torch.position + Vector3(0, 8, 0)
-					});
-				scene.instantiate("ParticleEffect", p_torch, TransformComponent{
-					t_torch.position + Vector3(0, 8, 0)
-					});
+
+				// Light most torches at random
+				if (rand() % 10 > 3)
+				{
+					scene.instantiate("PointLight", PointLightComponent{ {1, 147.0 / 255.0, 41.0 / 255.0}, 45,
+						t_torch.position + Vector3(0, 8, 0)
+						});
+					scene.instantiate("ParticleEffect", p_torch, TransformComponent{
+						t_torch.position + Vector3(0, 8, 0)
+						});
+				}
 			};
 
 			//Instantiate models for each cell type
@@ -598,7 +603,7 @@ namespace game::procgen
 		ModelComponent m_minotaur; m_minotaur.model_file = "models/Minotaur/Minotaur@Idle.fbx";
 		ColourComponent c_minotaur; c_minotaur.colour = { 0, 0, 255 };
 		DetectionComponent d_minotaur; d_minotaur.c.radius = 30; d_minotaur.camera = camera;
-		TransformComponent t_minotaur; t_minotaur.scale = { 0.10, 0.1, 0.1 }; t_minotaur.position = { 0, 6, -15 }; t_minotaur.rotation = { 90, 180, 0 };
+		TransformComponent t_minotaur; t_minotaur.scale = { 0.10, 0.1, 0.1 }; t_minotaur.position = { 0, 9, -15 }; /*t_minotaur.rotation = { 90, 180, 0 };*/
 		HitboxComponent h_minotaur; h_minotaur.c.radius = 2.5;
 		StatsComponent s_minotaur; s_minotaur.health = 3, s_minotaur.mana = 1;
 		scene.instantiate("AIModel", m_minotaur, c_minotaur, t_minotaur, h_minotaur, d_minotaur, s_minotaur, CollisionComponent{ 6 });
@@ -622,15 +627,15 @@ namespace game::procgen
 		scene.instantiate("PointLight", PointLightComponent{ {1, 147.0 / 255.0, 41.0 / 255.0}, 40, {26, 7, 23} });
 		scene.instantiate("ParticleEffect", p_torch, TransformComponent{ { 26, 8, 23 } });
 
-		TransformComponent t_torch3; t_torch3.position = { -26, 6, -10 }; t_torch3.scale = { 5, 5, 5 };
+		TransformComponent t_torch3; t_torch3.position = { -26, 0, -10 }; t_torch3.scale = { 5, 5, 5 };
 		scene.instantiate("Model", m_torch, t_torch3);
-		scene.instantiate("PointLight", PointLightComponent{ {1, 147.0 / 255.0, 41.0 / 255.0}, 40, { -26, 13, -10 } });
-		scene.instantiate("ParticleEffect", p_torch, TransformComponent{ { -26, 14, -10 } });
+		scene.instantiate("PointLight", PointLightComponent{ {1, 147.0 / 255.0, 41.0 / 255.0}, 40, { -26, 7, -10 } });
+		scene.instantiate("ParticleEffect", p_torch, TransformComponent{ { -26, 8, -10 } });
 
-		TransformComponent t_torch4; t_torch4.position = { -26, 6, 10 }; t_torch4.scale = { 5, 5, 5 };
+		TransformComponent t_torch4; t_torch4.position = { -26, 0, 10 }; t_torch4.scale = { 5, 5, 5 };
 		scene.instantiate("Model", m_torch, t_torch4);
-		scene.instantiate("PointLight", PointLightComponent{ {1, 147.0 / 255.0, 41.0 / 255.0}, 40, { -26, 13, 10 } });
-		scene.instantiate("ParticleEffect", p_torch, TransformComponent{ { -26, 14, 10 } });
+		scene.instantiate("PointLight", PointLightComponent{ {1, 147.0 / 255.0, 41.0 / 255.0}, 40, { -26, 7, 10 } });
+		scene.instantiate("ParticleEffect", p_torch, TransformComponent{ { -26, 8, 10 } });
 
 		//Portal
 		ParticleComponent p_portal; p_portal.texture_file = "models/Particles/star.png"; p_portal.respawn_count = 1;

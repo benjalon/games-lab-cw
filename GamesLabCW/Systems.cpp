@@ -262,8 +262,8 @@ namespace game::systems
 	//Animation system
 	auto AnimationSystem = [](auto info, auto entity, auto& m)
 	{
-		// Currently animation isn't finished
-		//if (!m.isAnimated)
+		// Animation works but is too laggy to use
+		if (!m.isAnimated)
 		{
 			return;
 		}
@@ -272,7 +272,7 @@ namespace game::systems
 		static double t = 0;
 		t += info.dt;
 
-		if (timeSinceLastUpdate < 0.2)
+		if (timeSinceLastUpdate < 0.1)
 		{
 			timeSinceLastUpdate += info.dt;
 			return;
@@ -372,9 +372,9 @@ namespace game::systems
 
 				// Apply acos to that value and set z-axis 360 rule. Then rotation to the AIModel
 				if (fromPlayerToEnemy.x < 0)
-					t.rotation.z = -(360 - glm::degrees(acos(cosinedegreesToRotate))) + 180;
+					t.rotation.y = -(360 - glm::degrees(acos(cosinedegreesToRotate))) + 180;
 				else
-					t.rotation.z = -(glm::degrees(acos(cosinedegreesToRotate))) + 180; 
+					t.rotation.y = -(glm::degrees(acos(cosinedegreesToRotate))) + 180;
 
 				if (s.mana > 3)
 				{

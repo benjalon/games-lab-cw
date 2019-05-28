@@ -1,16 +1,19 @@
 #include "Model.h"
 
+#include <iostream>
+
 namespace game
 {
 	Model::Model(std::string modelPath)
 	{
 		// Have Assimp load and read the model file
-		static Assimp::Importer imp;
-		scene = imp.ReadFile(modelPath,
+		scene = importer.ReadFile(modelPath,
+			aiProcess_JoinIdenticalVertices |
+			aiProcess_SortByPType |
 			aiProcess_CalcTangentSpace |
 			aiProcess_Triangulate |
 			aiProcess_JoinIdenticalVertices |
-			aiProcess_SortByPType |
+			aiProcess_GenSmoothNormals |
 			aiProcess_LimitBoneWeights
 		);
 
@@ -20,6 +23,8 @@ namespace game
 
 		if (scene->HasAnimations())
 		{
+			identity.InitIdentity();
+
 			globalInverseTransform = scene->mRootNode->mTransformation;
 			globalInverseTransform.Inverse();
 		}
@@ -113,6 +118,7 @@ namespace game
 			}
 			currentIndices += mesh->mNumFaces * 3;
 		}
+		vertices_backup = vertices;
 	}
 
 	void Model::loadMaterials(const aiScene *scene, std::string modelPath)
@@ -177,10 +183,18 @@ namespace game
 		glGenVertexArrays(1, &vao);
 		glBindVertexArray(vao);
 
-		vbo = VBO();
+		if (IsAnimated())
+		{
+			vbo = VBO(GL_ARRAY_BUFFER, true);
+		}
+		else
+		{
+			vbo = VBO();
+		}
+
 		vbo.create();
 
-		ebo = VBO(GL_ELEMENT_ARRAY_BUFFER);
+		ebo = VBO(GL_ELEMENT_ARRAY_BUFFER, false);
 		ebo.create();
 
 		vbo.add_data(&vertices[0], sizeof(VertexData) * vertices.size());
@@ -188,7 +202,16 @@ namespace game
 
 		// Vertex-related
 		vbo.bind();
-		vbo.upload(GL_STATIC_DRAW);
+
+		// If animated, use stream draw as the vbo will be constantly updated
+		if (IsAnimated())
+		{
+			vbo.upload(GL_DYNAMIC_DRAW);
+		}
+		else
+		{
+			vbo.upload(GL_STATIC_DRAW);
+		}
 
 		//Vertex positions
 		glEnableVertexAttribArray(0);
@@ -248,31 +271,32 @@ namespace game
 
 	void Model::Animate(double time)
 	{
-		Matrix4f identity;
-		identity.InitIdentity();
+		vertices = vertices_backup;
 
 		float ticksPerSecond = scene->mAnimations[0]->mTicksPerSecond;
 		float tickTime = time * ticksPerSecond;
 		float animationTime = fmod(tickTime, scene->mAnimations[0]->mDuration);
 
-		readNodeHierarchy(21, scene->mRootNode, identity);
+		readNodeHierarchy(animationTime, scene->mRootNode, identity);
 
-		std::vector<Matrix4f> transforms(boneCount);
+		transforms.resize(boneCount);
 
 		// Populates transforms vector with new bone transformation matrices. 
 		for (unsigned int i = 0; i < boneCount; i++) {
-			transforms[i] = boneInfos[i].finalTransformation;
+			transforms[i] = Matrix4fToGLM(boneInfos[i].finalTransformation);
 		}
 
 		for (unsigned int i = 0; i < vertices.size(); ++i)
 		{
 			auto currentBone = bones[i];
 
-			glm::mat4 boneTransform = Matrix4fToGLM(transforms[currentBone.ids[0]]) * currentBone.weights[0];
-			boneTransform += Matrix4fToGLM(transforms[currentBone.ids[1]]) * currentBone.weights[1];
-			boneTransform += Matrix4fToGLM(transforms[currentBone.ids[2]]) * currentBone.weights[2];
-			boneTransform += Matrix4fToGLM(transforms[currentBone.ids[3]]) * currentBone.weights[3];
+			glm::mat4 boneTransform = 
+				transforms[currentBone.ids[0]] * currentBone.weights[0] + 
+				transforms[currentBone.ids[1]] * currentBone.weights[1] + 
+				transforms[currentBone.ids[2]] * currentBone.weights[2] +
+				transforms[currentBone.ids[3]] * currentBone.weights[3];
 			boneTransform = glm::transpose(boneTransform);
+
 			vertices[i].pos = glm::vec3(boneTransform * glm::vec4(vertices[i].pos, 1));
 		}
 
@@ -281,9 +305,6 @@ namespace game
 
 	void Model::readNodeHierarchy(float animationTime, const aiNode* node, const Matrix4f& ParentTransform)
 	{
-		Matrix4f identity;
-		identity.InitIdentity();
-
 		std::string nodeName(node->mName.data);
 
 		const aiAnimation* pAnimation = scene->mAnimations[0];
@@ -301,13 +322,6 @@ namespace game
 		}
 
 		if (nodeAnimation) {
-
-			//// Interpolate scaling and generate scaling transformation matrix
-			//aiVector3D Scaling;
-			//CalcInterpolatedScaling(Scaling, AnimationTime, pNodeAnim);
-			//Matrix4f ScalingM;
-			//ScalingM.InitScaleTransform(Scaling.x, Scaling.y, Scaling.z);
-
 			// Interpolate rotation and generate rotation transformation matrix
 			aiQuaternion rot;
 			CalcInterpolatedRotation(rot, animationTime, nodeAnimation);
@@ -320,7 +334,7 @@ namespace game
 			TranslationM.InitTranslationTransform(tl.x, tl.y, tl.z);
 
 			// Combine the above transformations
-			nodeTransform = TranslationM * RotationM;/* *ScalingM;*/
+			nodeTransform = TranslationM * RotationM;
 		}
 
 		Matrix4f GlobalTransformation = ParentTransform * nodeTransform;
@@ -328,8 +342,7 @@ namespace game
 		// Apply the final transformation to the indexed bone in the array. 
 		if (boneMapper.find(nodeName) != boneMapper.end()) {
 			unsigned int BoneIndex = boneMapper[nodeName];
-			boneInfos[BoneIndex].finalTransformation = globalInverseTransform * GlobalTransformation *
-				boneInfos[BoneIndex].boneOffset;
+			boneInfos[BoneIndex].finalTransformation = globalInverseTransform * GlobalTransformation * boneInfos[BoneIndex].boneOffset;
 		}
 
 		// Do the same for all the node's children. 
@@ -357,7 +370,6 @@ namespace game
 
 		// Calculate the elapsed time within the delta time.  
 		float Factor = (AnimationTime - (float)pNodeAnim->mRotationKeys[RotationIndex].mTime) / DeltaTime;
-		//assert(Factor >= 0.0f && Factor <= 1.0f);
 
 		// Obtain the quaternions values for the current and next keyframe. 
 		const aiQuaternion& StartRotationQ = pNodeAnim->mRotationKeys[RotationIndex].mValue;
@@ -384,7 +396,7 @@ namespace game
 		assert(NextPositionIndex < pNodeAnim->mNumPositionKeys);
 		float DeltaTime = pNodeAnim->mPositionKeys[NextPositionIndex].mTime - pNodeAnim->mPositionKeys[PositionIndex].mTime;
 		float Factor = (AnimationTime - (float)pNodeAnim->mPositionKeys[PositionIndex].mTime) / DeltaTime;
-		//assert(Factor >= 0.0f && Factor <= 1.0f);
+
 		const aiVector3D& Start = pNodeAnim->mPositionKeys[PositionIndex].mValue;
 		const aiVector3D& End = pNodeAnim->mPositionKeys[NextPositionIndex].mValue;
 
@@ -423,20 +435,11 @@ namespace game
 		return 0;
 	}
 
-	/*glm::mat4 Model::InitTranslationTransform(float x, float y, float z)
-	{
-		glm::mat4 m = glm::mat4(1);
-		m[0][3] = x;
-		m[1][3] = y;
-		m[2][3] = z;
-		return m;
-	}
-*/
 	void Model::updateVertices()
 	{
 		vbo.bind();
 		vbo.add_data(&vertices[0], sizeof(VertexData) * vertices.size());
-		vbo.upload(GL_STATIC_DRAW);
+		vbo.upload(GL_DYNAMIC_DRAW);
 	}
 
 	std::string Model::stripPath(std::string path)
