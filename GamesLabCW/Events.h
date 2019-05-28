@@ -46,6 +46,7 @@ namespace game::events
 		std::string bullet_fs;
 		std::string bullet_particles;
 		double radius;
+		bool isPlayers;
 	};
 
 	//Represents a maze generation

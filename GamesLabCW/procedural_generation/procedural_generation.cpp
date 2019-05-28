@@ -579,8 +579,8 @@ namespace game::procgen
 	void load_hub(Scene &scene, int keys_collected)
 	{
 		//Player/camera
-		StatsComponent s_player; s_player.health = 4; s_player.mana = 1;
-		auto player = scene.instantiate("FirstPersonController", TransformComponent{ {0,6,5} , { 180,0,0 } }, CollisionComponent{ 6 }, KinematicComponent{ true });
+		StatsComponent s_player; s_player.health = 3; s_player.mana = 0;
+		auto player = scene.instantiate("FirstPersonController", TransformComponent{ {0,6,5} , { 180,0,0 } }, CollisionComponent{ 6 }, KinematicComponent{ true }, s_player);
 		auto camera = scene.instantiate("Camera", CameraComponent{ player });
 
 		//Room stuff
@@ -606,7 +606,7 @@ namespace game::procgen
 		TransformComponent t_minotaur; t_minotaur.scale = { 0.10, 0.1, 0.1 }; t_minotaur.position = { 0, 9, -15 }; /*t_minotaur.rotation = { 90, 180, 0 };*/
 		HitboxComponent h_minotaur; h_minotaur.c.radius = 2.5;
 		StatsComponent s_minotaur; s_minotaur.health = 3, s_minotaur.mana = 1;
-		scene.instantiate("AIModel", m_minotaur, c_minotaur, t_minotaur, h_minotaur, d_minotaur, s_minotaur);
+		scene.instantiate("AIModel", m_minotaur, c_minotaur, t_minotaur, h_minotaur, d_minotaur, s_minotaur, CollisionComponent{ 6 });
 
 		//Torches
 		ModelComponent m_torch; m_torch.model_file = "models/Torch/torch.obj";

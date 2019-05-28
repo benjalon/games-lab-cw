@@ -25,6 +25,7 @@ namespace game::events
 	void HandlePortalCollision(const EnterCollision &);
 	void HandleDetectionCollision(const EnterCollision &, Entity);
 	void HandleDetectionCollisionLeaving(const LeaveCollision &);
+	void HandlePlayerBulletCollision(const EnterCollision&, Entity, Entity);
 
 	void SphereEnterCollideResponse(const EnterCollision &e)
 	{
@@ -55,6 +56,11 @@ namespace game::events
 			collide<FirstPersonControllerComponent>(e, b))
 		{
 			HandleDetectionCollision(e, b ? e.b : e.a);
+		}
+		else if (collide_which<FirstPersonControllerComponent>(e, b) &&
+			collide<BulletComponent>(e, b))
+		{
+			HandlePlayerBulletCollision(e, b ? e.a : e.b, b ? e.b : e.a);
 		}
 	}
 	RESPONSE(SphereEnterCollideResponse, EnterCollision);
@@ -91,7 +97,8 @@ namespace game::events
 		p_fireball.velocity_variation = Vector3(100, 50, 10);
 		p_fireball.color_variation = Vector3(100, -0.5, 100);
 		p_fireball.color_modifier = Vector3(1, 0.15, 0);
-		e.scene.instantiate("Bullet", m, t, k, p_fireball);
+		BulletComponent b; b.isPlayers = e.isPlayers;
+		e.scene.instantiate("Bullet", m, t, k, p_fireball,b);
 		
 	}
 	RESPONSE(FireBulletResponse, FireBullet);
@@ -144,7 +151,6 @@ namespace game::events
 				ai.direction = -(glm::degrees(acos(cosinedegreesToRotate))) + 180;
 
 			ai.state = ai.Dodge;
-			//ai.dodgeBullet = false;
 		}
 		else
 		{
@@ -183,5 +189,16 @@ namespace game::events
 		e.info.scene.instantiate("Overlay", i_hp);
 		OverlayComponent i_mp; i_mp.texture_file = "models/UI/mana-3.png";
 		e.info.scene.instantiate("Overlay", i_mp);
+	}
+
+	//HandlePlayerBulletCollision
+
+	void HandlePlayerBulletCollision(const EnterCollision& e, Entity bullet, Entity player)
+	{
+		auto& s = e.info.registry.get<StatsComponent>(player);
+		auto& bs = e.info.registry.get<BulletComponent>(bullet);
+
+		bs.draw = false;
+		s.health -= 1;
 	}
 }
