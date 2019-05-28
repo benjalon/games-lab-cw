@@ -396,12 +396,17 @@ namespace game::procgen
 				t_torch.position = position;
 
 				scene.instantiate("Model", t_torch, ModelComponent{ "models/Torch/torch.obj" });
-				scene.instantiate("PointLight", PointLightComponent{ {1, 147.0 / 255.0, 41.0 / 255.0}, 45,
-					t_torch.position + Vector3(0, 8, 0)
-					});
-				scene.instantiate("ParticleEffect", p_torch, TransformComponent{
-					t_torch.position + Vector3(0, 8, 0)
-					});
+
+				// Light most torches at random
+				if (rand() % 10 > 3)
+				{
+					scene.instantiate("PointLight", PointLightComponent{ {1, 147.0 / 255.0, 41.0 / 255.0}, 45,
+						t_torch.position + Vector3(0, 8, 0)
+						});
+					scene.instantiate("ParticleEffect", p_torch, TransformComponent{
+						t_torch.position + Vector3(0, 8, 0)
+						});
+				}
 			};
 
 			//Instantiate models for each cell type
