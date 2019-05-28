@@ -10,7 +10,7 @@ namespace game
 {
 	VBO::VBO() : id_(0), data_uploaded_(false), target(GL_ARRAY_BUFFER) {}
 
-	VBO::VBO(GLenum target) : id_(0), data_uploaded_(false) { VBO::target = target; }
+	VBO::VBO(GLenum target, bool update) : id_(0), data_uploaded_(false) { this->target = target; this->update = update; }
 
 	void VBO::create(GLuint size)
 	{
@@ -28,7 +28,11 @@ namespace game
 	{
 		glDeleteBuffers(1, &id_);
 		data_uploaded_ = false;
-		data_.clear();
+		
+		if (!update)
+		{
+			data_.clear();
+		}
 	}
 
 	GLuint VBO::id() const { return id_; }
@@ -55,8 +59,16 @@ namespace game
 			return;
 		}
 
-		glBufferData(target, data_.size(), &data_[0], usage);
-		data_uploaded_ = true;
+		if (data_uploaded_ && update)
+		{
+			glBufferSubData(target, 0, data_.size(), &data_[0]);
+		}
+		else
+		{
+			glBufferData(target, data_.size(), &data_[0], usage);
+		}
+
 		data_.clear();
+		data_uploaded_ = true;
 	}
 }

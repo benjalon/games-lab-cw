@@ -183,10 +183,18 @@ namespace game
 		glGenVertexArrays(1, &vao);
 		glBindVertexArray(vao);
 
-		vbo = VBO();
+		if (IsAnimated())
+		{
+			vbo = VBO(GL_ARRAY_BUFFER, true);
+		}
+		else
+		{
+			vbo = VBO();
+		}
+
 		vbo.create();
 
-		ebo = VBO(GL_ELEMENT_ARRAY_BUFFER);
+		ebo = VBO(GL_ELEMENT_ARRAY_BUFFER, false);
 		ebo.create();
 
 		vbo.add_data(&vertices[0], sizeof(VertexData) * vertices.size());
@@ -194,7 +202,16 @@ namespace game
 
 		// Vertex-related
 		vbo.bind();
-		vbo.upload(GL_STATIC_DRAW);
+
+		// If animated, use stream draw as the vbo will be constantly updated
+		if (IsAnimated())
+		{
+			vbo.upload(GL_DYNAMIC_DRAW);
+		}
+		else
+		{
+			vbo.upload(GL_STATIC_DRAW);
+		}
 
 		//Vertex positions
 		glEnableVertexAttribArray(0);
@@ -422,7 +439,7 @@ namespace game
 	{
 		vbo.bind();
 		vbo.add_data(&vertices[0], sizeof(VertexData) * vertices.size());
-		vbo.upload(GL_STATIC_DRAW);
+		vbo.upload(GL_DYNAMIC_DRAW);
 	}
 
 	std::string Model::stripPath(std::string path)
