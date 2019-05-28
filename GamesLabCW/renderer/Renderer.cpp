@@ -27,9 +27,9 @@
 
 namespace game::renderer
 {
-	std::unordered_map<std::string, Model> models;
-	std::unordered_map<std::string, ParticleEffect> particleEffects;
-	std::unordered_map<std::string, Overlay> overlays;
+	std::unordered_map<std::string, std::unique_ptr<Model>> models;
+	std::unordered_map<std::string, std::unique_ptr<ParticleEffect>> particleEffects;
+	std::unordered_map<std::string, std::unique_ptr<Overlay>> overlays;
 	std::map<std::string, Texture> externalTextures;
 
 	void init()
@@ -103,15 +103,15 @@ namespace game::renderer
 	}
 
 	void load_model(std::string file) {
-		models.emplace(file, Model(file)).first->second;
+		models.emplace(file, std::make_unique<Model>(file)).first->second;
 	}
 
 	void load_particle_effect(std::string texture, int count, float scale, float speed) {
-		particleEffects.emplace(texture, ParticleEffect(texture, count, scale, speed)).first->second;
+		particleEffects.emplace(texture, std::make_unique<ParticleEffect>(texture, count, scale, speed)).first->second;
 	}
 
 	void load_overlay(std::string file, Vector2 position) {
-		overlays.emplace(file, Overlay(file, position)).first->second;
+		overlays.emplace(file, std::make_unique<Overlay>(file, position)).first->second;
 	}
 
 	void load_external_map(std::string path, std::string model_path, TextureType type)
@@ -137,12 +137,12 @@ namespace game::renderer
 		//Get the model, aborting if not found
 		auto it = models.find(m.model_file);
 		if (it == models.end()) return;
-		Model &model = it->second;
+		std::unique_ptr<Model> &model = it->second;
 
-		m.isAnimated = model.IsAnimated();
+		m.isAnimated = model->IsAnimated();
 		
 		//Determine and use appropriate shader
-		GLuint shader = get_shader(model.IsTextured(), model.IsNormalMapped(), n_ambient, n_directional, n_point, m.vertex_shader, m.fragment_shader);
+		GLuint shader = get_shader(model->IsTextured(), model->IsNormalMapped(), n_ambient, n_directional, n_point, m.vertex_shader, m.fragment_shader);
 		glUseProgram(shader);
 
 		//Calculate MVP matrices
@@ -303,7 +303,7 @@ namespace game::renderer
 				(GLfloat)points[i].on);
 		}
 
-		model.Render(shader);
+		model->Render(shader);
 	}
 
 	void render_particle(CameraComponent camera, ParticleComponent &p, ColourComponent c, TransformComponent t)
@@ -313,7 +313,7 @@ namespace game::renderer
 		//Get the particle, aborting if not found
 		auto it = particleEffects.find(p.texture_file);
 		if (it == particleEffects.end()) return;
-		ParticleEffect &particle = it->second;
+		std::unique_ptr<ParticleEffect> &particle = it->second;
 
 		GLuint shader = get_shader(false, false, 0, 0, 0, "shaders/Particle.vert", "shaders/Particle.frag");
 		glUseProgram(shader);
@@ -343,7 +343,7 @@ namespace game::renderer
 			1, GL_FALSE, glm::value_ptr(matModel)
 		);
 
-		particle.Render(shader);
+		particle->Render(shader);
 
 		glEnable(GL_CULL_FACE);
 	}
@@ -355,7 +355,7 @@ namespace game::renderer
 		//Get the overlay, aborting if not found
 		auto it = overlays.find(i.texture_file);
 		if (it == overlays.end()) return;
-		Overlay &overlay = it->second;
+		std::unique_ptr<Overlay> &overlay = it->second;
 
 		GLuint shader = get_shader(false, false, 0, 0, 0, "shaders/Overlay.vert", "shaders/Overlay.frag");
 		glUseProgram(shader);
@@ -387,7 +387,7 @@ namespace game::renderer
 			1, GL_FALSE, glm::value_ptr(matModel)
 		);
 
-		overlay.Render(shader);
+		overlay->Render(shader);
 
 		glEnable(GL_CULL_FACE);
 	}
@@ -397,9 +397,9 @@ namespace game::renderer
 		//Get the model, aborting if not found
 		auto it = models.find(model_file);
 		if (it == models.end()) return;
-		Model &model = it->second;
+		std::unique_ptr<Model> &model = it->second;
 
-		model.Animate(time);
+		model->Animate(time);
 	}
 
 	void update_particle(double time, std::string texture_file, int respawn_count, Vector3 position_variation, Vector3 velocity_variation, Vector3 color_variation)
@@ -407,8 +407,8 @@ namespace game::renderer
 		//Get the model, aborting if not found
 		auto it = particleEffects.find(texture_file);
 		if (it == particleEffects.end()) return;
-		ParticleEffect &particleEffect = it->second;
+		std::unique_ptr<ParticleEffect> &particleEffect = it->second;
 
-		particleEffect.Update(time, respawn_count, position_variation, velocity_variation, color_variation);
+		particleEffect->Update(time, respawn_count, position_variation, velocity_variation, color_variation);
 	}
 }

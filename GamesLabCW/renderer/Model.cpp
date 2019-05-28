@@ -7,8 +7,7 @@ namespace game
 	Model::Model(std::string modelPath)
 	{
 		// Have Assimp load and read the model file
-		static Assimp::Importer imp;
-		scene = imp.ReadFile(modelPath,
+		scene = importer.ReadFile(modelPath,
 			aiProcess_JoinIdenticalVertices |
 			aiProcess_SortByPType |
 			aiProcess_CalcTangentSpace |

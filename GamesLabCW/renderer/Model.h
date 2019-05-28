@@ -89,6 +89,8 @@ namespace game
 		std::vector<GLuint> baseIndices;
 		std::vector<GLuint> indexCounts;
 
+		Assimp::Importer importer;
+
 		// Bone related
 		const aiScene* scene;
 		std::vector<VertexBoneData> bones;
