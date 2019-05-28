@@ -178,7 +178,7 @@ namespace game::events
 		Vector3 player_pos = procgen::generate_maze(e.info.scene, 21, 120, 3, 4, 6);
 
 		auto player = e.info.scene.instantiate("FirstPersonController", TransformComponent{ player_pos , { 180,0,0 } }, CollisionComponent{ 6 }, KinematicComponent{ true });
-		auto camera = e.info.scene.instantiate("Camera", CameraComponent{ player });
+		e.info.scene.camera = e.info.scene.instantiate("Camera", CameraComponent{ player });
 
 		// Generic scene lighting
 		e.info.scene.instantiate("AmbientLight", AmbientLightComponent{ {1, 147.0 / 255.0, 41.0 / 255.0}, 0.1 });
@@ -189,6 +189,8 @@ namespace game::events
 		e.info.scene.instantiate("Overlay", i_hp);
 		OverlayComponent i_mp; i_mp.texture_file = "models/UI/mana-3.png";
 		e.info.scene.instantiate("Overlay", i_mp);
+		OverlayComponent i_ch; i_ch.texture_file = "models/UI/crosshair.png";
+		e.info.scene.instantiate("Overlay", i_ch);
 	}
 
 	//HandlePlayerBulletCollision

@@ -89,7 +89,8 @@ namespace game::systems
 		}
 
 		OverlayComponent i_hp; 
-		OverlayComponent i_mp; 
+		OverlayComponent i_mp;
+		OverlayComponent i_ch;
 		
 		switch (s.health)
 		{
@@ -126,8 +127,11 @@ namespace game::systems
 			break;
 		}
 
+		i_ch.texture_file = "models/UI/crosshair.png";
+
 		info.scene.instantiate("Overlay", i_hp);
 		info.scene.instantiate("Overlay", i_mp);
+		info.scene.instantiate("Overlay", i_ch);
 	};
 	SYSTEM(FirstPersonControllerSystem, FirstPersonControllerComponent, TransformComponent, KinematicComponent, ProjectileComponent, CollisionComponent, StatsComponent);
 
@@ -284,6 +288,7 @@ namespace game::systems
 	};
 	SYSTEM(AnimationSystem, ModelComponent);
 
+	float animationTime = 0;
 	auto AISystem = [](SceneInfo info, Entity entity, ModelComponent &m, TransformComponent &t, AIComponent &a, ProjectileComponent &bc, StatsComponent &s, DetectionComponent &d, HitboxComponent &h, KinematicComponent &k)
 	{
 		//Get reference to camera
@@ -358,6 +363,7 @@ namespace game::systems
 			}
 			else if (a.state == a.Shoot)
 			{
+				animationTime += info.dt;
 				//cout << "Attacking" << endl;
 
 				// Get the positions of both Entities
@@ -383,7 +389,14 @@ namespace game::systems
 					Vector3 rotation = { -fmod(t.rotation.z+180,360), 0, 0 };
 					events::dispatcher.enqueue<events::FireBullet>(info.scene, bc.model_file, t.position, rotation, bc.vs, bc.fs, bc.particle_file,h.c.radius, false);
 					m.model_file = a.attack_file;
+					animationTime = 0;
 				}
+
+				if (animationTime > 1)
+				{
+					m.model_file = a.idle_file;
+				}
+
 				//a.state = a.Look;
 			}
 		}

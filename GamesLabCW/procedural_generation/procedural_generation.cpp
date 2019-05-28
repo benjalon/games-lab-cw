@@ -416,6 +416,14 @@ namespace game::procgen
 			ModelComponent m_type_4; m_type_4.model_file = "models/Procedural/type4.obj";
 			ModelComponent m_type_5; m_type_5.model_file = "models/Procedural/type5.obj";
 
+			// Minotaur setup
+			//ModelComponent m_minotaur; m_minotaur.model_file = "models/Minotaur/Minotaur@Idle.fbx";
+			//ColourComponent c_minotaur; c_minotaur.colour = { 0, 0, 255 };
+			//DetectionComponent d_minotaur; d_minotaur.c.radius = 30; d_minotaur.camera = scene.camera;
+			//TransformComponent t_minotaur; t_minotaur.scale = { 0.10, 0.1, 0.1 }; t_minotaur.position = { 0, 6, -15 }; /*t_minotaur.rotation = { 90, 180, 0 };*/
+			//HitboxComponent h_minotaur; h_minotaur.c.radius = 2.5;
+			//StatsComponent s_minotaur; s_minotaur.health = 3, s_minotaur.mana = 1;
+
 			//Parameters of model
 			double model_size = 20.0;
 			double scale = 1.2;
@@ -457,6 +465,8 @@ namespace game::procgen
 						case 0:
 							//Room piece
 							scene.instantiate("Model", m_type_5, t);
+							/*scene.instantiate("Model", m_minotaur, c_minotaur, t_minotaur, h_minotaur, d_minotaur, s_minotaur, CollisionComponent{ 6 });*/
+
 							break;
 
 						case 1:
@@ -581,7 +591,7 @@ namespace game::procgen
 		//Player/camera
 		StatsComponent s_player; s_player.health = 3; s_player.mana = 0;
 		auto player = scene.instantiate("FirstPersonController", TransformComponent{ {0,6,5} , { 180,0,0 } }, CollisionComponent{ 6 }, KinematicComponent{ true }, s_player);
-		auto camera = scene.instantiate("Camera", CameraComponent{ player });
+		scene.camera = scene.instantiate("Camera", CameraComponent{ player });
 
 		//Room stuff
 		ModelComponent m_water; m_water.model_file = "models/Water/water.obj"; m_water.vertex_shader = "shaders/Water.vert"; m_water.fragment_shader = "shaders/Water.frag";
@@ -602,7 +612,7 @@ namespace game::procgen
 		//ModelComponent, ColourComponent, TransformComponent, HitboxComponent, KinematicComponent, AIComponent, CameraComponent, ProjectileComponent, DetectionComponent,StatsComponent, CollisionComponent
 		ModelComponent m_minotaur; m_minotaur.model_file = "models/Minotaur/Minotaur@Idle.fbx";
 		ColourComponent c_minotaur; c_minotaur.colour = { 0, 0, 255 };
-		DetectionComponent d_minotaur; d_minotaur.c.radius = 30; d_minotaur.camera = camera;
+		DetectionComponent d_minotaur; d_minotaur.c.radius = 30; d_minotaur.camera = scene.camera;
 		TransformComponent t_minotaur; t_minotaur.scale = { 0.10, 0.1, 0.1 }; t_minotaur.position = { 0, 6, -15 }; /*t_minotaur.rotation = { 90, 180, 0 };*/
 		HitboxComponent h_minotaur; h_minotaur.c.radius = 2.5;
 		StatsComponent s_minotaur; s_minotaur.health = 3, s_minotaur.mana = 1;
