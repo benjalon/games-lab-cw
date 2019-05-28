@@ -61,7 +61,6 @@ game::GameEngine::GameEngine(bool fullscreen, bool vsync, bool ground) :
 	prototypes::register_prototypes();
 
 	//Load models
-	//renderer::load_model("models/Cyborg/cyborg.obj");
 	renderer::load_model("models/Room/room.obj");
 	renderer::load_model("models/Procedural/type1.obj");
 	renderer::load_model("models/Procedural/type2.obj");
@@ -75,7 +74,6 @@ game::GameEngine::GameEngine(bool fullscreen, bool vsync, bool ground) :
 	renderer::load_model("models/Minotaur/Minotaur@Idle.fbx");
 	renderer::load_model("models/Fireball/fireball.obj");
 
-	//renderer::load_particle_effect("models/particle.png", 100);
 	renderer::load_particle_effect("models/Particles/star.png", 200, 0.2, 0.5);
 	renderer::load_particle_effect("models/Particles/fire.png", 30, 0.08, 0.3);
 	renderer::load_particle_effect("models/Particles/fire2.png", 80, 0.15, 1);

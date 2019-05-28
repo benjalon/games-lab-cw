@@ -19,6 +19,7 @@ namespace game
 		size_t current_size_;
 		bool data_uploaded_;
 		GLenum target;
+		bool update;
 
 		std::vector<unsigned char> data_;
 
@@ -27,7 +28,7 @@ namespace game
 		VBO();
 		
 		//Constructor for alternate types of buffer
-		VBO(GLenum target);
+		VBO(GLenum target, bool update);
 
 		//Initialises vertex buffer object
 		void create(GLuint size = 0);
