@@ -71,8 +71,11 @@ game::GameEngine::GameEngine(bool fullscreen, bool vsync, bool ground) :
 	renderer::load_model("models/Skybox/skybox.obj");
 	renderer::load_model("models/Torch/torch.obj");
 	renderer::load_model("models/Key/Key_B_02.obj");
-	renderer::load_model("models/Minotaur/Minotaur@Idle.fbx");
 	renderer::load_model("models/Fireball/fireball.obj");
+	renderer::load_model("models/Minotaur/Minotaur@Idle.fbx");
+	renderer::load_model("models/Minotaur/Minotaur@Walk.fbx");
+	renderer::load_model("models/Minotaur/Minotaur@Get_Hit.fbx");
+	renderer::load_model("models/Minotaur/Minotaur@Attack.fbx");
 
 	renderer::load_particle_effect("models/Particles/star.png", 200, 0.2, 0.5);
 	renderer::load_particle_effect("models/Particles/fire.png", 30, 0.08, 0.3);
@@ -89,6 +92,9 @@ game::GameEngine::GameEngine(bool fullscreen, bool vsync, bool ground) :
 	renderer::load_overlay("models/UI/mana-2.png", Vector2(0, 0));
 	renderer::load_overlay("models/UI/mana-1.png", Vector2(0, 0));
 	renderer::load_overlay("models/UI/mana-0.png", Vector2(0, 0));
+
+	// Crosshair overlay
+	renderer::load_overlay("models/UI/crosshair.png", Vector2(0, 0));
 
 	std::string paths[6] = {
 		"models/Skybox/hw_ruins/ruins_lf.tga",

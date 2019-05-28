@@ -142,6 +142,11 @@ namespace game
 
 	struct AIComponent {
 		enum State {Look, Dodge, Shoot};
+		std::string idle_file = "models/Minotaur/Minotaur@Idle.fbx";
+		std::string walk_file = "models/Minotaur/Minotaur@Walk.fbx";
+		std::string get_hit_file = "models/Minotaur/Minotaur@Get_Hit.fbx";
+		std::string attack_file = "models/Minotaur/Minotaur@Attack.fbx";
+
 		State state;
 		double moving = 0;
 		

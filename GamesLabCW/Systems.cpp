@@ -284,13 +284,11 @@ namespace game::systems
 	};
 	SYSTEM(AnimationSystem, ModelComponent);
 
-	auto AISystem = [](SceneInfo info, Entity entity, TransformComponent &t, AIComponent &a, ProjectileComponent &bc, StatsComponent &s, DetectionComponent &d, HitboxComponent &h, KinematicComponent &k)
+	auto AISystem = [](SceneInfo info, Entity entity, ModelComponent &m, TransformComponent &t, AIComponent &a, ProjectileComponent &bc, StatsComponent &s, DetectionComponent &d, HitboxComponent &h, KinematicComponent &k)
 	{
 		//Get reference to camera
 		CameraComponent &c = info.scene.get<CameraComponent>(d.camera);
 		s.mana += info.dt;
-
-		
 
 		if (s.health < 1)
 		{
@@ -307,6 +305,7 @@ namespace game::systems
 				a.moving += info.dt;
 				if (a.moving > 7)
 				{
+					m.model_file = a.walk_file;
 					auto r = rand() % 360;
 					auto direction = Vector2(-fmod(t.rotation.z + r, 360), 0).direction_hv().ToGLM();
 					Vector3 move = glm::normalize(direction);
@@ -318,10 +317,12 @@ namespace game::systems
 				}
 				else if (a.moving > 4)
 				{
+					m.model_file = a.idle_file;
 					k.move_velocity = { 0,0,0 };
 				}
 				else if (a.dodgeCooldown > 0.5 && a.dodgeBullet)
 				{
+					m.model_file = a.idle_file;
 					k.move_velocity = { 0,0,0 };
 					a.dodgeBullet = false;
 				}
@@ -329,6 +330,7 @@ namespace game::systems
 			}
 			else if (a.state == a.Dodge)
 			{
+				m.model_file = a.walk_file;
 				//cout << "Dodging" << endl;
 				cout << (a.dodgeCooldown > a.dodgeMax) << endl;
 
@@ -352,7 +354,6 @@ namespace game::systems
 					}
 				}
 				a.state = a.Look;
-
 
 			}
 			else if (a.state == a.Shoot)
@@ -381,6 +382,7 @@ namespace game::systems
 					s.mana = 0;
 					Vector3 rotation = { -fmod(t.rotation.z+180,360), 0, 0 };
 					events::dispatcher.enqueue<events::FireBullet>(info.scene, bc.model_file, t.position, rotation, bc.vs, bc.fs, bc.particle_file,h.c.radius, false);
+					m.model_file = a.attack_file;
 				}
 				//a.state = a.Look;
 			}
@@ -388,7 +390,7 @@ namespace game::systems
 		
 		
 	};
-	SYSTEM(AISystem, TransformComponent, AIComponent,ProjectileComponent, StatsComponent, DetectionComponent, HitboxComponent, KinematicComponent);
+	SYSTEM(AISystem, ModelComponent, TransformComponent, AIComponent, ProjectileComponent, StatsComponent, DetectionComponent, HitboxComponent, KinematicComponent);
 	
 	auto ParticleSystem = [](auto info, auto entity, ParticleComponent &p, ColourComponent &c, TransformComponent &t, KinematicComponent &k)
 	{
