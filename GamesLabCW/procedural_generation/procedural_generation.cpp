@@ -16,8 +16,10 @@
 #include "../Utility.h"
 #include "../Components.h"
 
+
 namespace game::procgen
 {
+	
 	//Provides a random engine seeded once at the start of the game
 	std::default_random_engine &rng()
 	{
@@ -416,14 +418,6 @@ namespace game::procgen
 			ModelComponent m_type_4; m_type_4.model_file = "models/Procedural/type4.obj";
 			ModelComponent m_type_5; m_type_5.model_file = "models/Procedural/type5.obj";
 
-			// Minotaur setup
-			//ModelComponent m_minotaur; m_minotaur.model_file = "models/Minotaur/Minotaur@Idle.fbx";
-			//ColourComponent c_minotaur; c_minotaur.colour = { 0, 0, 255 };
-			//DetectionComponent d_minotaur; d_minotaur.c.radius = 30; d_minotaur.camera = scene.camera;
-			//TransformComponent t_minotaur; t_minotaur.scale = { 0.10, 0.1, 0.1 }; t_minotaur.position = { 0, 6, -15 }; /*t_minotaur.rotation = { 90, 180, 0 };*/
-			//HitboxComponent h_minotaur; h_minotaur.c.radius = 2.5;
-			//StatsComponent s_minotaur; s_minotaur.health = 3, s_minotaur.mana = 0;
-
 			//Parameters of model
 			double model_size = 20.0;
 			double scale = 1.2;
@@ -560,7 +554,20 @@ namespace game::procgen
 						player_pos = { x, y };
 				}
 
-			return { player_pos.first * cell_size, 6, player_pos.second * cell_size };
+			Vector3 playerPos = { player_pos.first * cell_size, 6, player_pos.second * cell_size };
+
+			auto player = scene.instantiate("FirstPersonController", TransformComponent{ playerPos , { 180,0,0 } }, CollisionComponent{ 6 }, KinematicComponent{ true });
+			auto camera = scene.instantiate("Camera", CameraComponent{ player });
+
+			// Minotaur setup
+			ModelComponent m_minotaur; m_minotaur.model_file = "models/Minotaur/Minotaur@Idle.fbx";
+			ColourComponent c_minotaur; c_minotaur.colour = { 0, 0, 255 };
+			DetectionComponent d_minotaur; d_minotaur.c.radius = 30; d_minotaur.camera = camera;
+			TransformComponent t_minotaur; t_minotaur.scale = { 0.10, 0.1, 0.1 }; t_minotaur.position = { 0, 6, -15 }; /*t_minotaur.rotation = { 90, 180, 0 };*/
+			HitboxComponent h_minotaur; h_minotaur.c.radius = 2.5;
+			StatsComponent s_minotaur; s_minotaur.health = 3, s_minotaur.mana = 0;
+
+			return playerPos;
 		}
 	};
 
@@ -609,14 +616,15 @@ namespace game::procgen
 		scene.instantiate("SolidPlane", SolidPlaneComponent{ { 0, 0, 1 }, { 0, 0, -30 } }); //front wall
 
 		// Minotaur test model
-		//ModelComponent, ColourComponent, TransformComponent, HitboxComponent, KinematicComponent, AIComponent, CameraComponent, ProjectileComponent, DetectionComponent,StatsComponent, CollisionComponent
-		ModelComponent m_minotaur; m_minotaur.model_file = "models/Minotaur/Minotaur@Idle.fbx";
-		ColourComponent c_minotaur; c_minotaur.colour = { 0, 0, 255 };
-		DetectionComponent d_minotaur; d_minotaur.c.radius = 30; d_minotaur.camera = scene.camera;
-		TransformComponent t_minotaur; t_minotaur.scale = { 0.10, 0.1, 0.1 }; t_minotaur.position = { 0, 6, -15 }; /*t_minotaur.rotation = { 90, 180, 0 };*/
-		HitboxComponent h_minotaur; h_minotaur.c.radius = 2.5;
-		StatsComponent s_minotaur; s_minotaur.health = 3, s_minotaur.mana = 1;
-		scene.instantiate("AIModel", m_minotaur, c_minotaur, t_minotaur, h_minotaur, d_minotaur, s_minotaur, CollisionComponent{ 6 });
+		//Entity camera;
+		////ModelComponent, ColourComponent, TransformComponent, HitboxComponent, KinematicComponent, AIComponent, CameraComponent, ProjectileComponent, DetectionComponent,StatsComponent, CollisionComponent
+		//ModelComponent m_minotaur; m_minotaur.model_file = "models/Minotaur/Minotaur@Idle.fbx";
+		//ColourComponent c_minotaur; c_minotaur.colour = { 0, 0, 255 };
+		//DetectionComponent d_minotaur; d_minotaur.c.radius = 30; d_minotaur.camera = camera;
+		//TransformComponent t_minotaur; t_minotaur.scale = { 0.10, 0.1, 0.1 }; t_minotaur.position = { 0, 6, -15 };
+		//HitboxComponent h_minotaur; h_minotaur.c.radius = 2.5;
+		//StatsComponent s_minotaur; s_minotaur.health = 3, s_minotaur.mana = 1;
+		//scene.instantiate("AIModel", m_minotaur, c_minotaur, t_minotaur, h_minotaur, d_minotaur, s_minotaur, CollisionComponent{ 6 });
 
 		//Torches
 		ModelComponent m_torch; m_torch.model_file = "models/Torch/torch.obj";

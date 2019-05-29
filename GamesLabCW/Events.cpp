@@ -182,9 +182,6 @@ namespace game::events
 		e.info.scene.clear();
 		Vector3 player_pos = procgen::generate_maze(e.info.scene, 21, 120, 3, 4, 6);
 
-		auto player = e.info.scene.instantiate("FirstPersonController", TransformComponent{ player_pos , { 180,0,0 } }, CollisionComponent{ 6 }, KinematicComponent{ true });
-		e.info.scene.camera = e.info.scene.instantiate("Camera", CameraComponent{ player });
-
 		// Generic scene lighting
 		e.info.scene.instantiate("AmbientLight", AmbientLightComponent{ {1, 147.0 / 255.0, 41.0 / 255.0}, 0.1 });
 		e.info.scene.instantiate("DirectionalLight", DirectionalLightComponent{ {0, 0, 0}, 0, {0,0,0} });
