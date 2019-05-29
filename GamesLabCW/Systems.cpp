@@ -62,7 +62,7 @@ namespace game::systems
 			return;
 		}
 
-		s.mana += info.dt;
+		s.mana += info.dt * 2;
 
 		if (s.mana > MAX_MANA)
 		{
@@ -319,7 +319,7 @@ namespace game::systems
 	const int MAX_WAITING_TIME = 7;
 	const int MAX_MOVING_TIME = 4;
 	const double MAX_DODGE_TIME = 0.5;
-	const int WALK_SPEED = 200;
+	const int WALK_SPEED = 300;
 	const int DODGE_SPEED = 1000;
 	const int ATTACK_ANIMATION_DURATION = 1;
 	const int HIT_ANIMATION_DURATION = 1;

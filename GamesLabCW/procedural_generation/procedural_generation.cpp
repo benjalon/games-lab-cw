@@ -436,6 +436,7 @@ namespace game::procgen
 			bool key = false;
 			Coords key_pos;
 
+			std::vector<TransformComponent> transforms;
 			//Instantiate correct type for each cell in grid
 			for (int x = 1; x < size_ - 1; x++)
 				for (int y = 1; y < size_ - 1; y++)
@@ -459,9 +460,9 @@ namespace game::procgen
 						{
 						case 0:
 							//Room piece
-							scene.instantiate("Model", m_type_5, t);
-							/*scene.instantiate("Model", m_minotaur, c_minotaur, t_minotaur, h_minotaur, d_minotaur, s_minotaur, CollisionComponent{ 6 });*/
 
+							scene.instantiate("Model", m_type_5, t);
+							transforms.push_back(t);
 							break;
 
 						case 1:
@@ -561,12 +562,20 @@ namespace game::procgen
 			auto camera = scene.instantiate("Camera", CameraComponent{ player });
 
 			// Minotaur setup
-			ModelComponent m_minotaur; m_minotaur.model_file = "models/Minotaur/Minotaur@Idle.fbx";
-			ColourComponent c_minotaur; c_minotaur.colour = { 0, 0, 255 };
-			DetectionComponent d_minotaur; d_minotaur.c.radius = 30; d_minotaur.camera = camera;
-			TransformComponent t_minotaur; t_minotaur.scale = { 0.10, 0.1, 0.1 }; t_minotaur.position = { 0, 6, -15 }; /*t_minotaur.rotation = { 90, 180, 0 };*/
-			HitboxComponent h_minotaur; h_minotaur.c.radius = 2.5;
-			StatsComponent s_minotaur; s_minotaur.health = 3, s_minotaur.mana = 0;
+			for (int i = 0; i < transforms.size(); i++)
+			{
+				if (rand() % 10 != 1) {
+					continue;
+				}
+
+				ModelComponent m_minotaur; m_minotaur.model_file = "models/Minotaur/Minotaur@Idle.fbx";
+				ColourComponent c_minotaur; c_minotaur.colour = { 0, 0, 255 };
+				DetectionComponent d_minotaur; d_minotaur.c.radius = 50; d_minotaur.camera = camera;
+				TransformComponent t_minotaur; t_minotaur.scale = { 0.15, 0.15, 0.15 }; t_minotaur.position = transforms[i].position; t_minotaur.position.y = -5; /*t_minotaur.rotation = { 90, 180, 0 };*/
+				HitboxComponent h_minotaur; h_minotaur.c.radius = 4;
+				StatsComponent s_minotaur; s_minotaur.health = 3, s_minotaur.mana = 0;
+				scene.instantiate("AIModel", m_minotaur, c_minotaur, t_minotaur, h_minotaur, d_minotaur, s_minotaur, CollisionComponent{ 6 });
+			}
 
 			return playerPos;
 		}

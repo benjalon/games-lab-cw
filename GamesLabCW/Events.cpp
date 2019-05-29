@@ -77,11 +77,12 @@ namespace game::events
 	}
 	RESPONSE(SphereLeaveCollideResponse, LeaveCollision);
 
-	const int BULLET_SPEED = 30;
+	const int BULLET_SPEED = 45;
 	const int FIREBALL_SAFE_DISTANCE_OFFSET = 3;
 	void FireBulletResponse(const FireBullet &e)
 	{
-		TransformComponent t; t.scale = { 0.5, 0.5, 0.5 }; t.position = e.position; t.rotation = e.rotation;
+		TransformComponent t; t.position = e.position; t.rotation = e.rotation;
+		CollisionComponent c; c.radius = 5;
 		ModelComponent m; m.model_file = e.bullet_file; m.vertex_shader = e.bullet_vs; m.fragment_shader = e.bullet_fs;
 		
 		KinematicComponent k; k.velocity = Vector2(t.rotation.x, t.rotation.y).direction_hv() * BULLET_SPEED;
@@ -99,7 +100,7 @@ namespace game::events
 		p_fireball.color_variation = Vector3(100, -0.5, 100);
 		p_fireball.color_modifier = Vector3(1, 0.15, 0);
 		BulletComponent b; b.isPlayers = e.isPlayers;
-		e.scene.instantiate("Bullet", m, t, k, p_fireball,b);
+		e.scene.instantiate("Bullet", m, t, k, p_fireball, b, c);
 		
 	}
 	RESPONSE(FireBulletResponse, FireBullet);
