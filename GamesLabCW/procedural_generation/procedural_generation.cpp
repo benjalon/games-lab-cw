@@ -601,6 +601,8 @@ namespace game::procgen
 		TransformComponent t_room; t_room.position.y = 10; t_room.scale = { 0.5, 0.5, 0.5 };
 		scene.instantiate("Model", m_room, t_room);
 
+		scene.instantiate("Door", TransformComponent{ {-30, 12, 0} }, CollisionComponent{ 6 });
+
 		//Solid planes
 		scene.instantiate("SolidPlane", SolidPlaneComponent{ { 0, 1, 0 }, { 0, 0, 0 } }); //floor
 		scene.instantiate("SolidPlane", SolidPlaneComponent{ { -1, 0, 0 }, { 30, 0, 0 } }); //right wall
