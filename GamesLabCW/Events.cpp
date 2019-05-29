@@ -103,15 +103,15 @@ namespace game::events
 	}
 	RESPONSE(FireBulletResponse, FireBullet);
 
+	int keyCount = 0;
 	void HandleKeyCollision(const EnterCollision &e, Entity player)
 	{
 		//Return to the hub, incrementing keyCount
-		auto &s = e.info.registry.get<StatsComponent>(player);
-		s.keyCount++;
+		keyCount++;
 		e.info.scene.clear();
-		procgen::load_hub(e.info.scene, s.keyCount);
+		procgen::load_hub(e.info.scene, keyCount);
 
-		if (s.keyCount == 6)
+		if (keyCount == 6)
 		{
 			e.info.scene.instantiate("PointLight", PointLightComponent{ {255, 215, 0}, 10.0, { -30, 12, 0 } });
 		}

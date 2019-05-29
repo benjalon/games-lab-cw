@@ -49,6 +49,7 @@ namespace game::procgen
 		std::vector<Cell> grid_;
 		size_t size_;
 		std::unordered_set<int> connected_;
+		int key_id;
 
 	public:
 		using Coords = std::pair<int, int>;
@@ -376,10 +377,10 @@ namespace game::procgen
 			{
 				ModelComponent m_key; m_key.model_file = "models/Key/Key_B_02.obj";
 				KeyComponent k_key; k_key.destination = { -40, 10, 10 };
-				TransformComponent t_key; t_key.scale = { 0.5, 0.5, 0.5 }; t_key.rotation = { 0, 180, 180 };
-				t_key.position = position;
+				TransformComponent t_key; t_key.scale = { 0.5, 0.5, 0.5 }; t_key.rotation = { 0, 180, 180 }; t_key.position = position;
 				PointLightComponent pl_key{ {1, 180 / 255.0, 120.0 / 255.0}, 60, t_key.position };
 				KinematicComponent kn_key; kn_key.angular_velocity = { 0, 90, 0 };
+
 				scene.instantiate("Key", m_key, t_key, k_key, pl_key, kn_key);
 			};
 
@@ -585,11 +586,11 @@ namespace game::procgen
 		//Build the map into the scene
 		return g.build_scene(scene);
 	}
-
+	
 	void load_hub(Scene &scene, int keys_collected)
 	{
 		//Player/camera
-		StatsComponent s_player; s_player.health = 3; s_player.mana = 0;
+		StatsComponent s_player; s_player.health = 3; s_player.mana = 0; s_player.keyCount = keys_collected;
 		auto player = scene.instantiate("FirstPersonController", TransformComponent{ {0,6,5} , { 180,0,0 } }, CollisionComponent{ 6 }, KinematicComponent{ true }, s_player);
 		scene.camera = scene.instantiate("Camera", CameraComponent{ player });
 
@@ -676,18 +677,16 @@ namespace game::procgen
 		scene.instantiate("DirectionalLight", DirectionalLightComponent{ {0, 0, 0}, 0, {0,0,0} });
 
 		//Add keys to door, depending on number of keys collected
-		ModelComponent m_key; m_key.model_file = "models/Key/Key_B_02.obj";
-
 		for (int i = 0; i < keys_collected; i++)
 		{
+			ModelComponent m; m.model_file = { "models/Key/Key_B_02.obj" };
 			TransformComponent t; t.scale = { 0.5, 0.5, 0.5 }; t.rotation = { 90, 180, 180 };
-
 			if (i < 3)
 				t.position = { -40, 10 + i * 5.0, 10 };
 			else
 				t.position = { -40, 10 + (i - 3) * 5.0, -10 };
 
-			scene.instantiate("Model", t, ModelComponent{ "models/Key/Key_B_02.obj" });
+			scene.instantiate("Model", t, m);
 		}
 	}
 }
