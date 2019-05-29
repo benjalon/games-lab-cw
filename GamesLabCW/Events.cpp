@@ -110,20 +110,20 @@ namespace game::events
 		s.keyCount++;
 		e.info.scene.clear();
 		procgen::load_hub(e.info.scene, s.keyCount);
+
+		if (s.keyCount == 6)
+		{
+			e.info.scene.instantiate("PointLight", PointLightComponent{ {255, 215, 0}, 10.0, { -30, 12, 0 } });
+		}
 	}
 
 	void HandleDoorCollision(const EnterCollision &e, Entity player)
 	{
 		auto &s = e.info.registry.get<StatsComponent>(player);
 
-		if (s.keyCount < 6) 
+		if (s.keyCount > 5) 
 		{
-			return; // Not enough keys so you can't leave
-		}
-		else
-		{
-			//open door/end game here
-			
+			s.gameComplete = true;
 		}
 	}
 

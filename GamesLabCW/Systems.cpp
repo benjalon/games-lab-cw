@@ -43,15 +43,28 @@ namespace game::systems
 	//First-person control by the player
 	auto FirstPersonControllerSystem = [](SceneInfo info, auto entity, FirstPersonControllerComponent &f, TransformComponent &t, KinematicComponent &k, ProjectileComponent &bc, CollisionComponent &c, StatsComponent &s)
 	{
+		// Game completion states
+		if (s.health < 1)
+		{
+			OverlayComponent i_lose;
+			i_lose.texture_file = "models/UI/lose.png";
+			info.scene.instantiate("Overlay", i_lose);
+			return;
+		}
+		if (s.gameComplete)
+		{
+			OverlayComponent i_win;
+			i_win.texture_file = "models/UI/win.png";
+			info.scene.instantiate("Overlay", i_win);
+			return;
+		}
+
 		s.mana += info.dt;
 		if (s.mana > 3)
 		{
 			s.mana = 3;
 		}
-		if (s.health < 1)
-		{
-			info.scene.destroy(entity);
-		}
+
 		double mouse_sensitivity = 5.0;
 		double move_speed = 30.0;
 
@@ -132,6 +145,17 @@ namespace game::systems
 		info.scene.instantiate("Overlay", i_hp);
 		info.scene.instantiate("Overlay", i_mp);
 		info.scene.instantiate("Overlay", i_ch);
+
+		// DEBUGGING FOR DEMO - increase key point
+		if (input::is_pressed(input::KEY_F1))
+		{
+			s.keyCount++;
+
+			if (s.keyCount == 6)
+			{
+				info.scene.instantiate("PointLight", PointLightComponent{ {255, 215, 0}, 10.0, { -30, 12, 0 } });
+			}
+		}
 	};
 	SYSTEM(FirstPersonControllerSystem, FirstPersonControllerComponent, TransformComponent, KinematicComponent, ProjectileComponent, CollisionComponent, StatsComponent);
 
@@ -264,9 +288,9 @@ namespace game::systems
 	SYSTEM(MoveCameraSystem, CameraComponent);
 
 	//Animation system
+	const float ANIMATION_DELAY = 0.05;
 	auto AnimationSystem = [](auto info, auto entity, auto& m)
 	{
-		// Animation works but is too laggy to use
 		if (!m.isAnimated)
 		{
 			return;
@@ -276,7 +300,7 @@ namespace game::systems
 		static double t = 0;
 		t += info.dt;
 
-		if (timeSinceLastUpdate < 0.1)
+		if (timeSinceLastUpdate < ANIMATION_DELAY)
 		{
 			timeSinceLastUpdate += info.dt;
 			return;

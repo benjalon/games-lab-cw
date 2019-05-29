@@ -656,6 +656,7 @@ namespace game::procgen
 		scene.instantiate("ParticleEffect", p_portal, TransformComponent{ Vector3(3, 5, 22) });
 		scene.instantiate("PointLight", PointLightComponent{ {1, 105.0 / 255.0, 180.0 / 255.0}, 40, { 3, 3, 22} });
 		scene.instantiate("Portal", TransformComponent{ { 3, 3, 22 } });
+		scene.instantiate("Door", TransformComponent{ { -30, 12, 0 } });
 
 		//UI
 		OverlayComponent i_hp; i_hp.texture_file = "models/UI/hearts-2.png";
