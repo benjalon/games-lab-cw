@@ -298,18 +298,26 @@ namespace game::systems
 	const double MAX_DODGE_TIME = 0.5;
 	const int WALK_SPEED = 200;
 	const int DODGE_SPEED = 1000;
-	const int PUNCH_ANIMATION_DURATION = 1;
+	const int ATTACK_ANIMATION_DURATION = 1;
+	const int HIT_ANIMATION_DURATION = 1;
 	auto AISystem = [](SceneInfo info, Entity entity, ModelComponent &m, TransformComponent &t, AIComponent &a, ProjectileComponent &bc, StatsComponent &s, DetectionComponent &d, HitboxComponent &h, KinematicComponent &k)
 	{
 		//Get reference to camera
 		CameraComponent &c = info.scene.get<CameraComponent>(d.camera);
 		s.mana += info.dt;
+		animationTime += info.dt;
 
 		if (s.health < 1)
 		{
 			info.scene.destroy(entity);
 		}
-		else
+		else if (a.isHit)
+		{
+			animationTime = 0;
+			m.model_file = a.get_hit_file;
+			a.isHit = false;
+		}
+		else if (animationTime > HIT_ANIMATION_DURATION)
 		{
 			a.dodgeCooldown += info.dt;
 
@@ -366,7 +374,7 @@ namespace game::systems
 			}
 			else if (a.state == a.Shoot)
 			{
-				animationTime += info.dt;
+				//animationTime += info.dt;
 				k.move_velocity = { 0,0,0 };
 
 				// Get the positions of both Entities
@@ -395,7 +403,7 @@ namespace game::systems
 					animationTime = 0;
 				}
 
-				if (animationTime > PUNCH_ANIMATION_DURATION)
+				if (animationTime > ATTACK_ANIMATION_DURATION)
 				{
 					m.model_file = a.idle_file;
 				}

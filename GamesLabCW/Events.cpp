@@ -78,7 +78,7 @@ namespace game::events
 	RESPONSE(SphereLeaveCollideResponse, LeaveCollision);
 
 	const int BULLET_SPEED = 30;
-	const int FIREBALL_SAFE_DISTANCE_OFFSET = 2.5;
+	const int FIREBALL_SAFE_DISTANCE_OFFSET = 3;
 	void FireBulletResponse(const FireBullet &e)
 	{
 		TransformComponent t; t.scale = { 0.5, 0.5, 0.5 }; t.position = e.position; t.rotation = e.rotation;
@@ -131,8 +131,11 @@ namespace game::events
 	void HandleBulletCollision(const EnterCollision &e, Entity bullet, Entity aic)
 	{
 		auto &ai = e.info.registry.get<AIComponent>(aic);
+		auto &mod = e.info.registry.get<ModelComponent>(aic);
 		auto &s = e.info.registry.get<StatsComponent>(aic);
 		auto &bs = e.info.registry.get<BulletComponent>(bullet);
+
+		
 
 		if (ai.dodgeBullet)
 		{
@@ -157,6 +160,7 @@ namespace game::events
 		{
 			bs.draw = false;
 			s.health -= 1;
+			ai.isHit = true;
 		}
 	}
 
