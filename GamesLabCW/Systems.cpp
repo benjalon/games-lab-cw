@@ -379,14 +379,14 @@ namespace game::systems
 
 				// Apply acos to that value and set z-axis 360 rule. Then rotation to the AIModel
 				if (fromPlayerToEnemy.x < 0)
-					t.rotation.y = -(360 - glm::degrees(acos(cosinedegreesToRotate))) + 180;
+					t.rotation.y = (360 - glm::degrees(acos(cosinedegreesToRotate)));
 				else
-					t.rotation.y = -(glm::degrees(acos(cosinedegreesToRotate))) + 180;
+					t.rotation.y = (glm::degrees(acos(cosinedegreesToRotate)));
 
 				if (s.mana > 3)
 				{
 					s.mana = 0;
-					Vector3 rotation = { -fmod(t.rotation.z+180,360), 0, 0 };
+					Vector3 rotation = { fmod(t.rotation.y,360), 0, 0 };
 					events::dispatcher.enqueue<events::FireBullet>(info.scene, bc.model_file, t.position, rotation, bc.vs, bc.fs, bc.particle_file,h.c.radius, false);
 					m.model_file = a.attack_file;
 					animationTime = 0;
