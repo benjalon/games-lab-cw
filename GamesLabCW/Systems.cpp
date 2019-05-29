@@ -292,30 +292,27 @@ namespace game::systems
 
 	//Animation system
 	const float ANIMATION_DELAY = 0.05;
-	auto AnimationSystem = [](auto info, auto entity, auto& m)
+	auto AnimationSystem = [](auto info, auto entity, auto& m, auto& ai)
 	{
 		if (!m.isAnimated)
 		{
 			return;
 		}
 
-		static double timeSinceLastUpdate;
-		static double t = 0;
-		t += info.dt;
+		ai.t += info.dt;
 
-		if (timeSinceLastUpdate < ANIMATION_DELAY)
+		if (ai.timeSinceLastUpdate < ANIMATION_DELAY)
 		{
-			timeSinceLastUpdate += info.dt;
+			ai.timeSinceLastUpdate += info.dt;
 			return;
 		}
 
-		timeSinceLastUpdate = 0;
+		ai.timeSinceLastUpdate = 0;
 
-		renderer::animate_model(t, m.model_file);
+		renderer::animate_model(ai.t, m.model_file);
 	};
-	SYSTEM(AnimationSystem, ModelComponent);
+	SYSTEM(AnimationSystem, ModelComponent, AIComponent);
 
-	float animationTime = 0;
 	const int MAX_WAITING_TIME = 7;
 	const int MAX_MOVING_TIME = 4;
 	const double MAX_DODGE_TIME = 0.5;
@@ -328,7 +325,7 @@ namespace game::systems
 		//Get reference to camera
 		CameraComponent &c = info.scene.get<CameraComponent>(d.camera);
 		s.mana += info.dt;
-		animationTime += info.dt;
+		a.animationTime += info.dt;
 
 		if (s.health < 1)
 		{
@@ -336,11 +333,11 @@ namespace game::systems
 		}
 		else if (a.isHit)
 		{
-			animationTime = 0;
+			a.animationTime = 0;
 			m.model_file = a.get_hit_file;
 			a.isHit = false;
 		}
-		else if (animationTime > HIT_ANIMATION_DURATION)
+		else if (a.animationTime > HIT_ANIMATION_DURATION)
 		{
 			a.dodgeCooldown += info.dt;
 
@@ -423,10 +420,10 @@ namespace game::systems
 					Vector3 rotation = { fmod(t.rotation.y,360), 0, 0 };
 					events::dispatcher.enqueue<events::FireBullet>(info.scene, bc.model_file, t.position, rotation, bc.vs, bc.fs, bc.particle_file,h.c.radius, false);
 					m.model_file = a.attack_file;
-					animationTime = 0;
+					a.animationTime = 0;
 				}
 
-				if (animationTime > ATTACK_ANIMATION_DURATION)
+				if (a.animationTime > ATTACK_ANIMATION_DURATION)
 				{
 					m.model_file = a.idle_file;
 				}

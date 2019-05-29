@@ -564,7 +564,7 @@ namespace game::procgen
 			// Minotaur setup
 			for (int i = 0; i < transforms.size(); i++)
 			{
-				if (rand() % 10 != 1) {
+				if (rand() % 8 != 1) {
 					continue;
 				}
 

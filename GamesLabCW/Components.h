@@ -148,7 +148,7 @@ namespace game
 		std::string attack_file = "models/Minotaur/Minotaur@Attack.fbx";
 
 		State state;
-		double moving = 0;
+		double moving = (double)(rand() % 7);
 		
 		//Dodge trackers
 		double dodgeCooldown = 0;
@@ -158,6 +158,11 @@ namespace game
 		double direction = 0;
 
 		bool isHit = false;
+
+
+		float timeSinceLastUpdate = 0;
+		float t = 0;
+		float animationTime = 0;
 
 	};
 
