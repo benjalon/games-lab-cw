@@ -312,13 +312,13 @@ namespace game::systems
 				{
 					m.model_file = a.walk_file;
 					auto r = rand() % 360;
-					auto direction = Vector2(-fmod(t.rotation.z + r, 360), 0).direction_hv().ToGLM();
+					auto direction = Vector2(fmod(t.rotation.y + r, 360), 0).direction_hv().ToGLM();
 					Vector3 move = glm::normalize(direction);
 					a.moving = 0;
 					int speed = 2;
 					speed *= 100;
 					k.move_velocity = move * speed * info.dt;
-					t.rotation.z = Vector2(-fmod(t.rotation.z + r, 360), 0).abs() + 180;
+					t.rotation.y = Vector2(fmod(t.rotation.y + r, 360), 0).abs();
 				}
 				else if (a.moving > 4)
 				{
@@ -364,6 +364,7 @@ namespace game::systems
 			else if (a.state == a.Shoot)
 			{
 				animationTime += info.dt;
+				k.move_velocity = { 0,0,0 };
 				//cout << "Attacking" << endl;
 
 				// Get the positions of both Entities
