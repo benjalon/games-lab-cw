@@ -564,7 +564,7 @@ namespace game::procgen
 			// Minotaur setup
 			for (int i = 0; i < transforms.size(); i++)
 			{
-				if (rand() % 8 != 1) {
+				if (rand() % 6 != 1) {
 					continue;
 				}
 
@@ -574,7 +574,7 @@ namespace game::procgen
 				TransformComponent t_minotaur; t_minotaur.scale = { 0.15, 0.15, 0.15 }; t_minotaur.position = transforms[i].position; t_minotaur.position.y = -5; /*t_minotaur.rotation = { 90, 180, 0 };*/
 				HitboxComponent h_minotaur; h_minotaur.c.radius = 4;
 				StatsComponent s_minotaur; s_minotaur.health = 3, s_minotaur.mana = 0;
-				scene.instantiate("AIModel", m_minotaur, c_minotaur, t_minotaur, h_minotaur, d_minotaur, s_minotaur, CollisionComponent{ 6 });
+				scene.instantiate("AIModel", m_minotaur, c_minotaur, t_minotaur, h_minotaur, d_minotaur, s_minotaur, CollisionComponent{ 0 });
 			}
 
 			return playerPos;
@@ -628,13 +628,13 @@ namespace game::procgen
 		// Minotaur test model
 		//Entity camera;
 		//ModelComponent, ColourComponent, TransformComponent, HitboxComponent, KinematicComponent, AIComponent, CameraComponent, ProjectileComponent, DetectionComponent,StatsComponent, CollisionComponent
-		ModelComponent m_minotaur; m_minotaur.model_file = "models/Minotaur/Minotaur@Idle.fbx";
+		/*ModelComponent m_minotaur; m_minotaur.model_file = "models/Minotaur/Minotaur@Idle.fbx";
 		ColourComponent c_minotaur; c_minotaur.colour = { 0, 0, 255 };
 		DetectionComponent d_minotaur; d_minotaur.c.radius = 30; d_minotaur.camera = camera;
 		TransformComponent t_minotaur; t_minotaur.scale = { 0.10, 0.1, 0.1 }; t_minotaur.position = { 0, 6, -15 };
 		HitboxComponent h_minotaur; h_minotaur.c.radius = 2.5;
 		StatsComponent s_minotaur; s_minotaur.health = 3, s_minotaur.mana = 1;
-		scene.instantiate("AIModel", m_minotaur, c_minotaur, t_minotaur, h_minotaur, d_minotaur, s_minotaur, CollisionComponent{ 6 });
+		scene.instantiate("AIModel", m_minotaur, c_minotaur, t_minotaur, h_minotaur, d_minotaur, s_minotaur, CollisionComponent{ 0 });*/
 
 		//Torches
 		ModelComponent m_torch; m_torch.model_file = "models/Torch/torch.obj";

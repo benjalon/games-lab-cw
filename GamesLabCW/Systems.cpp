@@ -229,13 +229,13 @@ namespace game::systems
 				AIComponent &ai = info.registry.get<AIComponent>(other);
 				BulletComponent& bc = info.registry.get<BulletComponent>(entity);
 
-				if (ai.dodgeCooldown > ai.dodgeMax && bc.isPlayers)
+				/*if (ai.dodgeCooldown > ai.dodgeMax && bc.isPlayers)
 				{
 					DetectionComponent& d = info.registry.get<DetectionComponent>(other);
 					ai.dodgeBullet = true;
 					c2 = d.c; 
 				}
-				else
+				else*/
 				{
 					HitboxComponent& h = info.registry.get<HitboxComponent>(other);
 					c2 = h.c;
