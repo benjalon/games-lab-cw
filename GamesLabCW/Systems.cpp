@@ -63,7 +63,7 @@ namespace game::systems
 			return;
 		}
 
-		s.mana += info.dt * 2;
+		s.mana += info.dt * 5;
 
 		if (s.mana > MAX_MANA)
 		{
@@ -220,25 +220,24 @@ namespace game::systems
 			if (info.registry.has<DetectionComponent>(other) && info.registry.has<FirstPersonControllerComponent>(entity))
 			{
 				DetectionComponent& d = info.registry.get<DetectionComponent>(other);
-				c2 = d.c;
+				c2.radius = d.c.radius;
 				t2 = info.registry.get<TransformComponent>(other);
 			}
-
+			bool dodge = false;
 			if (info.registry.has<DetectionComponent>(other) && info.registry.has<BulletComponent>(entity))
 			{
 				AIComponent &ai = info.registry.get<AIComponent>(other);
 				BulletComponent& bc = info.registry.get<BulletComponent>(entity);
 
-				/*if (ai.dodgeCooldown > ai.dodgeMax && bc.isPlayers)
+				if (ai.dodgeCooldown > ai.dodgeMax && bc.isPlayers)
 				{
 					DetectionComponent& d = info.registry.get<DetectionComponent>(other);
-					ai.dodgeBullet = true;
-					c2 = d.c; 
+					dodge = true;
 				}
-				else*/
+				else
 				{
 					HitboxComponent& h = info.registry.get<HitboxComponent>(other);
-					c2 = h.c;
+					c2.radius = h.c.radius;
 				}
 				t2 = info.registry.get<TransformComponent>(other);
 					
@@ -261,6 +260,12 @@ namespace game::systems
 			{
 				c1.colliding.insert(other);
 				c2.colliding.insert(entity);
+				if (info.registry.has<AIComponent>(other))
+				{
+					AIComponent &ai = info.registry.get<AIComponent>(other);
+					ai.dodgeBullet = dodge;
+					c2.radius = d.c.radius;
+				}
 
 				events::dispatcher.enqueue<events::EnterCollision>(info, entity, other);
 			}
