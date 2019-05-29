@@ -422,7 +422,7 @@ namespace game::procgen
 			//DetectionComponent d_minotaur; d_minotaur.c.radius = 30; d_minotaur.camera = scene.camera;
 			//TransformComponent t_minotaur; t_minotaur.scale = { 0.10, 0.1, 0.1 }; t_minotaur.position = { 0, 6, -15 }; /*t_minotaur.rotation = { 90, 180, 0 };*/
 			//HitboxComponent h_minotaur; h_minotaur.c.radius = 2.5;
-			//StatsComponent s_minotaur; s_minotaur.health = 3, s_minotaur.mana = 1;
+			//StatsComponent s_minotaur; s_minotaur.health = 3, s_minotaur.mana = 0;
 
 			//Parameters of model
 			double model_size = 20.0;

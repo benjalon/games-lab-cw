@@ -40,15 +40,19 @@ namespace game::systems
 	};
 	SYSTEM(OverlaySystem, OverlayComponent);
 
+	const int MAX_MANA = 3;
+	const int MIN_HEALTH = 1;
+	const double Y_AXIS_CLAMP = 85.0;
 	//First-person control by the player
 	auto FirstPersonControllerSystem = [](SceneInfo info, auto entity, FirstPersonControllerComponent &f, TransformComponent &t, KinematicComponent &k, ProjectileComponent &bc, CollisionComponent &c, StatsComponent &s)
 	{
 		s.mana += info.dt;
-		if (s.mana > 3)
+
+		if (s.mana > MAX_MANA)
 		{
-			s.mana = 3;
+			s.mana = MAX_MANA;
 		}
-		if (s.health < 1)
+		if (s.health < MIN_HEALTH)
 		{
 			info.scene.destroy(entity);
 		}
@@ -60,7 +64,7 @@ namespace game::systems
 		t.rotation.y += mouse_sensitivity * input::cursor_pos.y * info.dt;
 
 		//Clamp y rotation to avoid flipping
-		t.rotation.y = std::clamp(t.rotation.y, -85.0, 85.0);
+		t.rotation.y = std::clamp(t.rotation.y, -Y_AXIS_CLAMP, Y_AXIS_CLAMP);
 		
 
 		//Move forward/backward
@@ -82,7 +86,7 @@ namespace game::systems
 		k.move_velocity = move_dir * move_speed;
 
 		//Fire bullet
-		if (input::is_released(input::MOUSE_BUTTON_1) && s.mana >= 3)
+		if (input::is_released(input::MOUSE_BUTTON_1) && s.mana >= MAX_MANA)
 		{
 			s.mana = 0;
 			events::dispatcher.enqueue<events::FireBullet>(info.scene, bc.model_file, t.position, t.rotation, bc.vs, bc.fs, bc.particle_file, c.radius, true);
@@ -289,6 +293,12 @@ namespace game::systems
 	SYSTEM(AnimationSystem, ModelComponent);
 
 	float animationTime = 0;
+	const int MAX_WAITING_TIME = 7;
+	const int MAX_MOVING_TIME = 4;
+	const double MAX_DODGE_TIME = 0.5;
+	const int WALK_SPEED = 200;
+	const int DODGE_SPEED = 1000;
+	const int PUNCH_ANIMATION_DURATION = 1;
 	auto AISystem = [](SceneInfo info, Entity entity, ModelComponent &m, TransformComponent &t, AIComponent &a, ProjectileComponent &bc, StatsComponent &s, DetectionComponent &d, HitboxComponent &h, KinematicComponent &k)
 	{
 		//Get reference to camera
@@ -305,27 +315,23 @@ namespace game::systems
 
 			if (a.state == a.Look)
 			{
-				//cout << "Looking" << endl;
-
 				a.moving += info.dt;
-				if (a.moving > 7)
+				if (a.moving > MAX_WAITING_TIME)
 				{
 					m.model_file = a.walk_file;
 					auto r = rand() % 360;
 					auto direction = Vector2(fmod(t.rotation.y + r, 360), 0).direction_hv().ToGLM();
 					Vector3 move = glm::normalize(direction);
 					a.moving = 0;
-					int speed = 2;
-					speed *= 100;
-					k.move_velocity = move * speed * info.dt;
+					k.move_velocity = move * WALK_SPEED * info.dt;
 					t.rotation.y = Vector2(fmod(t.rotation.y + r, 360), 0).abs();
 				}
-				else if (a.moving > 4)
+				else if (a.moving > MAX_MOVING_TIME)
 				{
 					m.model_file = a.idle_file;
 					k.move_velocity = { 0,0,0 };
 				}
-				else if (a.dodgeCooldown > 0.5 && a.dodgeBullet)
+				else if (a.dodgeCooldown > MAX_DODGE_TIME && a.dodgeBullet)
 				{
 					m.model_file = a.idle_file;
 					k.move_velocity = { 0,0,0 };
@@ -336,7 +342,6 @@ namespace game::systems
 			else if (a.state == a.Dodge)
 			{
 				m.model_file = a.walk_file;
-				//cout << "Dodging" << endl;
 				cout << (a.dodgeCooldown > a.dodgeMax) << endl;
 
 				if (a.dodgeCooldown > a.dodgeMax)
@@ -346,16 +351,14 @@ namespace game::systems
 					auto direction = Vector2(-fmod(a.direction, 360), 0).direction_hv_right().ToGLM();
 					Vector3 move = glm::normalize(direction);
 					a.moving = 0;
-					int speed = 10;
-					speed *= 100;
 					auto r = rand() % 2;
 					if (r == 1)
 					{
-						k.move_velocity = move * speed * info.dt;
+						k.move_velocity = move * DODGE_SPEED * info.dt;
 					}
 					else
 					{
-						k.move_velocity = move * speed * info.dt * -1;
+						k.move_velocity = move * DODGE_SPEED * info.dt * -1;
 					}
 				}
 				a.state = a.Look;
@@ -365,7 +368,6 @@ namespace game::systems
 			{
 				animationTime += info.dt;
 				k.move_velocity = { 0,0,0 };
-				//cout << "Attacking" << endl;
 
 				// Get the positions of both Entities
 				Vector2 cameraPos = Vector2(c.position.x, c.position.z);
@@ -384,7 +386,7 @@ namespace game::systems
 				else
 					t.rotation.y = (glm::degrees(acos(cosinedegreesToRotate)));
 
-				if (s.mana > 3)
+				if (s.mana > MAX_MANA)
 				{
 					s.mana = 0;
 					Vector3 rotation = { fmod(t.rotation.y,360), 0, 0 };
@@ -393,12 +395,10 @@ namespace game::systems
 					animationTime = 0;
 				}
 
-				if (animationTime > 1)
+				if (animationTime > PUNCH_ANIMATION_DURATION)
 				{
 					m.model_file = a.idle_file;
 				}
-
-				//a.state = a.Look;
 			}
 		}
 		
@@ -423,14 +423,15 @@ namespace game::systems
 			(((fmod(rand(), p.color_variation.x)) - p.color_variation.y) / p.color_variation.z) * p.color_modifier.y,
 			(((fmod(rand(), p.color_variation.x)) - p.color_variation.y) / p.color_variation.z) * p.color_modifier.z);
 
-		renderer::update_particle(info.dt, p.texture_file, p.respawn_count, randomPosition, randomVelocity, randomColor);// , t.position);
+		renderer::update_particle(info.dt, p.texture_file, p.respawn_count, randomPosition, randomVelocity, randomColor);
 	};
 	SYSTEM(ParticleSystem, ParticleComponent, ColourComponent, TransformComponent, KinematicComponent);
 
+	const int BULLET_TIMEOUT = 5;
 	auto BulletSystem = [](auto info, auto entity, BulletComponent &b) {
 
 		b.timeAlive += info.dt;
-		if (!b.draw || b.timeAlive > 5)
+		if (!b.draw || b.timeAlive > BULLET_TIMEOUT)
 		{
 			info.scene.destroy(entity);
 		}
