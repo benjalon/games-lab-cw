@@ -28,9 +28,6 @@ namespace game
 		//Spatial partitioning grid of entities
 		SpatialGrid<Entity> spatial_grid;
 
-		// Reference to current scene's camera
-		Entity camera;
-
 		//Default constructor
 		Scene();
 

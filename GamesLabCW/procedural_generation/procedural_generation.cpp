@@ -608,7 +608,7 @@ namespace game::procgen
 		//Player/camera
 		StatsComponent s_player; s_player.health = 3; s_player.mana = 0; s_player.keyCount = keys_collected;
 		auto player = scene.instantiate("FirstPersonController", FirstPersonControllerComponent{ 25.0f }, TransformComponent{ {0,6,5} , { 180,0,0 } }, CollisionComponent{ 6 }, KinematicComponent{ true }, s_player);
-		scene.camera = scene.instantiate("Camera", CameraComponent{ player });
+		auto camera = scene.instantiate("Camera", CameraComponent{ player });
 
 		//Room stuff
 		ModelComponent m_water; m_water.model_file = "models/Water/water.obj"; m_water.vertex_shader = "shaders/Water.vert"; m_water.fragment_shader = "shaders/Water.frag";
@@ -627,14 +627,14 @@ namespace game::procgen
 
 		// Minotaur test model
 		//Entity camera;
-		////ModelComponent, ColourComponent, TransformComponent, HitboxComponent, KinematicComponent, AIComponent, CameraComponent, ProjectileComponent, DetectionComponent,StatsComponent, CollisionComponent
-		//ModelComponent m_minotaur; m_minotaur.model_file = "models/Minotaur/Minotaur@Idle.fbx";
-		//ColourComponent c_minotaur; c_minotaur.colour = { 0, 0, 255 };
-		//DetectionComponent d_minotaur; d_minotaur.c.radius = 30; d_minotaur.camera = camera;
-		//TransformComponent t_minotaur; t_minotaur.scale = { 0.10, 0.1, 0.1 }; t_minotaur.position = { 0, 6, -15 };
-		//HitboxComponent h_minotaur; h_minotaur.c.radius = 2.5;
-		//StatsComponent s_minotaur; s_minotaur.health = 3, s_minotaur.mana = 1;
-		//scene.instantiate("AIModel", m_minotaur, c_minotaur, t_minotaur, h_minotaur, d_minotaur, s_minotaur, CollisionComponent{ 6 });
+		//ModelComponent, ColourComponent, TransformComponent, HitboxComponent, KinematicComponent, AIComponent, CameraComponent, ProjectileComponent, DetectionComponent,StatsComponent, CollisionComponent
+		ModelComponent m_minotaur; m_minotaur.model_file = "models/Minotaur/Minotaur@Idle.fbx";
+		ColourComponent c_minotaur; c_minotaur.colour = { 0, 0, 255 };
+		DetectionComponent d_minotaur; d_minotaur.c.radius = 30; d_minotaur.camera = camera;
+		TransformComponent t_minotaur; t_minotaur.scale = { 0.10, 0.1, 0.1 }; t_minotaur.position = { 0, 6, -15 };
+		HitboxComponent h_minotaur; h_minotaur.c.radius = 2.5;
+		StatsComponent s_minotaur; s_minotaur.health = 3, s_minotaur.mana = 1;
+		scene.instantiate("AIModel", m_minotaur, c_minotaur, t_minotaur, h_minotaur, d_minotaur, s_minotaur, CollisionComponent{ 6 });
 
 		//Torches
 		ModelComponent m_torch; m_torch.model_file = "models/Torch/torch.obj";
