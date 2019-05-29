@@ -157,6 +157,8 @@ namespace game
 		bool dodgeBullet = false;
 		double direction = 0;
 
+		bool isHit = false;
+
 	};
 
 	struct ProjectileComponent{

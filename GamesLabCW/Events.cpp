@@ -77,18 +77,19 @@ namespace game::events
 	}
 	RESPONSE(SphereLeaveCollideResponse, LeaveCollision);
 
+	const int BULLET_SPEED = 30;
+	const int FIREBALL_SAFE_DISTANCE_OFFSET = 3;
 	void FireBulletResponse(const FireBullet &e)
 	{
 		TransformComponent t; t.scale = { 0.5, 0.5, 0.5 }; t.position = e.position; t.rotation = e.rotation;
 		ModelComponent m; m.model_file = e.bullet_file; m.vertex_shader = e.bullet_vs; m.fragment_shader = e.bullet_fs;
 		
-		KinematicComponent k; k.velocity = Vector2(t.rotation.x, t.rotation.y).direction_hv() * 30;
+		KinematicComponent k; k.velocity = Vector2(t.rotation.x, t.rotation.y).direction_hv() * BULLET_SPEED;
 
 		auto vel = glm::normalize(k.velocity.ToGLM());
-		double x = e.radius * 2.5;
+		double x = e.radius * FIREBALL_SAFE_DISTANCE_OFFSET;
 		glm::vec3 vel2 = { x,x,x };
 		t.position = Vector3(t.position.ToGLM() + vel * vel2);
-		//k.velocity = { 0,0,0 };
 
 
 		ParticleComponent p_fireball; p_fireball.texture_file = e.bullet_particles; p_fireball.respawn_count = 1;
@@ -130,8 +131,11 @@ namespace game::events
 	void HandleBulletCollision(const EnterCollision &e, Entity bullet, Entity aic)
 	{
 		auto &ai = e.info.registry.get<AIComponent>(aic);
+		auto &mod = e.info.registry.get<ModelComponent>(aic);
 		auto &s = e.info.registry.get<StatsComponent>(aic);
 		auto &bs = e.info.registry.get<BulletComponent>(bullet);
+
+		
 
 		if (ai.dodgeBullet)
 		{
@@ -156,6 +160,7 @@ namespace game::events
 		{
 			bs.draw = false;
 			s.health -= 1;
+			ai.isHit = true;
 		}
 	}
 
@@ -176,9 +181,6 @@ namespace game::events
 	{
 		e.info.scene.clear();
 		Vector3 player_pos = procgen::generate_maze(e.info.scene, 21, 120, 3, 4, 6);
-
-		auto player = e.info.scene.instantiate("FirstPersonController", TransformComponent{ player_pos , { 180,0,0 } }, CollisionComponent{ 6 }, KinematicComponent{ true });
-		e.info.scene.camera = e.info.scene.instantiate("Camera", CameraComponent{ player });
 
 		// Generic scene lighting
 		e.info.scene.instantiate("AmbientLight", AmbientLightComponent{ {1, 147.0 / 255.0, 41.0 / 255.0}, 0.1 });
