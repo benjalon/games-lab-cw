@@ -18,7 +18,10 @@ namespace game
 	/* GAME AND ENGINE */
 
 	struct GameStateComponent {};
-	struct FirstPersonControllerComponent {};
+	struct FirstPersonControllerComponent 
+	{
+		float moveSpeed;
+	};
 	struct PortalComponent {};
 
 	// Tracks how many keys are picked up, and where in the game they should be rendered

@@ -43,6 +43,7 @@ namespace game::systems
 	const int MAX_MANA = 3;
 	const int MIN_HEALTH = 1;
 	const double Y_AXIS_CLAMP = 85.0;
+	const double MOUSE_SENSITIVITY = 5.0;
 	//First-person control by the player
 	auto FirstPersonControllerSystem = [](SceneInfo info, auto entity, FirstPersonControllerComponent &f, TransformComponent &t, KinematicComponent &k, ProjectileComponent &bc, CollisionComponent &c, StatsComponent &s)
 	{
@@ -68,12 +69,10 @@ namespace game::systems
 		{
 			s.mana = MAX_MANA;
 		}
-		double mouse_sensitivity = 5.0;
-		double move_speed = 30.0;
 
 		//Rotate using cursor offsetW
-		t.rotation.x += mouse_sensitivity * input::cursor_pos.x * info.dt;
-		t.rotation.y += mouse_sensitivity * input::cursor_pos.y * info.dt;
+		t.rotation.x += MOUSE_SENSITIVITY * input::cursor_pos.x * info.dt;
+		t.rotation.y += MOUSE_SENSITIVITY * input::cursor_pos.y * info.dt;
 
 		//Clamp y rotation to avoid flipping
 		t.rotation.y = std::clamp(t.rotation.y, -Y_AXIS_CLAMP, Y_AXIS_CLAMP);
@@ -95,7 +94,7 @@ namespace game::systems
 		}
 
 		//Apply movement instruction
-		k.move_velocity = move_dir * move_speed;
+		k.move_velocity = move_dir * f.moveSpeed;
 
 		//Fire bullet
 		if (input::is_released(input::MOUSE_BUTTON_1) && s.mana >= MAX_MANA)
@@ -319,7 +318,7 @@ namespace game::systems
 	const int WALK_SPEED = 300;
 	const int DODGE_SPEED = 1000;
 	const int ATTACK_ANIMATION_DURATION = 1;
-	const int HIT_ANIMATION_DURATION = 1;
+	const int HIT_ANIMATION_DURATION = 0.6;
 	auto AISystem = [](SceneInfo info, Entity entity, ModelComponent &m, TransformComponent &t, AIComponent &a, ProjectileComponent &bc, StatsComponent &s, DetectionComponent &d, HitboxComponent &h, KinematicComponent &k)
 	{
 		//Get reference to camera
