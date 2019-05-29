@@ -607,7 +607,7 @@ namespace game::procgen
 	{
 		//Player/camera
 		StatsComponent s_player; s_player.health = 3; s_player.mana = 0; s_player.keyCount = keys_collected;
-		auto player = scene.instantiate("FirstPersonController", FirstPersonControllerComponent{ 25.0f }, TransformComponent{ {0,6,5} , { 180,0,0 } }, CollisionComponent{ 6 }, KinematicComponent{ true }, s_player);
+		auto player = scene.instantiate("FirstPersonController", FirstPersonControllerComponent{ 25.0f }, TransformComponent{ {30,6,0} , { -90,0,0 } }, CollisionComponent{ 6 }, KinematicComponent{ true }, s_player);
 		auto camera = scene.instantiate("Camera", CameraComponent{ player });
 
 		//Room stuff
