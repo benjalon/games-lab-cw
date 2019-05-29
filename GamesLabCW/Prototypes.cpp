@@ -39,6 +39,6 @@ void game::prototypes::register_prototypes()
 
 	PROTOTYPE(Portal, PortalComponent, CollisionComponent, TransformComponent);
 
-	PROTOTYPE(Portal, DoorComponent, CollisionComponent, TransformComponent);
+	PROTOTYPE(Door, DoorComponent, CollisionComponent, TransformComponent);
 }
 

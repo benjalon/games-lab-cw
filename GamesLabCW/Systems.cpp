@@ -43,20 +43,28 @@ namespace game::systems
 	//First-person control by the player
 	auto FirstPersonControllerSystem = [](SceneInfo info, auto entity, FirstPersonControllerComponent &f, TransformComponent &t, KinematicComponent &k, ProjectileComponent &bc, CollisionComponent &c, StatsComponent &s)
 	{
+		// Game completion states
+		if (s.health < 1)
+		{
+			OverlayComponent i_lose;
+			i_lose.texture_file = "models/UI/lose.png";
+			info.scene.instantiate("Overlay", i_lose);
+			return;
+		}
+		if (s.gameComplete)
+		{
+			OverlayComponent i_win;
+			i_win.texture_file = "models/UI/win.png";
+			info.scene.instantiate("Overlay", i_win);
+			return;
+		}
+
 		s.mana += info.dt;
 		if (s.mana > 3)
 		{
 			s.mana = 3;
 		}
-		if (s.health < 1)
-		{
-			info.scene.destroy(entity);
 
-			OverlayComponent i_death;
-			i_death.texture_file = "models/UI/death.png";
-			info.scene.instantiate("Overlay", i_death);
-			return;
-		}
 		double mouse_sensitivity = 5.0;
 		double move_speed = 30.0;
 

@@ -601,8 +601,6 @@ namespace game::procgen
 		TransformComponent t_room; t_room.position.y = 10; t_room.scale = { 0.5, 0.5, 0.5 };
 		scene.instantiate("Model", m_room, t_room);
 
-		scene.instantiate("Door", TransformComponent{ {-30, 12, 0} }, CollisionComponent{ 6 });
-
 		//Solid planes
 		scene.instantiate("SolidPlane", SolidPlaneComponent{ { 0, 1, 0 }, { 0, 0, 0 } }); //floor
 		scene.instantiate("SolidPlane", SolidPlaneComponent{ { -1, 0, 0 }, { 30, 0, 0 } }); //right wall
@@ -658,6 +656,7 @@ namespace game::procgen
 		scene.instantiate("ParticleEffect", p_portal, TransformComponent{ Vector3(3, 5, 22) });
 		scene.instantiate("PointLight", PointLightComponent{ {1, 105.0 / 255.0, 180.0 / 255.0}, 40, { 3, 3, 22} });
 		scene.instantiate("Portal", TransformComponent{ { 3, 3, 22 } });
+		scene.instantiate("Door", TransformComponent{ { -30, 12, 0 } });
 
 		//UI
 		OverlayComponent i_hp; i_hp.texture_file = "models/UI/hearts-2.png";

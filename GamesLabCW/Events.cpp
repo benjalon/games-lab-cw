@@ -123,11 +123,7 @@ namespace game::events
 
 		if (s.keyCount > 5) 
 		{
-			OverlayComponent i_win;
-			i_win.texture_file = "models/UI/win.png";
-			e.info.scene.instantiate("Overlay", i_win);
-
-			e.info.scene.destroy(player);
+			s.gameComplete = true;
 		}
 	}
 

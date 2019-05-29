@@ -93,8 +93,10 @@ game::GameEngine::GameEngine(bool fullscreen, bool vsync, bool ground) :
 	renderer::load_overlay("models/UI/mana-1.png", Vector2(0, 0));
 	renderer::load_overlay("models/UI/mana-0.png", Vector2(0, 0));
 
-	// Crosshair overlay
+	// Misc overlays
 	renderer::load_overlay("models/UI/crosshair.png", Vector2(0, 0));
+	renderer::load_overlay("models/UI/win.png", Vector2(0, 0));
+	renderer::load_overlay("models/UI/lose.png", Vector2(0, 0));
 
 	std::string paths[6] = {
 		"models/Skybox/hw_ruins/ruins_lf.tga",

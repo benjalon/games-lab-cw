@@ -175,6 +175,7 @@ namespace game
 		int health = 3;
 		double mana = 3;
 		int keyCount = 0;
+		bool gameComplete = false;
 	};
 
 	struct BulletComponent {
