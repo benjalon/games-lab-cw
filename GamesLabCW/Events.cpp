@@ -136,29 +136,28 @@ namespace game::events
 		auto &s = e.info.registry.get<StatsComponent>(aic);
 		auto &bs = e.info.registry.get<BulletComponent>(bullet);
 
-		
+		auto& bt = e.info.registry.get<TransformComponent>(bullet);
+		auto& at = e.info.registry.get<TransformComponent>(aic);
+		Vector2 cameraPos = Vector2(bt.position.x, bt.position.z);
+		Vector2 enemyPos = Vector2(at.position.x, at.position.z);
+		Vector2 nonNormal = cameraPos - enemyPos;
+		Vector2 fromPlayerToEnemy = Vector2(glm::normalize(nonNormal.ToGLM()));
+		glm::mat4 matModel = glm::rotate(glm::radians((float)(at.rotation.z)), glm::vec3(0, 0, 1));
+		glm::vec2 playerHeading = glm::vec2(matModel[2][0], matModel[2][2]);
+		float cosinedegreesToRotate = glm::dot(playerHeading, fromPlayerToEnemy.ToGLM());
+
+		if (fromPlayerToEnemy.x < 0)
+			ai.direction = -(360 - glm::degrees(acos(cosinedegreesToRotate))) + 180;
+		else
+			ai.direction = -(glm::degrees(acos(cosinedegreesToRotate))) + 180;
 
 		if (ai.dodgeBullet)
 		{
-			auto& bt = e.info.registry.get<TransformComponent>(bullet);
-			auto& at = e.info.registry.get<TransformComponent>(aic);
-			Vector2 cameraPos = Vector2(bt.position.x, bt.position.z);
-			Vector2 enemyPos = Vector2(at.position.x, at.position.z);
-			Vector2 nonNormal = cameraPos - enemyPos;
-			Vector2 fromPlayerToEnemy = Vector2(glm::normalize(nonNormal.ToGLM()));
-			glm::mat4 matModel = glm::rotate(glm::radians((float)(at.rotation.z)), glm::vec3(0, 0, 1));
-			glm::vec2 playerHeading = glm::vec2(matModel[2][0], matModel[2][2]);
-			float cosinedegreesToRotate = glm::dot(playerHeading, fromPlayerToEnemy.ToGLM());
-
-			if (fromPlayerToEnemy.x < 0)
-				ai.direction = -(360 - glm::degrees(acos(cosinedegreesToRotate))) + 180;
-			else
-				ai.direction = -(glm::degrees(acos(cosinedegreesToRotate))) + 180;
-
 			ai.state = ai.Dodge;
 		}
 		else if (ai.hitBox)
 		{
+			ai.state = ai.Shoot;
 			bs.draw = false;
 			ai.hitBox = false;
 			s.health -= 1;
