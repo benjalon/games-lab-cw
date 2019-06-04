@@ -158,6 +158,7 @@ namespace game
 		double dodgeMax = 5;
 		bool canDodge = dodgeCooldown > dodgeMax;
 		bool dodgeBullet = false;
+		bool hitBox = false;
 		double direction = 0;
 
 		bool isHit = false;

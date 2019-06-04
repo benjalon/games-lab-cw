@@ -217,6 +217,8 @@ namespace game::systems
 
 			auto& [c2, t2] = info.registry.get<CollisionComponent, TransformComponent>(other);
 
+			bool detect = false;
+			bool hitbox = false;
 			if (info.registry.has<DetectionComponent>(other) && info.registry.has<FirstPersonControllerComponent>(entity))
 			{
 				DetectionComponent& d = info.registry.get<DetectionComponent>(other);
@@ -229,16 +231,18 @@ namespace game::systems
 				AIComponent &ai = info.registry.get<AIComponent>(other);
 				BulletComponent& bc = info.registry.get<BulletComponent>(entity);
 
-				/*if (ai.dodgeCooldown > ai.dodgeMax && bc.isPlayers)
+				if (ai.dodgeCooldown > ai.dodgeMax && bc.isPlayers)
 				{
 					DetectionComponent& d = info.registry.get<DetectionComponent>(other);
-					ai.dodgeBullet = true;
 					c2 = d.c; 
+					detect = true;
 				}
-				else*/
+				else
 				{
 					HitboxComponent& h = info.registry.get<HitboxComponent>(other);
 					c2 = h.c;
+					hitbox = true;
+					
 				}
 				t2 = info.registry.get<TransformComponent>(other);
 					
@@ -261,6 +265,12 @@ namespace game::systems
 			{
 				c1.colliding.insert(other);
 				c2.colliding.insert(entity);
+				if (info.registry.has<AIComponent>(other))
+				{
+					AIComponent &enterAI = info.registry.get<AIComponent>(other);
+					enterAI.hitBox = hitbox;
+					enterAI.dodgeBullet = detect;
+				}
 
 				events::dispatcher.enqueue<events::EnterCollision>(info, entity, other);
 			}
@@ -417,7 +427,7 @@ namespace game::systems
 				{
 					s.mana = 0;
 					Vector3 rotation = { fmod(t.rotation.y,360), 0, 0 };
-					events::dispatcher.enqueue<events::FireBullet>(info.scene, bc.model_file, t.position, rotation, bc.vs, bc.fs, bc.particle_file,h.c.radius, false);
+					//events::dispatcher.enqueue<events::FireBullet>(info.scene, bc.model_file, t.position, rotation, bc.vs, bc.fs, bc.particle_file,h.c.radius, false);
 					m.model_file = a.attack_file;
 					a.animationTime = 0;
 				}
