@@ -150,7 +150,7 @@ namespace game
 		std::string get_hit_file = "models/Minotaur/Minotaur@Get_Hit.fbx";
 		std::string attack_file = "models/Minotaur/Minotaur@Attack.fbx";
 
-		State state;
+		State state = State::Look;
 		double moving = (double)(rand() % 7);
 		
 		//Dodge trackers
