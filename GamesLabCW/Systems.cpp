@@ -44,6 +44,8 @@ namespace game::systems
 	const int MIN_HEALTH = 1;
 	const double Y_AXIS_CLAMP = 85.0;
 	const double MOUSE_SENSITIVITY = 5.0;
+	const double START_OVERLAY_MAX = 7.0;
+	double startOverlayTimer = 0.0;
 	//First-person control by the player
 	auto FirstPersonControllerSystem = [](SceneInfo info, auto entity, FirstPersonControllerComponent &f, TransformComponent &t, KinematicComponent &k, ProjectileComponent &bc, CollisionComponent &c, StatsComponent &s)
 	{
@@ -61,6 +63,14 @@ namespace game::systems
 			i_win.texture_file = "models/UI/win.png";
 			info.scene.instantiate("Overlay", i_win);
 			return;
+		}
+
+		startOverlayTimer += info.dt;
+		if (startOverlayTimer < START_OVERLAY_MAX)
+		{
+			OverlayComponent i_start;
+			i_start.texture_file = "models/UI/start.png";
+			info.scene.instantiate("Overlay", i_start);
 		}
 
 		s.mana += info.dt * 2;
