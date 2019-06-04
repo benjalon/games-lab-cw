@@ -157,9 +157,10 @@ namespace game::events
 
 			ai.state = ai.Dodge;
 		}
-		else
+		else if (ai.hitBox)
 		{
 			bs.draw = false;
+			ai.hitBox = false;
 			s.health -= 1;
 			ai.isHit = true;
 		}

@@ -574,7 +574,7 @@ namespace game::procgen
 				TransformComponent t_minotaur; t_minotaur.scale = { 0.15, 0.15, 0.15 }; t_minotaur.position = transforms[i].position; t_minotaur.position.y = -5; /*t_minotaur.rotation = { 90, 180, 0 };*/
 				HitboxComponent h_minotaur; h_minotaur.c.radius = 4;
 				StatsComponent s_minotaur; s_minotaur.health = 3, s_minotaur.mana = 0;
-				scene.instantiate("AIModel", m_minotaur, c_minotaur, t_minotaur, h_minotaur, d_minotaur, s_minotaur, CollisionComponent{ 0 });
+				scene.instantiate("AIModel", m_minotaur, c_minotaur, t_minotaur, h_minotaur, d_minotaur, s_minotaur, CollisionComponent{ 1 }, KinematicComponent{ true });
 			}
 
 			return playerPos;

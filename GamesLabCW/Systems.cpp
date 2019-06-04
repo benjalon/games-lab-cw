@@ -227,6 +227,9 @@ namespace game::systems
 
 			auto& [c2, t2] = info.registry.get<CollisionComponent, TransformComponent>(other);
 
+			bool detect = false;
+			bool hitbox = false;
+			bool isBullet = false;
 			if (info.registry.has<DetectionComponent>(other) && info.registry.has<FirstPersonControllerComponent>(entity))
 			{
 				DetectionComponent& d = info.registry.get<DetectionComponent>(other);
@@ -234,22 +237,36 @@ namespace game::systems
 				t2 = info.registry.get<TransformComponent>(other);
 			}
 
+			//if (!(info.registry.has<DetectionComponent>(other) && info.registry.has<BulletComponent>(entity)))
+			//{
+			//	Entity t = other;
+			//	other = entity;
+			//	entity = t;
+			//}
+
 			if (info.registry.has<DetectionComponent>(other) && info.registry.has<BulletComponent>(entity))
 			{
+				isBullet = true;
 				AIComponent &ai = info.registry.get<AIComponent>(other);
 				BulletComponent& bc = info.registry.get<BulletComponent>(entity);
 
-				/*if (ai.dodgeCooldown > ai.dodgeMax && bc.isPlayers)
+				if (ai.dodgeCooldown > ai.dodgeMax && bc.isPlayers)
 				{
 					DetectionComponent& d = info.registry.get<DetectionComponent>(other);
-					ai.dodgeBullet = true;
 					c2 = d.c; 
+					detect = true;
+					ai.dodgeBullet = true;
 				}
-				else*/
+
+
 				{
 					HitboxComponent& h = info.registry.get<HitboxComponent>(other);
 					c2 = h.c;
+					hitbox = true;
+					
 				}
+				
+				
 				t2 = info.registry.get<TransformComponent>(other);
 					
 			}
@@ -271,6 +288,16 @@ namespace game::systems
 			{
 				c1.colliding.insert(other);
 				c2.colliding.insert(entity);
+				if (info.registry.has<AIComponent>(other))
+				{
+					if (!hitbox && !detect)
+					{
+						cout << "fart" << endl;
+					}
+					AIComponent &enterAI = info.registry.get<AIComponent>(other);
+					enterAI.hitBox = hitbox;
+					//enterAI.dodgeBullet = detect;
+				}
 
 				events::dispatcher.enqueue<events::EnterCollision>(info, entity, other);
 			}
@@ -326,7 +353,7 @@ namespace game::systems
 	const int MAX_MOVING_TIME = 4;
 	const double MAX_DODGE_TIME = 0.5;
 	const int WALK_SPEED = 300;
-	const int DODGE_SPEED = 1000;
+	const int DODGE_SPEED = 2000;
 	const int ATTACK_ANIMATION_DURATION = 1;
 	const int HIT_ANIMATION_DURATION = 0.6;
 	auto AISystem = [](SceneInfo info, Entity entity, ModelComponent &m, TransformComponent &t, AIComponent &a, ProjectileComponent &bc, StatsComponent &s, DetectionComponent &d, HitboxComponent &h, KinematicComponent &k)
@@ -335,6 +362,10 @@ namespace game::systems
 		CameraComponent &c = info.scene.get<CameraComponent>(d.camera);
 		s.mana += info.dt;
 		a.animationTime += info.dt;
+		//if (k.solid == false)
+		//{
+		//	k.solid == true;
+		//}
 
 		if (s.health < 1)
 		{
@@ -388,7 +419,7 @@ namespace game::systems
 					auto direction = Vector2(-fmod(a.direction, 360), 0).direction_hv_right().ToGLM();
 					Vector3 move = glm::normalize(direction);
 					a.moving = 0;
-					auto r = rand() % 2;
+					int r = rand() % 2;
 					if (r == 1)
 					{
 						k.move_velocity = move * DODGE_SPEED * info.dt;
@@ -490,7 +521,6 @@ namespace game::systems
 		{
 			return scalar_projection(a, b) * b / glm::length(b);
 		};
-
 
 		//Undo resetting of acceleration, for now
 		k.acceleration = k.acceleration_old;
